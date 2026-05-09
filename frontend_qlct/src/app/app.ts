@@ -1,12 +1,13 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { Sidebar } from './layout/sidebar/sidebar';
+import { AppHeader } from './layout/header/header';
+import { AppFooter } from './layout/footer/footer';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, Sidebar, AppHeader, AppFooter],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
 })
-export class App {
-  protected readonly title = signal('frontend_qlct');
-}
+export class App {}
