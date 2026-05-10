@@ -1,0 +1,253 @@
+<div class="login-page">
+  <!-- Animated Background Orbs -->
+  <div class="login-page__bg-orb login-page__bg-orb--1"></div>
+  <div class="login-page__bg-orb login-page__bg-orb--2"></div>
+  <div class="login-page__bg-orb login-page__bg-orb--3"></div>
+
+  <div class="login-container">
+    <!-- Left Panel: Branding -->
+    <div class="login-branding">
+      <div class="login-branding__content">
+        <div class="login-branding__logo">
+          <div class="login-branding__icon-wrapper">
+            <span class="material-symbols-outlined login-branding__icon">account_balance_wallet</span>
+          </div>
+          <h1 class="login-branding__title">WealthWise</h1>
+        </div>
+        <p class="login-branding__tagline">Personal Finance Manager</p>
+        <p class="login-branding__desc">
+          Quản lý thu chi thông minh, theo dõi ngân sách và đạt được mục tiêu tài chính của bạn.
+        </p>
+
+        <!-- Feature highlights -->
+        <div class="login-branding__features">
+          <div class="login-branding__feature">
+            <span class="material-symbols-outlined login-branding__feature-icon">trending_up</span>
+            <div>
+              <h4 class="login-branding__feature-title">Theo dõi thu chi</h4>
+              <p class="login-branding__feature-desc">Ghi nhận mọi giao dịch một cách chi tiết</p>
+            </div>
+          </div>
+          <div class="login-branding__feature">
+            <span class="material-symbols-outlined login-branding__feature-icon">pie_chart</span>
+            <div>
+              <h4 class="login-branding__feature-title">Phân tích chi tiêu</h4>
+              <p class="login-branding__feature-desc">Biểu đồ trực quan giúp bạn hiểu rõ tài chính</p>
+            </div>
+          </div>
+          <div class="login-branding__feature">
+            <span class="material-symbols-outlined login-branding__feature-icon">savings</span>
+            <div>
+              <h4 class="login-branding__feature-title">Quản lý ngân sách</h4>
+              <p class="login-branding__feature-desc">Đặt mục tiêu và kiểm soát chi tiêu hiệu quả</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel: Form -->
+    <div class="login-form-panel">
+      <div class="login-form-wrapper">
+        <!-- Mobile Logo -->
+        <div class="login-form__mobile-logo">
+          <div class="login-branding__icon-wrapper login-branding__icon-wrapper--sm">
+            <span class="material-symbols-outlined login-branding__icon">account_balance_wallet</span>
+          </div>
+          <h2 class="login-form__mobile-title">WealthWise</h2>
+        </div>
+
+        <!-- Tab Switcher -->
+        <div class="login-tabs">
+          <button
+            class="login-tabs__btn"
+            [class.login-tabs__btn--active]="isLoginMode"
+            (click)="isLoginMode || toggleMode()"
+            id="login-tab-btn">
+            <span class="material-symbols-outlined login-tabs__icon">login</span>
+            Đăng nhập
+          </button>
+          <button
+            class="login-tabs__btn"
+            [class.login-tabs__btn--active]="!isLoginMode"
+            (click)="isLoginMode && toggleMode()"
+            id="register-tab-btn">
+            <span class="material-symbols-outlined login-tabs__icon">person_add</span>
+            Đăng ký
+          </button>
+          <div class="login-tabs__indicator" [class.login-tabs__indicator--right]="!isLoginMode"></div>
+        </div>
+
+        <!-- Heading -->
+        <div class="login-form__heading">
+          <h2 class="login-form__title">
+            {{ isLoginMode ? 'Chào mừng trở lại!' : 'Tạo tài khoản mới' }}
+          </h2>
+          <p class="login-form__subtitle">
+            {{ isLoginMode ? 'Đăng nhập để tiếp tục quản lý tài chính' : 'Bắt đầu hành trình quản lý tài chính thông minh' }}
+          </p>
+        </div>
+
+        <!-- Form -->
+        <form (ngSubmit)="onSubmit()" class="login-form" id="login-form">
+          <!-- Full Name (Register Only) -->
+          <div class="login-form__field" *ngIf="!isLoginMode">
+            <label class="login-form__label" for="fullName">
+              <span class="material-symbols-outlined login-form__label-icon">badge</span>
+              Họ và tên
+            </label>
+            <div class="login-form__input-wrapper">
+              <input
+                type="text"
+                id="fullName"
+                class="login-form__input"
+                placeholder="Nguyễn Văn A"
+                [(ngModel)]="fullName"
+                name="fullName"
+                required />
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="login-form__field">
+            <label class="login-form__label" for="email">
+              <span class="material-symbols-outlined login-form__label-icon">mail</span>
+              Email
+            </label>
+            <div class="login-form__input-wrapper">
+              <input
+                type="email"
+                id="email"
+                class="login-form__input"
+                placeholder="you@example.com"
+                [(ngModel)]="email"
+                name="email"
+                required />
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="login-form__field">
+            <label class="login-form__label" for="password">
+              <span class="material-symbols-outlined login-form__label-icon">lock</span>
+              Mật khẩu
+            </label>
+            <div class="login-form__input-wrapper">
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                id="password"
+                class="login-form__input login-form__input--has-action"
+                placeholder="••••••••"
+                [(ngModel)]="password"
+                name="password"
+                required />
+              <button
+                type="button"
+                class="login-form__input-action"
+                (click)="togglePasswordVisibility()"
+                id="toggle-password-btn">
+                <span class="material-symbols-outlined">
+                  {{ showPassword ? 'visibility_off' : 'visibility' }}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Confirm Password (Register Only) -->
+          <div class="login-form__field" *ngIf="!isLoginMode">
+            <label class="login-form__label" for="confirmPassword">
+              <span class="material-symbols-outlined login-form__label-icon">lock_reset</span>
+              Xác nhận mật khẩu
+            </label>
+            <div class="login-form__input-wrapper">
+              <input
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                id="confirmPassword"
+                class="login-form__input login-form__input--has-action"
+                placeholder="••••••••"
+                [(ngModel)]="confirmPassword"
+                name="confirmPassword"
+                required />
+              <button
+                type="button"
+                class="login-form__input-action"
+                (click)="toggleConfirmPasswordVisibility()"
+                id="toggle-confirm-password-btn">
+                <span class="material-symbols-outlined">
+                  {{ showConfirmPassword ? 'visibility_off' : 'visibility' }}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Remember / Forgot (Login Only) -->
+          <div class="login-form__options" *ngIf="isLoginMode">
+            <label class="login-form__checkbox-label" for="rememberMe">
+              <input
+                type="checkbox"
+                id="rememberMe"
+                class="login-form__checkbox"
+                [(ngModel)]="rememberMe"
+                name="rememberMe" />
+              <span class="login-form__checkbox-custom"></span>
+              Ghi nhớ đăng nhập
+            </label>
+            <a href="#" class="login-form__forgot-link" id="forgot-password-link">Quên mật khẩu?</a>
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            type="submit"
+            class="login-form__submit"
+            [class.login-form__submit--loading]="isLoading"
+            [disabled]="isLoading"
+            id="submit-btn">
+            <span class="login-form__submit-content" *ngIf="!isLoading">
+              <span class="material-symbols-outlined login-form__submit-icon">
+                {{ isLoginMode ? 'login' : 'person_add' }}
+              </span>
+              {{ isLoginMode ? 'Đăng nhập' : 'Đăng ký' }}
+            </span>
+            <span class="login-form__spinner" *ngIf="isLoading"></span>
+          </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="login-form__divider">
+          <span class="login-form__divider-text">hoặc tiếp tục với</span>
+        </div>
+
+        <!-- Social Login -->
+        <div class="login-form__social">
+          <button class="login-form__social-btn" id="google-login-btn">
+            <svg class="login-form__social-svg" viewBox="0 0 24 24">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            </svg>
+            Google
+          </button>
+          <button class="login-form__social-btn" id="github-login-btn">
+            <svg class="login-form__social-svg" viewBox="0 0 24 24">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" fill="#333"/>
+            </svg>
+            GitHub
+          </button>
+        </div>
+
+        <!-- Footer -->
+        <p class="login-form__footer">
+          {{ isLoginMode ? 'Chưa có tài khoản?' : 'Đã có tài khoản?' }}
+          <button
+            type="button"
+            class="login-form__toggle-link"
+            (click)="toggleMode()"
+            id="toggle-mode-link">
+            {{ isLoginMode ? 'Đăng ký ngay' : 'Đăng nhập' }}
+          </button>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
