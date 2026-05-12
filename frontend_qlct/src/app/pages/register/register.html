@@ -59,43 +59,113 @@
 
         <!-- Heading -->
         <div class="form-heading">
-          <h2 class="form-title">Chào mừng trở lại!</h2>
-          <p class="form-subtitle">Đăng nhập để tiếp tục quản lý tài chính</p>
+          <h2 class="form-title">Tạo tài khoản mới</h2>
+          <p class="form-subtitle">Bắt đầu hành trình quản lý tài chính thông minh</p>
         </div>
 
         <!-- Form -->
-        <form (ngSubmit)="onSubmit()" class="auth-form" id="login-form">
-          <!-- Email -->
-          <div class="form-group">
-<!--            <label class="form-label" for="email">-->
-<!--              <span class="material-symbols-outlined form-label-icon">mail</span>-->
-<!--              Email-->
+        <form (ngSubmit)="onSubmit()" class="auth-form" id="register-form">
+          <!-- Full Name -->
+<!--          <div class="form-group">-->
+<!--            <label class="form-label" for="fullName">-->
+<!--              <span class="material-symbols-outlined form-label-icon">badge</span>-->
+<!--              Họ và tên-->
 <!--            </label>-->
 <!--            <div class="form-input-wrap">-->
 <!--              <input-->
-<!--                type="email"-->
-<!--                id="email"-->
+<!--                type="text"-->
+<!--                id="fullName"-->
 <!--                class="form-input"-->
-<!--                placeholder="you@example.com"-->
-<!--                [(ngModel)]="email"-->
-<!--                name="email"-->
+<!--                placeholder="Nguyễn Văn A"-->
+<!--                [(ngModel)]="fullName"-->
+<!--                name="fullName"-->
 <!--                required />-->
 <!--            </div>-->
+<!--          </div>-->
+
+          <!-- Email -->
+          <!-- <div class="form-group">
+            <label class="form-label" for="email">
+              <span class="material-symbols-outlined form-label-icon">mail</span>
+              Email
+            </label>
+            <div class="form-input-wrap">
+              <input
+                type="email"
+                id="email"
+                class="form-input"
+                placeholder="you@example.com"
+                [(ngModel)]="email"
+                name="email"
+                required />
+            </div>
+          </div> -->
+          <!--username -->
+          <div class="form-group">
+            <label class="form-label" for="username">
+              <span class="material-symbols-outlined form-label-icon">person</span>
+              Tên đăng nhập
+            </label>
+            <div class="form-input-wrap">
+              <input
+                type="text"
+                id="username"
+                class="form-input"
+                placeholder="Tên đăng nhập của bạn"
+                [(ngModel)]="loadData.username"
+                name="username"
+                required />
+            </div>
           </div>
-          <!--Username-->
-          <label class="form-label" for="username">
-            <span class="material-symbols-outlined form-label-icon">person</span>
-            Tên đăng nhập
-          </label>
-          <div class="form-input-wrap">
-            <input
-              type="text"
-              id="username"
-              class="form-input"
-              placeholder="Tên đăng nhập của bạn"
-              [(ngModel)]="logindata.username"
-              name="username"
-              required />
+          <!--Firstname-->
+           <div class="form-group">
+            <label class="form-label" for="firstname">
+              <span class="material-symbols-outlined form-label-icon">person</span>
+              Tên
+            </label>
+            <div class="form-input-wrap">
+              <input
+                type="text"
+                id="firstname"
+                class="form-input"
+                placeholder="Tên của bạn"
+                [(ngModel)]="loadData.firstname"
+                name="firstname"
+                required />
+            </div>
+          </div>
+          <!--Lastname-->
+           <div class="form-group">
+            <label class="form-label" for="lastname">
+              <span class="material-symbols-outlined form-label-icon">person</span>
+              Họ
+            </label>
+            <div class="form-input-wrap">
+              <input
+                type="text"
+                id="lastname"
+                class="form-input"
+                placeholder="Họ của bạn"
+                [(ngModel)]="loadData.lastname"
+                name="lastname"
+                required />
+            </div>
+          </div>
+          <!--Date of birth-->
+          <div class="form-group">
+            <label class="form-label" for="dob">
+              <span class="material-symbols-outlined form-label-icon">cake</span>
+              Ngày sinh
+            </label>
+            <div class="form-input-wrap">
+              <input
+                type="date"
+                id="dob"
+                class="form-input"
+                [(ngModel)]="loadData.dob"
+                name="dob"
+                required />
+            </div>
           </div>
           <!-- Password -->
           <div class="form-group">
@@ -109,7 +179,7 @@
                 id="password"
                 class="form-input has-action"
                 placeholder="••••••••"
-                [(ngModel)]="logindata.password"
+                [(ngModel)]="loadData.password"
                 name="password"
                 required />
               <button
@@ -124,19 +194,31 @@
             </div>
           </div>
 
-          <!-- Remember / Forgot -->
-          <div class="form-options">
-            <label class="checkbox-label" for="rememberMe">
-              <input
-                type="checkbox"
-                id="rememberMe"
-                class="checkbox-input"
-                [(ngModel)]="rememberMe"
-                name="rememberMe" />
-              <span class="checkbox-custom"></span>
-              Ghi nhớ đăng nhập
+          <!-- Confirm Password -->
+          <div class="form-group">
+            <label class="form-label" for="confirmPassword">
+              <span class="material-symbols-outlined form-label-icon">lock_reset</span>
+              Xác nhận mật khẩu
             </label>
-            <a href="#" class="forgot-link" id="forgot-password-link">Quên mật khẩu?</a>
+            <div class="form-input-wrap">
+              <input
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                id="confirmPassword"
+                class="form-input has-action"
+                placeholder="••••••••"
+                [(ngModel)]="confirmPassword"
+                name="confirmPassword"
+                required />
+              <button
+                type="button"
+                class="form-input-action"
+                (click)="toggleConfirmPasswordVisibility()"
+                id="toggle-confirm-password-btn">
+                <span class="material-symbols-outlined">
+                  {{ showConfirmPassword ? 'visibility_off' : 'visibility' }}
+                </span>
+              </button>
+            </div>
           </div>
 
           <!-- Submit Button -->
@@ -147,8 +229,8 @@
             [disabled]="isLoading"
             id="submit-btn">
             <span class="btn-content" *ngIf="!isLoading">
-              <span class="material-symbols-outlined btn-icon">login</span>
-              Đăng nhập
+              <span class="material-symbols-outlined btn-icon">person_add</span>
+              Đăng ký
             </span>
             <span class="spinner" *ngIf="isLoading"></span>
           </button>
@@ -180,13 +262,13 @@
 
         <!-- Footer -->
         <p class="form-footer">
-          Chưa có tài khoản?
+          Đã có tài khoản?
           <button
             type="button"
             class="toggle-link"
-            onclick="window.location.href='/register'"
-            id="go-to-register-link">
-            Đăng ký ngay
+            onclick="window.location.href='/login'"
+            id="go-to-login-link">
+            Đăng nhập
           </button>
         </p>
       </div>

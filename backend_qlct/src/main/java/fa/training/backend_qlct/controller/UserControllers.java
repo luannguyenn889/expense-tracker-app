@@ -21,17 +21,23 @@ public class UserControllers {
     }
 
     @GetMapping
-    List<Users> getAllUsers() {
+    public List<Users> getAllUsers() {
         return userService.getAllUsers();
     }
 
     @GetMapping("/{userId}")
-    Users users(@PathVariable("userId") String userId){
+    public Users users(@PathVariable("userId") String userId){
         return userService.getUser(userId);
     }
     
     @PutMapping("/{userId}")
     public Users updateRequest(@PathVariable("userId") String userId, @RequestBody UserUpdateRequest request) {
          return userService.updateRequest(userId, request);
+    }
+
+    @DeleteMapping("/{userId}")
+    public String deleteUser(@PathVariable("userId") String userId) {
+        userService.deleteUser(userId);
+        return "User has been deleted!";
     }
 }
