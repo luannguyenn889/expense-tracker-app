@@ -3,10 +3,10 @@ package fa.training.backend_qlct.dto.request;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.LocalDate;
+// Dto la lop chua thong tin tu client gui len, de xu ly va tra ve cho client
+public class UserUpdateRequest {
 
-public class UserCreationRequest {
-
-    private String username;
+//    private String username;
     private  String password;
     private String firstname;
     private String lastname;
@@ -14,13 +14,13 @@ public class UserCreationRequest {
     private LocalDate dob;
 
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
+//    public String getUsername() {
+//        return username;
+//    }
+//
+//    public void setUsername(String username) {
+//        this.username = username;
+//    }
 
     public String getPassword() {
         return password;

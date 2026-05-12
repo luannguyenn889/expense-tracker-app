@@ -9,5 +9,8 @@ public class Controllers {
     public String getString(){
         return "Hello World";
     }
-
+    @GetMapping("/api")
+    public String getItem(){
+        return "Item";
+    }
 }
