@@ -8,11 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 // Service la lop chua logic xu ly, tuong tac voi repository de lay du lieu va tra ve cho controller de tra ve cho client
 @Service
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+    
     public Users createRequest(UserCreationRequest request){
        Users users = new Users();
        users.setUsername(request.getUsername());
@@ -41,4 +43,15 @@ public class UserService {
 
         return userRepository.save(users);
     }
+
+    public void deleteUser(String id) {
+        userRepository.deleteById(id);
+    }
+
+    // Tim user theo username va password (su dung query thong qua Spring Data JPA cho toi uu)
+    public Users findByUsername(String username) {
+        return userRepository.findByUsername(username).orElse(null);
+    }
+    
+    // Tim user theo password -> ban khong nen co ham nay, rat mat bao mat va khong thuc te.
 }
