@@ -1,5 +1,5 @@
 package fa.training.backend_qlct.dto.request;
-
+// Lop DTO lay du lieu tu login form cua component login
 public class LoginRequest {
     private String username;
     private String password;
