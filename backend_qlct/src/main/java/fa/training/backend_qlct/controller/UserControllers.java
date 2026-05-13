@@ -8,7 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-// Controller la lop chua cac endpoint, nhan request tu client, goi service de xu ly va tra ve response cho client
+// Controller la lop chua cac endpoint,
+// nhan request tu client, goi service de xu ly va tra ve response cho client
 @RestController
 @RequestMapping("/users")
 public class UserControllers {
@@ -41,3 +42,4 @@ public class UserControllers {
         return "User has been deleted!";
     }
 }
+

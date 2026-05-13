@@ -40,7 +40,7 @@ public class UserService {
         users.setLastname(request.getLastname());
         users.setDob(request.getDob());
         users.setPassword(request.getPassword());
-
+// Tra ve Responsitory de luu vao db
         return userRepository.save(users);
     }
 
