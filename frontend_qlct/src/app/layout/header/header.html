@@ -10,7 +10,7 @@
     </div>
 
     <!-- Search -->
-    <div class="topbar__search-wrapper">
+    <div class="topbar__search-wrapper" *ngIf="isLoggedIn">
       <span class="material-symbols-outlined topbar__search-icon">search</span>
       <input
         class="topbar__search"
@@ -20,15 +20,68 @@
   </div>
 
   <div class="topbar__actions">
-    <button class="topbar__quick-add">
-      <span class="material-symbols-outlined topbar__quick-add-icon">add</span>
-      Quick Add
-    </button>
-    <button class="topbar__icon-btn">
-      <span class="material-symbols-outlined">notifications</span>
-    </button>
-    <div class="topbar__avatar">
-      <span class="material-symbols-outlined">person</span>
+    <ng-container *ngIf="isLoggedIn">
+      <button class="topbar__quick-add">
+        <span class="material-symbols-outlined topbar__quick-add-icon">add</span>
+        Quick Add
+      </button>
+      <button class="topbar__icon-btn">
+        <span class="material-symbols-outlined">notifications</span>
+      </button>
+    </ng-container>
+
+    <!-- User Avatar & Dropdown Menu -->
+    <div class="topbar__avatar-container" style="position: relative;">
+      <div class="topbar__avatar" (click)="toggleMenu()" style="cursor: pointer;">
+        <!-- Show first letter of username if logged in, else show person icon -->
+        <span *ngIf="isLoggedIn && user?.username" class="avatar-text" style="font-weight: bold; text-transform: uppercase;">
+          {{ user.username.charAt(0) }}
+        </span>
+        <span *ngIf="!isLoggedIn || !user?.username" class="material-symbols-outlined">person</span>
+      </div>
+
+      <!-- Dropdown Menu -->
+      <div class="dropdown-menu" *ngIf="isMenuOpen">
+
+        <!-- TRẠNG THÁI: CHƯA ĐĂNG NHẬP -->
+        <ul class="dropdown-list" *ngIf="!isLoggedIn">
+          <li>
+            <a routerLink="/login" class="dropdown-item" (click)="toggleMenu()">
+              <span class="material-symbols-outlined">login</span>
+              Đăng nhập
+            </a>
+          </li>
+          <li>
+            <a routerLink="/register" class="dropdown-item" (click)="toggleMenu()">
+              <span class="material-symbols-outlined">person_add</span>
+              Đăng ký
+            </a>
+          </li>
+        </ul>
+
+        <!-- TRẠNG THÁI: ĐÃ ĐĂNG NHẬP -->
+        <div *ngIf="isLoggedIn">
+          <div class="dropdown-header" style="padding: 12px 16px; border-bottom: 1px solid var(--color-outline-variant); background-color: var(--color-surface-container-lowest);">
+            <div style="font-weight: 600; color: var(--color-on-surface);">{{ user?.firstname || '' }} {{ user?.lastname || '' }}</div>
+            <div style="font-size: 12px; color: var(--color-on-surface-variant); margin-top: 2px;">{{ user?.username || 'User' }}</div>
+          </div>
+          <ul class="dropdown-list">
+            <li>
+              <a routerLink="/settings" class="dropdown-item" (click)="toggleMenu()">
+                <span class="material-symbols-outlined">settings</span>
+                Cài đặt
+              </a>
+            </li>
+            <li>
+              <a (click)="onLogout(); toggleMenu()" class="dropdown-item" style="color: #d32f2f;">
+                <span class="material-symbols-outlined" style="color: #d32f2f;">logout</span>
+                Đăng xuất
+              </a>
+            </li>
+          </ul>
+        </div>
+
+      </div>
     </div>
   </div>
 </header>
