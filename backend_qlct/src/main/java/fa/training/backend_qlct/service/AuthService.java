@@ -44,13 +44,16 @@ public class AuthService {
         String email = payload.getEmail();
         String name = (String) payload.get("name");
         
+        // Lấy chuỗi ký tự trước dấu @ làm username
+        String extractedUsername = email != null ? email.split("@")[0] : "GoogleUser";
+        
         // 2. Kiểm tra nếu user đã tồn tại trong database, nếu chưa thì tạo mới
-        Optional<Users> userOpt = userRepository.findByUsername(email);
+        Optional<Users> userOpt = userRepository.findByUsername(extractedUsername);
         Users user;
         
         if (userOpt.isEmpty()) {
             user = new Users();
-            user.setUsername(email); // Dùng email của Google làm username luôn
+            user.setUsername(extractedUsername); // Dùng username vừa tách được
             
             // Tách tên và họ (cơ bản) từ fullname của Google
             if (name != null && name.contains(" ")) {

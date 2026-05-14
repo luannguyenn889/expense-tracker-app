@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {HttpClient} from '@angular/common/http';
 import {GoogleSigninButtonDirective, SocialAuthService} from '@abacritt/angularx-social-login';
+import {Auth} from '../../services/auth';
+
 
 @Component({
   selector: 'app-login',
@@ -25,10 +27,7 @@ export class Login implements OnInit{
   password = '';
   rememberMe = false;
 
-  constructor(private router: Router, private http: HttpClient,private authService: SocialAuthService ) {}
-
-
-
+  constructor(private router: Router, private http: HttpClient, private authService: SocialAuthService, private auth: Auth) {}
 
 
   togglePasswordVisibility() {
@@ -42,12 +41,20 @@ export class Login implements OnInit{
     }
     // URL cua Spring Boot
     const backend_url = 'http://localhost:8080/api/auth/login';
+
+    this.isLoading = true;
+
     // Bắn request POST mang theo object loginData (Angular tự động biến nó thành JSON)
     this.http.post(backend_url, this.logindata).subscribe(
-      (response) => {
+      (response: any) => {
         // Xử lý phản hồi từ server
-        console.log(response);
+        console.log("Đăng nhập thường thành công", response);
         this.isLoading = false;
+
+        // GỌI HÀM SET SESSION TẠI ĐÂY ĐỂ CẬP NHẬT HEADER
+        // Truyền một token giả định và thông tin user vừa nhận được từ backend
+        this.auth.setLoginSession('normal_login_token', response);
+
         this.router.navigate(['/']);
       },
       (error) => {
@@ -57,15 +64,6 @@ export class Login implements OnInit{
         alert('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.');
       }
     );
-
-
-    this.isLoading = true;
-
-    // Simulate API call
-    setTimeout(() => {
-      this.isLoading = false;
-      this.router.navigate(['/']);
-    }, 1500);
   }
 
   ngOnInit() {
@@ -90,13 +88,14 @@ export class Login implements OnInit{
     this.http.post(backendUrl, requestBody).subscribe({
       next: (response: any) => {
         this.isLoading = false;
-        console.log('Backend trả về JWT thành công:', response);
+        console.log('Backend trả về JWT và User Info thành công:', response);
 
-        // 1. Lưu JWT của hệ thống (do Spring Boot trả về) vào LocalStorage
-        localStorage.setItem('access_token', response.accessToken);
+        // GỌI HÀM SET SESSION TẠI ĐÂY ĐỂ CẬP NHẬT HEADER
+        // Backend (AuthResponse) đã trả về sẵn đối tượng 'user' được tách chuỗi chuẩn xác từ Java
+        this.auth.setLoginSession(response.accessToken, response.user);
 
         // 2. Chuyển hướng người dùng vào trang Dashboard
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/']);
       },
       error: (err) => {
         this.isLoading = false;
