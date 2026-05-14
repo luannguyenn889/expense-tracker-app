@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -22,7 +22,7 @@ export class Wallets implements OnInit {
     description: ''
   };
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.loadWallets();
@@ -35,10 +35,12 @@ export class Wallets implements OnInit {
         next: (data: any) => {
           this.wallets = data;
           this.isLoading = false;
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('Lỗi tải ví:', err);
           this.isLoading = false;
+          this.cdr.detectChanges();
         }
       });
   }
@@ -49,6 +51,7 @@ export class Wallets implements OnInit {
         next: () => {
           this.loadWallets();
           this.newWallet = { name: '', balance: 0, description: '' };
+          this.cdr.detectChanges();
         },
         error: (err) => console.error('Lỗi tạo ví:', err)
       });
