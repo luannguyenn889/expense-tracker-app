@@ -1,0 +1,121 @@
+.wallets-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.add-wallet-form {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.add-wallet-form input {
+  padding: 10px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  flex: 1;
+}
+
+.add-wallet-form button {
+  padding: 10px 24px;
+  background-color: #006493;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.wallets-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.wallet-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  position: relative;
+}
+
+.wallet-card h3 {
+  margin: 0 0 10px 0;
+  color: #006493;
+}
+
+.balance {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2ecc71;
+  margin: 10px 0;
+}
+
+.description {
+  color: #666;
+  font-size: 14px;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #999;
+}
+
+.delete-btn:hover {
+  color: #e74c3c;
+}
+
+/* Empty state (khi chưa có ví) */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: #f8f9fa;
+  border-radius: 16px;
+  margin-top: 20px;
+}
+
+.empty-image {
+  width: 200px;
+  max-width: 80%;
+  margin-bottom: 20px;
+  opacity: 0.7;
+}
+
+.empty-state h3 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.empty-state p {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.btn-primary {
+  background-color: #006493;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.btn-primary:hover {
+  background-color: #004b70;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}

@@ -1,0 +1,35 @@
+<div class="wallets-container">
+  <h2>Ví của tôi</h2>
+
+  <!-- Form thêm ví -->
+  <div class="add-wallet-form">
+    <input [(ngModel)]="newWallet.name" placeholder="Tên ví" />
+    <input type="number" [(ngModel)]="newWallet.balance" placeholder="Số dư ban đầu" />
+    <input [(ngModel)]="newWallet.description" placeholder="Mô tả" />
+    <button (click)="createWallet()">+ Thêm ví</button>
+  </div>
+
+  <!-- HIỂN THỊ KHI CÓ VÍ -->
+  <div class="wallets-list" *ngIf="!isLoading && wallets.length > 0">
+    <div class="wallet-card" *ngFor="let wallet of wallets">
+      <div class="wallet-info">
+        <h3>{{ wallet.name }}</h3>
+        <p class="balance">{{ wallet.balance | number:'1.2-2' }} ₫</p>
+        <p class="description">{{ wallet.description }}</p>
+        <small>Ngày tạo: {{ wallet.createdAt | date:'dd/MM/yyyy' }}</small>
+      </div>
+      <button class="delete-btn" (click)="deleteWallet(wallet.id)">🗑️ Xóa</button>
+    </div>
+  </div>
+
+  <!-- HIỂN THỊ KHI CHƯA CÓ VÍ -->
+  <div class="empty-state" *ngIf="!isLoading && wallets.length === 0">
+    <h3>Chưa có ví nào!</h3>
+    <p>Hãy thêm ví đầu tiên để bắt đầu quản lý tài chính của bạn.</p>
+  </div>
+
+  <!-- Hiển thị loading -->
+  <div class="loading" *ngIf="isLoading">
+    <p>Đang tải...</p>
+  </div>
+</div>
