@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
-
+import { SocialAuthService } from '@abacritt/angularx-social-login';
 import {Router} from '@angular/router';
 
 @Injectable({
@@ -17,7 +17,7 @@ export class Auth {
   private currentUser = new BehaviorSubject<any>(this.getUserFromStorage());
   currentUser$ = this.currentUser.asObservable();
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, private socialAuthService: SocialAuthService) { }
 
   // Hàm kiểm tra xem token có tồn tại không (để giữ trạng thái khi F5 trang)
   private checkToken(): boolean {
@@ -40,6 +40,11 @@ export class Auth {
 
   // Hàm gọi khi nhấn Đăng xuất ở Header
   logout() {
+    // Đăng xuất khỏi Google nếu đang dùng tài khoản Google
+    this.socialAuthService.signOut().catch(() => {
+        // Bỏ qua lỗi nếu user chưa từng đăng nhập Google
+    });
+
     localStorage.removeItem('access_token');
     localStorage.removeItem('user_info');
 
@@ -48,4 +53,5 @@ export class Auth {
 
     this.router.navigate(['/login']); // Đẩy về trang đăng nhập
   }
+  
 }
