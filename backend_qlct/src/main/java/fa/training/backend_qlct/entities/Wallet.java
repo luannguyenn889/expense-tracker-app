@@ -28,11 +28,11 @@ public class Wallet {
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    // Constructor khong tham so (can cho JPA)
+    // Constructor khong tham so
     public Wallet() {
     }
 
-    // Constructor co tham so (tuy chon)
+    
     public Wallet(String name, BigDecimal balance, Long userId, String description) {
         this.name = name;
         this.balance = balance != null ? balance : BigDecimal.ZERO;
@@ -90,7 +90,7 @@ public class Wallet {
         this.createdAt = createdAt;
     }
 
-    // toString() de debug (tuy chon)
+    
     @Override
     public String toString() {
         return "Wallet{" +
