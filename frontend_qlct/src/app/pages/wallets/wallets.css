@@ -6,7 +6,7 @@
 
 .wallets-container h2 {
   font-size: 30px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 /* Nút thêm ví */
@@ -32,7 +32,7 @@
 .total-balance {
   border-radius: 0px;
   padding: 20px;
-  margin-bottom: 24px;
+  margin-bottom: 18px;
   color: black;
   text-align: left;
 }
