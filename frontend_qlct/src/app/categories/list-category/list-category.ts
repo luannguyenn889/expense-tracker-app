@@ -15,10 +15,10 @@ export class ListCategory implements OnInit {
   paginatedCategories: Category[] = [];
   
   // Pagination properties
-  currentPage: number = 1;
-  pageSize: number = 5;
-  totalPages: number = 1;
-  pagesArray: number[] = [];
+  currentPage: number = 1; // trang hiện tại
+  pageSize: number = 3; // kích thước trang
+  totalPages: number = 1; // tổng số trang
+  pagesArray: number[] = []; // mảng các số trang
 
   constructor(
     private categoryService: CategoryService,
@@ -47,8 +47,7 @@ export class ListCategory implements OnInit {
 
   updatePagination(): void {
     this.totalPages = Math.max(1, Math.ceil(this.categories.length / this.pageSize));
-    
-    // Ensure currentPage is within bounds
+    // Đảm bảo trang hiện tại nằm trong giới hạn
     if (this.currentPage > this.totalPages) {
       this.currentPage = this.totalPages;
     } else if (this.currentPage < 1) {
@@ -59,7 +58,7 @@ export class ListCategory implements OnInit {
     const endIndex = startIndex + this.pageSize;
     this.paginatedCategories = this.categories.slice(startIndex, endIndex);
     
-    // Generate page numbers array
+    // Tạo mảng các số trang
     this.pagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
   }
 
@@ -113,4 +112,4 @@ export class ListCategory implements OnInit {
 // }
 
 
-}
+

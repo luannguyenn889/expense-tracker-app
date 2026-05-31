@@ -58,6 +58,7 @@
         <div class="pagination-size">
           <label for="pageSizeSelect">Số dòng: </label>
           <select id="pageSizeSelect" class="pagination-select" (change)="changePageSize($event)">
+            <option value="3" [selected]="pageSize === 3">3</option>
             <option value="5" [selected]="pageSize === 5">5</option>
             <option value="10" [selected]="pageSize === 10">10</option>
             <option value="20" [selected]="pageSize === 20">20</option>
