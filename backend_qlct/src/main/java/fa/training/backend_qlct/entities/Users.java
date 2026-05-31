@@ -3,15 +3,14 @@ package fa.training.backend_qlct.entities;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import org.springframework.data.annotation.Id;
+import jakarta.persistence.Id;
 
 import java.time.LocalDate;
 // Entity la lop tuong ung voi bang trong database, chua thong tin va cau truc cua bang, de spring tao bang trong database va tuong tac voi database
 @Entity
 public class Users {
-    @jakarta.persistence.Id
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID) //
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     private String username;

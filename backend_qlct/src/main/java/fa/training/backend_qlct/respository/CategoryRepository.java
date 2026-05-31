@@ -8,7 +8,4 @@ import java.util.Optional;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Categories, String> {
-
-    @Override
-    Optional<Categories> findById(String s);
 }

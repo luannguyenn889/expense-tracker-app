@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ChangeDetectorRef} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {Router, ActivatedRoute, RouterLink} from '@angular/router';
 import {CategoryService} from '../../services/category-service';
@@ -19,7 +19,8 @@ export class EditCategory implements OnInit {
   constructor(
     private categoryService: CategoryService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -29,10 +30,12 @@ export class EditCategory implements OnInit {
         next: (data) => {
           this.category = data;
           this.isLoading = false;
+          this.cdr.detectChanges(); // Force Angular to update UI immediately
         },
         error: (err) => {
           console.error('Error fetching category:', err);
           this.isLoading = false;
+          this.cdr.detectChanges(); // Force UI update on error too
         }
       });
     }
