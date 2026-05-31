@@ -1,0 +1,14 @@
+package fa.training.backend_qlct.respository;
+
+import fa.training.backend_qlct.entities.Categories;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface CategoryRepository extends JpaRepository<Categories, String> {
+
+    @Override
+    Optional<Categories> findById(String s);
+}
