@@ -1,0 +1,49 @@
+<div class="basic">
+  <div class="basic-header">
+    <h2 class="basic-title">Categories</h2>
+    <button class="basic-btn" routerLink="/categories/add">
+      <span class="material-symbols-outlined">add</span>
+      Add Category
+    </button>
+  </div>
+  
+  <div class="basic-table-container">
+    <table class="basic-table">
+      <thead>
+        <tr>
+          <th>Icon</th>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (category of categories; track category.id) {
+          <tr>
+            <td class="basic-icon-cell">
+              <span class="material-symbols-outlined">{{ category.icon || 'category' }}</span>
+            </td>
+            <td>{{ category.name }}</td>
+            <td>
+              <span class="basic-badge" [class.income]="category.type === 'INCOME'" [class.expense]="category.type === 'EXPENSE'">
+                {{ category.type }}
+              </span>
+            </td>
+            <td class="basic-actions">
+              <button class="basic-action-btn edit" title="Edit" (click)="updateCategory(category.id)">
+                <span class="material-symbols-outlined">edit</span>
+              </button>
+              <button class="basic-action-btn delete" title="Delete" (click)="deleteCategory(category.id)">
+                <span class="material-symbols-outlined">delete</span>
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="4" class="basic-empty">No categories found.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
