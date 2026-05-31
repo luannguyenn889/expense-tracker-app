@@ -67,6 +67,12 @@
           </div>
           <ul class="dropdown-list">
             <li>
+              <a [routerLink]="['/user/edit', user?.id]" class="dropdown-item" (click)="toggleMenu()">
+                <span class="material-symbols-outlined">manage_accounts</span>
+                Cập nhật tài khoản
+              </a>
+            </li>
+            <li>
               <a routerLink="/settings" class="dropdown-item" (click)="toggleMenu()">
                 <span class="material-symbols-outlined">settings</span>
                 Cài đặt
