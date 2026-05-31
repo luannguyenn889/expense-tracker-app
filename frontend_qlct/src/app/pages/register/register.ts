@@ -49,6 +49,10 @@ export class Register implements OnInit{
   }
 
   onSubmit() {
+    if (this.loadData.password !== this.confirmPassword) {
+      alert('Mật khẩu và xác nhận mật khẩu không khớp!');
+      return;
+    }
     this.isLoading = true;
     // URL cua Spring Boot
 
