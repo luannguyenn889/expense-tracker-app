@@ -1,9 +1,6 @@
 package fa.training.backend_qlct.controller;
 
-import fa.training.backend_qlct.dto.request.AuthResponse;
-import fa.training.backend_qlct.dto.request.GoogleLoginRequest;
-import fa.training.backend_qlct.dto.request.LoginRequest;
-import fa.training.backend_qlct.dto.request.UserCreationRequest;
+import fa.training.backend_qlct.dto.request.*;
 import fa.training.backend_qlct.entities.Users;
 import fa.training.backend_qlct.service.AuthService;
 import fa.training.backend_qlct.service.UserService;
@@ -11,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 
 @RestController
 @RequestMapping("/api/auth")
@@ -65,4 +63,18 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
+    // Update Users
+    @PutMapping("/update/{userId}")
+
+     public ResponseEntity<?> updateUser(@PathVariable("userId") String userId, @RequestBody UserUpdateRequest request) {
+        try{
+            Users newUser = userService.updateRequest(userId, request);
+            return ResponseEntity.ok(newUser);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+     }
+
+
 }

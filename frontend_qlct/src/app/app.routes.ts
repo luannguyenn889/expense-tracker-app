@@ -7,6 +7,9 @@ import { Categories } from './pages/categories/categories';
 import { Budget } from './pages/budget/budget';
 import { Reports } from './pages/reports/reports';
 import { Settings } from './pages/settings/settings';
+import { ListCategory } from './categories/list-category/list-category';
+import { AddCategory } from './categories/add-category/add-category';
+import { EditCategory } from './categories/edit-category/edit-category';
 
 export const routes: Routes = [
   { path: 'login', component: Login },
@@ -17,5 +20,9 @@ export const routes: Routes = [
   { path: 'budget', component: Budget },
   { path: 'reports', component: Reports },
   { path: 'settings', component: Settings },
-  { path: '**', redirectTo: '' },
+  { path: 'list-category', component: ListCategory },
+  { path: 'categories/add', component: AddCategory },
+  { path: 'categories/edit/:id', component: EditCategory },
+  { path: '**', redirectTo: '' }
 ];
+
