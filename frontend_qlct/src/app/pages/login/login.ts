@@ -7,9 +7,10 @@ import {GoogleSigninButtonDirective, SocialAuthService} from '@abacritt/angularx
 import {Auth} from '../../services/auth';
 
 import {User} from '../../model/user';
+import { ReactiveFormsModule } from '@angular/forms';
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, FormsModule, GoogleSigninButtonDirective],
+  imports: [CommonModule, FormsModule, GoogleSigninButtonDirective, ReactiveFormsModule, FormsModule,CommonModule],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
