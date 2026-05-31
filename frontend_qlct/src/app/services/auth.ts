@@ -38,6 +38,12 @@ export class Auth {
     this.currentUser.next(userInfo); // Phát tín hiệu: Thông tin user đây!
   }
 
+  // Cập nhật thông tin user hiện tại trong session (để cập nhật Avatar/tên ở Header ngay lập tức)
+  updateCurrentUser(userInfo: any) {
+    localStorage.setItem('user_info', JSON.stringify(userInfo));
+    this.currentUser.next(userInfo);
+  }
+
   // Hàm gọi khi nhấn Đăng xuất ở Header
   logout() {
     // Đăng xuất khỏi Google nếu đang dùng tài khoản Google
