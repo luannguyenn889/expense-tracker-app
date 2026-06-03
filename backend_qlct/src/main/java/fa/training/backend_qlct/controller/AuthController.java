@@ -67,7 +67,7 @@ public class AuthController {
     // Update Users
     @PutMapping("/update/{userId}")
 
-     public ResponseEntity<?> updateUser(@PathVariable("userId") String userId, @RequestBody UserUpdateRequest request) {
+     public ResponseEntity<?> updateUser(@PathVariable("userId") Long userId, @RequestBody UserUpdateRequest request) {
         try{
             Users newUser = userService.updateRequest(userId, request);
             return ResponseEntity.ok(newUser);
