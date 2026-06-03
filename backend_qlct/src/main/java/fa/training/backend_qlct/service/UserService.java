@@ -30,11 +30,11 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public Users getUser(String id){
+    public Users getUser(Long id){
        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
 
-    public Users updateRequest(String userID,UserUpdateRequest request){
+    public Users updateRequest(Long userID,UserUpdateRequest request){
         Users users = getUser(userID);
         users.setFirstname(request.getFirstname());
         users.setLastname(request.getLastname());
@@ -44,7 +44,7 @@ public class UserService {
         return userRepository.save(users);
     }
 
-    public void deleteUser(String id) {
+    public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
 
