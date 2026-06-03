@@ -17,7 +17,7 @@ export class EditUser implements OnInit{
 
   isLoading: boolean = true;
   user: User = new User();
-  userId: string = '';
+  userId: number = 0;
 
   constructor(
     private userService: UserService, // Sửa lại tên biến cho đúng convention
@@ -28,7 +28,8 @@ export class EditUser implements OnInit{
   ) {}
 
   ngOnInit(): void {
-    this.userId = this.route.snapshot.paramMap.get('id') || '';
+    const idParam = this.route.snapshot.paramMap.get('id');
+    this.userId = idParam ? Number(idParam) : 0;
     if (this.userId) {
       this.userService.getUserById(this.userId).subscribe({
         next: (data) => {
