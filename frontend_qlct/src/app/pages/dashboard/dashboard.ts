@@ -1,205 +1,146 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Router } from '@angular/router';
 import { Auth } from '../../services/auth';
-import { CategoryService } from '../../services/category-service';
-import { Category } from '../../model/category';
-import {
-  Chart,
-  ArcElement,
-  Tooltip,
-  Legend,
-  DoughnutController,
-  Title,
-} from 'chart.js';
-
-// Đăng ký các thành phần Chart.js cần dùng
-Chart.register(ArcElement, Tooltip, Legend, DoughnutController, Title);
+import { DashboardSer, CashFlowItem, Wallet, TransactionItem, CategoryExpense, SpendingAlert } from '../../services/dashboardSer';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, RouterLink],
+  standalone: true,
+  imports: [CommonModule, FormsModule, HttpClientModule],
   templateUrl: './dashboard.html',
-  styleUrl: './dashboard.css',
+  styleUrls: ['./dashboard.css']
 })
-export class Dashboard implements OnInit, OnDestroy {
+export class Dashboard implements OnInit {
 
-  aiAdvice: string = '';
-  isAiThinking: boolean = false;
-  username: string = '';
-  userId: number | null = null;
+  selectedPeriod: number = 6; // Bộ lọc chung cho Dashboard
 
-  // Danh mục gần đây của user (tối đa 7)
-  recentCategories: Category[] = [];
-  isCategoryLoading: boolean = true;
+  // Các biến lọc độc lập cho khu vực Biểu đồ tròn
+  selectedMonth: number = new Date().getMonth() + 1; 
+  selectedYear: number = new Date().getFullYear();    
 
-  // Biểu đồ
-  private pieChart: Chart | null = null;
-  hasExpenseCategories: boolean = false;
-  private allUserCategories: Category[] = [];
+  monthsList: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+  yearsList: number[] = [];
+
+  totalIncome: number = 0;
+  totalExpense: number = 0;
+  netCashFlow: number = 0;
+  incomeChange: number = 0;
+  expenseChange: number = 0;
+  
+  spendingAlerts: SpendingAlert[] = [];
+  cashFlows: CashFlowItem[] = [];
+  wallets: Wallet[] = [];
+  totalAssets: number = 0;
+  recentTransactions: TransactionItem[] = [];
+  
+  // Dữ liệu hiển thị biểu đồ tròn và cột % bên cạnh
+  categoryExpenses: CategoryExpense[] = [];
+
+  userId!: number;
 
   constructor(
-    private http: HttpClient,
+    private dashboardSer: DashboardSer,
     private auth: Auth,
-    private categoryService: CategoryService,
-    private cdr: ChangeDetectorRef
-  ) {}
+    private router: Router,
+    private cdr: ChangeDetectorRef 
+  ) {
+    const currentYear = new Date().getFullYear();
+    for (let y = currentYear - 3; y <= currentYear + 1; y++) {
+      this.yearsList.push(y);
+    }
+  }
 
-  ngOnInit() {
-    this.auth.currentUser$.subscribe({
-      next: (user) => {
-        if (user && user.username) {
-          this.username = user.username;
+  ngOnInit(): void {
+    this.initializeDashboard();
+  }
+
+  private initializeDashboard(): void {
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    const checkUserAndLoad = () => {
+      const userObj = this.auth.getCurrentUser();
+      if (userObj && userObj.id) {
+        this.userId = Number(userObj.id);
+        this.loadGeneralData();  // Tải dữ liệu tổng quan
+        this.loadPieChartData(); // Tải riêng dữ liệu biểu đồ tròn
+      } else {
+        attempts++;
+        if (attempts < maxAttempts) {
+          setTimeout(checkUserAndLoad, 100);
         } else {
-          this.username = '';
-        }
-        if (user && user.id) {
-          this.userId = user.id;
-          this.loadRecentCategories(user.id);
+          this.router.navigate(['/login']);
         }
       }
+    };
+    setTimeout(checkUserAndLoad, 50);
+  }
+
+  // Hàm chạy khi thay đổi bộ lọc chu kỳ tổng (Tháng này, 3 tháng, 6 tháng...)
+  loadGeneralData(): void {
+    if (!this.userId) return;
+
+    this.dashboardSer.getDashboardData(this.userId, this.selectedPeriod).subscribe({
+      next: (data) => {
+        if (data) {
+          this.totalIncome = data.totalIncome || 0;
+          this.totalExpense = data.totalExpense || 0;
+          this.netCashFlow = data.netCashFlow || 0;
+          this.incomeChange = data.incomeChange || 0;
+          this.expenseChange = data.expenseChange || 0;
+          this.spendingAlerts = data.spendingAlerts || [];
+          this.cashFlows = data.cashFlows || [];
+          this.wallets = data.wallets || [];
+          this.totalAssets = data.totalAssets || 0;
+          this.recentTransactions = data.recentTransactions || [];
+
+          this.cdr.detectChanges(); 
+        }
+      },
+      error: (err) => console.error('Lỗi tải dữ liệu tổng quan:', err)
     });
   }
 
-  ngOnDestroy() {
-    if (this.pieChart) {
-      this.pieChart.destroy();
-      this.pieChart = null;
-    }
-  }
+  // Hàm chạy RIÊNG khi thay đổi tháng hoặc năm ở biểu đồ tròn
+  loadPieChartData(): void {
+    if (!this.userId) return;
 
-  /** Lấy danh mục của user, hiển thị bảng + biểu đồ */
-  loadRecentCategories(userId: number) {
-    this.isCategoryLoading = true;
-    this.categoryService.getAllCategories(userId).subscribe({
-      next: (categories) => {
-        const userCats = categories.filter(c => c.userId != null);
-
-        // 1. Cập nhật dữ liệu bảng (tối đa 7)
-        this.recentCategories = userCats.slice(0, 7);
-
-        // 2. Xác định có danh mục Chi tiêu không
-        const expenseCats = userCats.filter(c => c.type === 'EXPENSE');
-        this.hasExpenseCategories = expenseCats.length > 0;
-        this.allUserCategories = userCats;
-
-        // 3. Tắt loading → Angular render @if block (canvas xuất hiện trong DOM)
-        this.isCategoryLoading = false;
-
-        // 4. Force Angular detect changes để canvas được render TRƯỚC khi vẽ
+    this.dashboardSer.getCategoryExpenses(this.userId, this.selectedMonth, this.selectedYear).subscribe({
+      next: (data) => {
+        this.categoryExpenses = data || [];
         this.cdr.detectChanges();
-
-        // 5. Sau khi DOM đã cập nhật → vẽ chart
-        if (this.hasExpenseCategories) {
-          this.buildPieChart(expenseCats);
-        }
       },
-      error: (err) => {
-        console.error('Lỗi tải danh mục:', err);
-        this.isCategoryLoading = false;
-      }
+      error: (err) => console.error('Lỗi tải dữ liệu biểu đồ tròn:', err)
     });
   }
 
-  /** Vẽ biểu đồ tròn phân bổ chi tiêu theo danh mục EXPENSE */
-  buildPieChart(expenseCategories: Category[]) {
-    const canvas = document.getElementById('categoryPieCanvas') as HTMLCanvasElement;
-    if (!canvas) {
-      console.warn('Canvas không tìm thấy, thử lại sau 200ms...');
-      setTimeout(() => this.buildPieChart(expenseCategories), 200);
-      return;
+  getBarHeight(amount: number): number {
+    if (amount <= 0 || !this.cashFlows || this.cashFlows.length === 0) return 0;
+    const maxHeight = 140; 
+    const maxInList = Math.max(...this.cashFlows.map(item => Math.max(item.income, item.expense)));
+    const maxAmount = maxInList > 0 ? maxInList : 100000;
+    return (amount / maxAmount) * maxHeight;
+  }
+
+  getSavingRate(): number {
+    if (!this.totalIncome || this.totalIncome <= 0) return 0;
+    return (this.netCashFlow / this.totalIncome) * 100;
+  }
+
+  getPieStrokeArray(index: number): string {
+    if (!this.categoryExpenses || !this.categoryExpenses[index]) return '0 100';
+    const currentPercent = this.categoryExpenses[index].percentage || 0;
+    return `${currentPercent} ${100 - currentPercent}`;
+  }
+
+  getPieStrokeOffset(index: number): number {
+    let accumulatedPercent = 0;
+    for (let i = 0; i < index; i++) {
+      accumulatedPercent += this.categoryExpenses[i].percentage || 0;
     }
-
-    // Huỷ chart cũ nếu tồn tại
-    if (this.pieChart) {
-      this.pieChart.destroy();
-      this.pieChart = null;
-    }
-
-    // Palette màu mặc định dùng khi category không có color
-    const defaultPalette = [
-      '#EF5350', '#EC407A', '#AB47BC', '#5C6BC0',
-      '#42A5F5', '#26C6DA', '#26A69A', '#66BB6A',
-      '#D4E157', '#FFCA28', '#FFA726', '#FF7043',
-      '#8D6E63', '#78909C'
-    ];
-
-    const labels     = expenseCategories.map(c => c.name);
-    const dataValues = expenseCategories.map(c => c.monthlyBudget ?? 1);
-    const bgColors   = expenseCategories.map((c, i) =>
-      c.color ?? defaultPalette[i % defaultPalette.length]
-    );
-    const borderColors = bgColors.map(c => c + 'bb');
-
-    this.pieChart = new Chart(canvas, {
-      type: 'doughnut',
-      data: {
-        labels,
-        datasets: [{
-          data: dataValues,
-          backgroundColor: bgColors,
-          borderColor: borderColors,
-          borderWidth: 2,
-          hoverOffset: 10,
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '58%',
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              padding: 14,
-              font: { size: 12 },
-              usePointStyle: true,
-              pointStyleWidth: 10,
-              color: '#555',
-            }
-          },
-          tooltip: {
-            callbacks: {
-              label: (ctx) => {
-                const cat = expenseCategories[ctx.dataIndex];
-                if (cat.monthlyBudget) {
-                  return ` ${cat.name}: ${cat.monthlyBudget.toLocaleString('vi-VN')} ₫/tháng`;
-                }
-                return ` ${cat.name}`;
-              }
-            }
-          }
-        }
-      }
-    });
-  }
-
-  /** Màu nền icon */
-  getCategoryBgColor(category: Category): string {
-    return category.color ? category.color + '22' : 'var(--color-primary-container)';
-  }
-
-  /** Màu icon */
-  getCategoryIconColor(category: Category): string {
-    return category.color ?? 'var(--color-primary)';
-  }
-
-  askAiForAdvice() {
-    this.isAiThinking = true;
-    this.aiAdvice = '';
-
-    const url = `http://localhost:8080/api/ai/advice?username=${this.username}`;
-    this.http.get(url).subscribe({
-      next: (res: any) => {
-        this.aiAdvice = res.message;
-        this.isAiThinking = false;
-      },
-      error: (err) => {
-        console.error('Lỗi AI:', err);
-        this.aiAdvice = 'Xin lỗi, trợ lý AI hiện đang đi vắng. Hãy thử lại sau nhé.';
-        this.isAiThinking = false;
-      }
-    });
+    return 100 - accumulatedPercent + 25; 
   }
 }
