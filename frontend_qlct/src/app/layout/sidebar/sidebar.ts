@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 
 @Component({
   selector: 'app-sidebar',
@@ -7,4 +7,13 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
 })
-export class Sidebar {}
+export class Sidebar {
+  constructor(private router: Router) {}
+
+  openNewTransaction() {
+    sessionStorage.setItem('openAddTransaction', 'true');
+    // Chuyển đến trang transactions và mở popup thêm giao dịch
+    this.router.navigate(['/transactions']).then(() => {
+    });
+  }
+}
