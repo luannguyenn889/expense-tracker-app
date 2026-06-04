@@ -1,0 +1,149 @@
+<div class="dashboard">
+  <!-- Row 1: Summary Cards -->
+  <div class="cards-grid">
+    <!-- Current Balance -->
+    <div class="card">
+      <div class="card__header">
+        <div class="card__icon card__icon--primary">
+          <span class="material-symbols-outlined">account_balance_wallet</span>
+        </div>
+        <h3 class="card__title">Số dư hiện tại</h3>
+      </div>
+      <div class="card__body">
+        <p class="card__amount card__amount--primary">245,500,000 ₫</p>
+        <p class="card__meta">Updated just now</p>
+      </div>
+    </div>
+
+    <!-- Monthly Income -->
+    <div class="card">
+      <div class="card__header">
+        <div class="card__icon card__icon--income">
+          <span class="material-symbols-outlined">trending_up</span>
+        </div>
+        <h3 class="card__title">Tổng Thu tháng này</h3>
+      </div>
+      <div class="card__body">
+        <p class="card__amount card__amount--income">45,200,000 ₫</p>
+        <div class="card__trend">
+          <span class="material-symbols-outlined card__trend-icon card__trend-icon--up">arrow_upward</span>
+          <span class="card__trend-value card__trend-value--up">12%</span>
+          <span class="card__trend-label">vs last month</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monthly Expenses -->
+    <div class="card">
+      <div class="card__header">
+        <div class="card__icon card__icon--expense">
+          <span class="material-symbols-outlined">trending_down</span>
+        </div>
+        <h3 class="card__title">Tổng Chi tháng này</h3>
+      </div>
+      <div class="card__body">
+        <p class="card__amount card__amount--expense">18,450,000 ₫</p>
+        <div class="card__trend">
+          <span class="material-symbols-outlined card__trend-icon card__trend-icon--down">arrow_downward</span>
+          <span class="card__trend-value card__trend-value--down">5%</span>
+          <span class="card__trend-label">vs last month</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: Charts -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h3 class="chart-card__title">Income vs Expenses</h3>
+      <div class="chart-card__placeholder">
+        <span class="material-symbols-outlined chart-card__icon">bar_chart</span>
+        <p>Bar Chart Visualization Area</p>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3 class="chart-card__title">Expenses by Category</h3>
+      <div class="chart-card__placeholder">
+        <span class="material-symbols-outlined chart-card__icon">pie_chart</span>
+        <p>Pie Chart Visualization Area</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 3: Recent Transactions -->
+  <div class="table-card">
+    <div class="table-card__header">
+      <h3 class="table-card__title">Hoạt động gần đây</h3>
+      <button class="table-card__view-all">View All</button>
+    </div>
+    <div class="table-card__body">
+      <table class="txn-table">
+        <thead>
+          <tr>
+            <th>Ngày</th>
+            <th>Danh mục</th>
+            <th>Nội dung</th>
+            <th class="txn-table__right">Số tiền</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>15 Oct 2023</td>
+            <td>
+              <div class="txn-table__category">
+                <span class="material-symbols-outlined txn-table__cat-icon">restaurant</span>
+                <span>Food &amp; Dining</span>
+              </div>
+            </td>
+            <td>Dinner at Sushi Bar</td>
+            <td class="txn-table__right txn-table__amount">- 850,000 ₫</td>
+          </tr>
+          <tr>
+            <td>12 Oct 2023</td>
+            <td>
+              <div class="txn-table__category">
+                <span class="material-symbols-outlined txn-table__cat-icon txn-table__cat-icon--primary">work</span>
+                <span>Salary</span>
+              </div>
+            </td>
+            <td>October Salary</td>
+            <td class="txn-table__right txn-table__amount txn-table__amount--income">+ 45,200,000 ₫</td>
+          </tr>
+          <tr>
+            <td>10 Oct 2023</td>
+            <td>
+              <div class="txn-table__category">
+                <span class="material-symbols-outlined txn-table__cat-icon">home</span>
+                <span>Housing</span>
+              </div>
+            </td>
+            <td>Monthly Rent</td>
+            <td class="txn-table__right txn-table__amount">- 12,000,000 ₫</td>
+          </tr>
+          <tr>
+            <td>08 Oct 2023</td>
+            <td>
+              <div class="txn-table__category">
+                <span class="material-symbols-outlined txn-table__cat-icon">directions_car</span>
+                <span>Transport</span>
+              </div>
+            </td>
+            <td>Gas Station</td>
+            <td class="txn-table__right txn-table__amount">- 500,000 ₫</td>
+          </tr>
+          <tr>
+            <td>05 Oct 2023</td>
+            <td>
+              <div class="txn-table__category">
+                <span class="material-symbols-outlined txn-table__cat-icon">shopping_cart</span>
+                <span>Groceries</span>
+              </div>
+            </td>
+            <td>Supermarket Run</td>
+            <td class="txn-table__right txn-table__amount">- 1,200,000 ₫</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

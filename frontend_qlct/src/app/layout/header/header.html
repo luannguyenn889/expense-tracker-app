@@ -1,0 +1,87 @@
+<header class="topbar">
+  <div class="topbar__left">
+    <div class="topbar__brand">
+      <img
+        alt="WealthWise Logo"
+        class="topbar__logo topbar__logo--mobile"
+        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAABGlJREFUaIHtmVtsFUUYx3/fOW1pS1sMVWm1xlRFjcYLBm+JiRoTE2N8UOODxgcfNEZjjPHBxBgvL0aj8RL1QWO8BKNGo/GCxoAoihdUvKFi1IoWraC0tIWW9pzx+83u2T1nz9ntnlMu/pPN7OzMt/P9d+ab2VmwWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovlvwzlLdDc3KxjY2NpNxuBPcCezs7O7rwdV1dX6+DgYNo9CQwEaZTOqNQp0CWiZ4WNa0ZHR2/0LFuKXLzGOBb5K/Ja3r17Q0cXoZPzBHFPkpJ6x4gXc7l9N/IKvAF4A3gIOA0T90V6OjZT/qBjUArcDJwInC0P10MXAbcCjQBBTflFNA+I/hL4GPXR3pxvGfideCVoWuXAHcBT7rXy3H+Xv5+RFdnS0t82GzS6p0AjvJeePyYn4QvzFH0DeAnYIZU9EnVdTkdZFZ3cF6Xs9x2K9CH83e4P+haBj4HhqLGVvjIR8PuNi3KfcLFa+YeVcAJ6MsFnrGM7TaQUe7AMu0Ux90DWq6gzk7eB/4EW3y21Js9x70kF/AhqBV4DfcfYc26qcXw9gA+BQ5J+05NE3EjlBsC6I2gy8EpP2APCD+JoRCUhXyVp8FxxZ3k/iH5T0Lm9RJPC2KfJLY+ojeH8XvIF1MfclQfpT5WJx13NfHgP2xOnx7yCDQB/oO8mYqYiM4u3Ax0OXm5tGYl/sDcJ+HWmjMNO3T5DkD9XJ2CKagYeA94H/cFasd6AUUXOqtBe4FHgdeInyL3MTAb2eZx5cJqoIcivM7MUB74PabPpv0N2AxcDpzjKXcA8BDQBXwKDOSQqVKsAt4DPo6J3w7UEzzHp4F3gC7P/MfAbuAAb8cJpuhTiQ9L04+cBdwC/BOTfx/OJnYbQTLsj8D/FLgbuBj4i2BHMR34nKCevUOXWAicDPwZKjcIrMT5J/EH0Il8oqNJqzqcN7cW+AMn4gXAE8A9wO+uTG7LajIIjOJ8z+sU9ZZiGwIyIl/J/AbuAp4l+C50+2mv8uNN9p3Q4/APTjP1Y4z7c5mIH8F+sDpWV8GLvfkfQz81XPdD/RGlBkGPsNZ2UaBdqCbhM+IOw3F7xXYIHYCi4muL4E+oF3gL+AT4ETPGm7Xe1kNPVZ4G3gPJx/ZwCYAbwNfAW8TzCMjuN4/3r8YXSEBMNNKGRGXKVzinuAvJuImerSLwBeJBi6nuc0ypnnfkr4DPdcchZwEfBcKH8jwTPMxvVhvS5xHGfe3IfzdepzZ5bgXWAHzhdJgJ+x++JZl1oSFO/3LNcTvD+AvgQ6PKUuJBhaXgceAbly1YnzrD6kCefd+g8Fvl3knxb2Eywj7iLCr3RcqPSi4BXgP2A/XC+hL0D/BR1U0aZCIr3A0cBL1HDj5AnUPrfaQHOAA4DTiDYML+C87VpDfAPpf+xZrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWP5L/AuERWlBAVrrogAAAABJRU5ErkJggg==" />
+      <h2 class="topbar__title topbar__title--mobile">WealthWise</h2>
+      <h2 class="topbar__title topbar__title--desktop">WealthWise</h2>
+    </div>
+
+    <!-- Search -->
+    <div class="topbar__search-wrapper" *ngIf="isLoggedIn">
+      <span class="material-symbols-outlined topbar__search-icon">search</span>
+      <input
+        class="topbar__search"
+        type="text"
+        placeholder="Search transactions, categories..." />
+    </div>
+  </div>
+
+  <div class="topbar__actions">
+    <ng-container *ngIf="isLoggedIn">
+      <button class="topbar__quick-add">
+        <span class="material-symbols-outlined topbar__quick-add-icon">add</span>
+        Quick Add
+      </button>
+      <button class="topbar__icon-btn">
+        <span class="material-symbols-outlined">notifications</span>
+      </button>
+    </ng-container>
+
+    <!-- User Avatar & Dropdown Menu -->
+    <div class="topbar__avatar-container" style="position: relative;">
+      <div class="topbar__avatar" (click)="toggleMenu()" style="cursor: pointer;">
+        <!-- Show first letter of username if logged in, else show person icon -->
+        <span *ngIf="isLoggedIn && user?.username" class="avatar-text" style="font-weight: bold; text-transform: uppercase;">
+          {{ user.username.charAt(0) }}
+        </span>
+        <span *ngIf="!isLoggedIn || !user?.username" class="material-symbols-outlined">person</span>
+      </div>
+
+      <!-- Dropdown Menu -->
+      <div class="dropdown-menu" *ngIf="isMenuOpen">
+
+        <!-- TRẠNG THÁI: CHƯA ĐĂNG NHẬP -->
+        <ul class="dropdown-list" *ngIf="!isLoggedIn">
+          <li>
+            <a routerLink="/login" class="dropdown-item" (click)="toggleMenu()">
+              <span class="material-symbols-outlined">login</span>
+              Đăng nhập
+            </a>
+          </li>
+          <li>
+            <a routerLink="/register" class="dropdown-item" (click)="toggleMenu()">
+              <span class="material-symbols-outlined">person_add</span>
+              Đăng ký
+            </a>
+          </li>
+        </ul>
+
+        <!-- TRẠNG THÁI: ĐÃ ĐĂNG NHẬP -->
+        <div *ngIf="isLoggedIn">
+          <div class="dropdown-header" style="padding: 12px 16px; border-bottom: 1px solid var(--color-outline-variant); background-color: var(--color-surface-container-lowest);">
+            <div style="font-weight: 600; color: var(--color-on-surface);">{{ user?.firstname || '' }} {{ user?.lastname || '' }}</div>
+            <div style="font-size: 12px; color: var(--color-on-surface-variant); margin-top: 2px;">{{ user?.username || 'User' }}</div>
+          </div>
+          <ul class="dropdown-list">
+            <li>
+              <a routerLink="/settings" class="dropdown-item" (click)="toggleMenu()">
+                <span class="material-symbols-outlined">settings</span>
+                Cài đặt
+              </a>
+            </li>
+            <li>
+              <a (click)="onLogout(); toggleMenu()" class="dropdown-item" style="color: #d32f2f;">
+                <span class="material-symbols-outlined" style="color: #d32f2f;">logout</span>
+                Đăng xuất
+              </a>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</header>
