@@ -1,0 +1,158 @@
+<div class="transactions-container">
+
+  <div class="header-actions">
+    <h2>Giao dịch</h2>
+  </div>
+<div class="comparison-card" *ngIf="comparisonData">
+  <h3>📊 Biến động chi tiêu</h3>
+
+  <div class="comparison-content">
+    <div class="comparison-item">
+      <span class="label">Tháng này</span>
+      <span class="value">
+        {{comparisonData?.currentMonthTotal | number:'1.0-0'}} ₫
+      </span>
+    </div>
+
+    <div class="comparison-item">
+      <span class="label">So với tháng trước</span>
+      <span
+        class="value"
+        [ngClass]="{
+          'increase': comparisonData?.percentageChange > 0,
+          'decrease': comparisonData?.percentageChange < 0
+        }">
+        {{comparisonData?.percentageChange}}%
+      </span>
+    </div>
+  </div>
+</div>
+
+<div class="notification-list">
+  <h3>🔔 Thông báo</h3>
+
+  <div class="notification-item" *ngFor="let n of notifications">
+    <div class="notification-message">
+      {{ n.message }}
+    </div>
+
+    <button class="read-btn" (click)="markAsRead(n.id)">
+      Đã đọc
+    </button>
+  </div>
+
+  <div class="empty-notification" *ngIf="notifications.length === 0">
+    Chưa có thông báo nào
+  </div>
+</div>
+
+  <div class="modal-overlay" *ngIf="isTransferModalOpen">
+    <div class="transfer-modal">
+      <h3>Chuyển tiền</h3>
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="closeModals()">Hủy</button>
+        <button class="save-btn">Xác nhận</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" *ngIf="isAddTransactionModalOpen">
+    <div class="add-transaction-modal">
+      <h3>Thêm giao dịch</h3>
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="closeModals()">Hủy</button>
+        <button class="save-btn">Lưu lại</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="filters" style="display: flex; flex-direction: column; gap: 16px; align-items: stretch; background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 20px; margin-bottom: 24px;">
+    
+    <div class="filter-group" style="max-width: 400px; width: 100%;">
+      <input type="text" 
+             [(ngModel)]="filter.keyword" 
+             (ngModelChange)="onFilterChange()" 
+             placeholder="Tìm kiếm theo từ khóa nội dung..." 
+             style="width: 100%;" />
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 12px; width: 100%;">
+      <div class="filter-group">
+        <label>Từ ngày</label>
+        <input type="date" [(ngModel)]="filter.startDate" (ngModelChange)="onFilterChange()" />
+      </div>
+      
+      <div class="filter-group">
+        <label>Đến ngày</label>
+        <input type="date" [(ngModel)]="filter.endDate" (ngModelChange)="onFilterChange()" />
+      </div>
+      
+      <div class="filter-group">
+        <label>Loại</label>
+        <select [(ngModel)]="filter.type" (ngModelChange)="onFilterChange()">
+          <option value="">Tất cả</option>
+          <option value="INCOME">Thu</option>
+          <option value="EXPENSE">Chi</option>
+          <option value="TRANSFER">Chuyển tiền</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label>Ví tài sản</label>
+        <select [(ngModel)]="filter.walletId" (ngModelChange)="onFilterChange()" class="filter-select">
+          <option [ngValue]="null">Tất cả ví</option>
+          <option *ngFor="let wallet of wallets" [ngValue]="wallet.id">{{ wallet.name }}</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label>Số tiền từ (₫)</label>
+        <input type="number" [(ngModel)]="filter.minAmount" (ngModelChange)="onFilterChange()" placeholder="Ví dụ: 100000" />
+      </div>
+      
+      <div class="filter-group">
+        <label>Đến (₫)</label>
+        <input type="number" [(ngModel)]="filter.maxAmount" (ngModelChange)="onFilterChange()" placeholder="Ví dụ: 500000" />
+      </div>
+    </div>
+
+    <div class="export-actions" style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #f3f4f6; padding-top: 12px; margin-top: 4px;">
+      <button (click)="exportReport('excel')" 
+              [disabled]="transactions.length === 0" 
+              style="background-color: #15803d; color: white; padding: 9px 16px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+        📊 Xuất Excel
+      </button>
+      <button (click)="exportReport('pdf')" 
+              [disabled]="transactions.length === 0" 
+              style="background-color: #b91c1c; color: white; padding: 9px 16px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+        📕 Xuất PDF
+      </button>
+    </div>
+  </div>
+
+  <div class="transaction-list">
+    <div class="transaction-item" *ngFor="let tx of transactions">
+      <div class="tx-info">
+        <span class="tx-icon">{{ tx.type === 'TRANSFER' ? '🔄' : (tx.type === 'INCOME' ? '💰' : '📉') }}</span>
+        <div>
+          <div class="tx-title">{{ tx.note || (tx.type === 'TRANSFER' ? 'Chuyển khoản nội bộ' : 'Giao dịch') }}</div>
+          <div class="tx-date">{{ tx.transactionDate | date:'dd/MM/yyyy' }}</div>
+        </div>
+      </div>
+      <div class="tx-amount" [ngClass]="{'income': tx.type === 'INCOME', 'expense': tx.type === 'EXPENSE'}" style="font-size: 18px; font-weight: 700;">
+        {{ tx.type === 'INCOME' ? '+' : (tx.type === 'TRANSFER' ? '⇄ ' : '-') }}{{ tx.amount | number:'1.0-0' }} ₫
+      </div>
+    </div>
+    
+    <div class="empty-transactions" *ngIf="transactions.length === 0">
+      <p>Không tìm thấy kết quả giao dịch phù hợp trong Cơ sở dữ liệu!</p>
+    </div>
+  </div>
+
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 0">◀</button>
+    <span style="font-size: 14px; color: #4b5563; font-weight: 500; margin: 0 10px;">
+      Trang {{ currentPage + 1 }} / {{ totalPages }}
+    </span>
+    <button (click)="changePage(currentPage + 1)" [disabled]="currentPage + 1 >= totalPages">▶</button>
+  </div>
