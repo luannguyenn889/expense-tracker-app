@@ -1,149 +1,96 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';  // ← THÊM ChangeDetectorRef
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { TransactionService } from '../../services/transactionService';
+import { Auth } from '../../services/auth';
+import { Subject, debounceTime } from 'rxjs';
 
 @Component({
   selector: 'app-transactions',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './transactions.html',
-  styleUrl: './transactions.css',
+  styleUrls: ['./transactions.css']
 })
-export class Transactions implements OnInit {
-  wallets: any[] = [];
-  transactions: any[] = [];
-  
-  filter = { startDate: '', endDate: '', type: '', walletId: null as number | null };
+export class Transactions implements OnInit, OnDestroy {
+  userId!: number;
   currentPage = 0;
-  pageSize = 10;
-  totalPages = 1;
-  
-  showTransferModal = false;
-  transferData = {
-    fromWalletId: null as number | null,
-    toWalletId: null as number | null,
-    amount: 0,
-    note: ''
+  size = 10;
+  totalPages = 0;
+
+  transactions: any[] = [];
+  wallets: any[] = [];
+  notifications: any[] = [];
+  comparisonData: any = null;
+
+  isTransferModalOpen = false;
+  isAddTransactionModalOpen = false;
+
+  filter: any = {
+    keyword: '', startDate: '', endDate: '', type: '', 
+    walletId: null, minAmount: null, maxAmount: null
   };
-  
-  showAddModal = false;
-  userId = 1;
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  private filterChange$ = new Subject<void>();
 
-  ngOnInit() {
+  constructor(private transactionService: TransactionService, private auth: Auth) {}
+
+  ngOnInit(): void {
+    const id = this.auth.getCurrentUserId();
+    if (!id) { this.auth.logout(); return; }
+    this.userId = id;
+
     this.loadWallets();
+    this.loadTransactions();
+    this.loadComparison();
+    this.loadNotifications();
+
+    this.filterChange$.pipe(debounceTime(200)).subscribe(() => this.loadTransactions());
+  }
+
+  loadWallets(): void {
+    this.transactionService.getWallets(this.userId).subscribe(res => this.wallets = res);
+  }
+
+  loadTransactions(): void {
+    this.transactionService.getAdvancedSearch(this.userId, this.filter, this.currentPage, this.size)
+      .subscribe(res => {
+        this.transactions = res.content || [];
+        this.totalPages = res.totalPages || 0;
+      });
+  }
+
+  loadComparison(): void {
+    this.transactionService.getSpendingComparison(this.userId).subscribe(res => this.comparisonData = res);
+  }
+
+  loadNotifications(): void {
+    this.transactionService.getNotifications(this.userId).subscribe(res => this.notifications = res);
+  }
+
+  markAsRead(id: number): void {
+    // Gọi service markAsRead nếu đã định nghĩa, hoặc logic tương tự
+    this.transactionService.markNotificationAsRead(id).subscribe(() => this.loadNotifications());
+  }
+
+  onFilterChange(): void { this.currentPage = 0; this.filterChange$.next(); }
+
+  changePage(page: number): void {
+    if (page < 0 || page >= this.totalPages) return;
+    this.currentPage = page;
     this.loadTransactions();
   }
 
-  loadWallets() {
-    this.http.get(`http://localhost:8080/api/wallets?userId=${this.userId}`)
-      .subscribe({
-        next: (data: any) => { this.wallets = data; },
-        error: (err) => console.error('Lỗi tải ví:', err)
-      });
-  }
-
-  loadTransactions() {
-    let url = `http://localhost:8080/api/transactions?userId=${this.userId}&page=${this.currentPage}&size=${this.pageSize}`;
-    if (this.filter.startDate) url += `&startDate=${this.filter.startDate}`;
-    if (this.filter.endDate) url += `&endDate=${this.filter.endDate}`;
-    if (this.filter.type) url += `&type=${this.filter.type}`;
-    if (this.filter.walletId) url += `&walletId=${this.filter.walletId}`;
-    
-    this.http.get(url).subscribe({
-      next: (data: any) => {
-        this.transactions = data.content || [];
-        this.totalPages = data.totalPages || 1;
-      },
-      error: (err) => console.error('Lỗi tải giao dịch:', err)
+  exportReport(format: 'excel' | 'pdf'): void {
+    this.transactionService.downloadReportFile(this.userId, format, this.filter).subscribe(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `Bao_Cao_${Date.now()}.${format === 'excel' ? 'xlsx' : 'pdf'}`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
     });
   }
 
-  search() { 
-    this.currentPage = 0; 
-    this.loadTransactions(); 
-  }
-  changePage(page: number) { 
-    this.currentPage = page; 
-    this.loadTransactions(); 
-  }
+  closeModals(): void { this.isTransferModalOpen = false; this.isAddTransactionModalOpen = false; }
 
-  openAddTransaction() { 
-    this.showAddModal = true; 
-  }
-  closeAddModal() { 
-    this.showAddModal = false; 
-  }
-
-  openTransferModal() { 
-    this.showTransferModal = true; 
-  }
-  closeTransferModal() { 
-    this.showTransferModal = false; 
-  }
-
-  isTransferValid(): boolean {
-    return !!this.transferData.fromWalletId &&
-           !!this.transferData.toWalletId &&
-           this.transferData.fromWalletId !== this.transferData.toWalletId &&
-           this.transferData.amount > 0;
-  }
-
-  doTransfer() {
-    if (!this.isTransferValid()) {
-      alert('Vui lòng chọn đầy đủ thông tin!');
-      return;
-    }
-
-    const data = {
-      fromWalletId: this.transferData.fromWalletId,
-      toWalletId: this.transferData.toWalletId,
-      amount: this.transferData.amount,
-      note: this.transferData.note,
-      transferDate: new Date().toISOString().split('T')[0]
-    };
-
-    this.http.post(`http://localhost:8080/api/transactions/transfer?userId=${this.userId}`, data)
-      .subscribe({
-        next: (res: any) => {
-          console.log('Response:', res);
-          
-          // Đóng popup
-          this.showTransferModal = false;
-          this.cdr.detectChanges();  
-          
-          // Hiển thị thông báo
-          if (res.success === true || res.message) {
-            alert(res.message || 'Chuyển tiền thành công');
-          } else {
-            alert('Chuyển tiền thành công!');
-          }
-          
-          // Load lại dữ liệu
-          this.loadWallets();
-          this.loadTransactions();
-          
-          // Reset form
-          this.transferData = {
-            fromWalletId: null,
-            toWalletId: null,
-            amount: 0,
-            note: ''
-          };
-        },
-        error: (err) => {
-          console.error('Lỗi:', err);
-          this.showTransferModal = false;
-          this.cdr.detectChanges(); 
-          
-          let errorMsg = 'Chuyển tiền thất bại!';
-          if (err.error && err.error.message) {
-            errorMsg = err.error.message;
-          }
-          alert(errorMsg);
-        }
-      });
-  }
+  ngOnDestroy(): void { this.filterChange$.complete(); }
 }
