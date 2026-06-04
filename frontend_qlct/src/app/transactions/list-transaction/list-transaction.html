@@ -1,0 +1,56 @@
+<div class="transaction-list">
+  <div class="transaction-item" *ngFor="let tx of transactions">
+    <div class="tx-info">
+      <span class="material-symbols-outlined tx-icon">
+        {{ tx.type === 'INCOME' ? 'trending_up' : (tx.type === 'EXPENSE' ? 'trending_down' : 'swap_horiz') }}
+      </span>
+      <div>
+        <div class="tx-title">
+          {{ tx.type === 'INCOME' ? 'Thu nhập' : (tx.type === 'EXPENSE' ? 'Chi tiêu' : 'Chuyển tiền') }}
+        </div>
+        <div class="tx-date">{{ tx.transactionDate | date:'dd/MM/yyyy' }}</div>
+        
+        <!-- Hiển thị chi tiết chuyển tiền -->
+        <div class="tx-detail" *ngIf="tx.type === 'TRANSFER'">
+          <div class="tx-detail-wallet">
+            <span class="tx-detail-from">{{ getWalletDisplayName(tx.walletId) }}</span>
+            <span class="tx-detail-arrow">
+              <span class="material-symbols-outlined">arrow_forward</span>
+            </span>
+            <span class="tx-detail-to">{{ getWalletDisplayName(tx.toWalletId) }}</span>
+          </div>
+        </div>
+        
+        <!-- Hiển thị ghi chú nếu có -->
+        <div class="tx-note" *ngIf="tx.note">
+          <span class="material-symbols-outlined tx-note-icon">note_alt</span>
+          <span>{{ tx.note }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="tx-amount" [class.income]="tx.type === 'INCOME'" [class.expense]="tx.type === 'EXPENSE'">
+      {{ tx.type === 'INCOME' ? '+' : (tx.type === 'EXPENSE' ? '-' : '') }}{{ tx.amount | number:'1.0-0' }} ₫
+    </div>
+    <div class="tx-actions">
+      <button class="edit-btn" (click)="edit.emit(tx)">
+        <span class="material-symbols-outlined">edit</span>
+      </button>
+      <button class="delete-btn" (click)="delete.emit(tx.id)">
+        <span class="material-symbols-outlined">delete</span>
+      </button>
+    </div>
+  </div>
+  <div class="empty-transactions" *ngIf="transactions.length === 0">
+    <p>Chưa có giao dịch nào</p>
+  </div>
+</div>
+
+<div class="pagination" *ngIf="totalPages > 1">
+  <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 0">
+    <span class="material-symbols-outlined">chevron_left</span>
+  </button>
+  <span>Trang {{ currentPage + 1 }} / {{ totalPages }}</span>
+  <button (click)="changePage(currentPage + 1)" [disabled]="currentPage + 1 >= totalPages">
+    <span class="material-symbols-outlined">chevron_right</span>
+  </button>
+</div>
