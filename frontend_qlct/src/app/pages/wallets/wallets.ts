@@ -1,189 +1,124 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ListWallet } from '../../wallets/list-wallet/list-wallet';
+import { AddWallet } from '../../wallets/add-wallet/add-wallet';
+import { EditWallet } from '../../wallets/edit-wallet/edit-wallet';
+import { WalletService } from '../../services/wallet-service';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-wallets',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, ListWallet, AddWallet, EditWallet],
   templateUrl: './wallets.html',
-  styleUrl: './wallets.css',
+  styleUrl: './wallets.css'
 })
 export class Wallets implements OnInit {
   wallets: any[] = [];
-  isLoading = false;
+  isLoading = true;
   userId = 1;
-
-  // Popup thêm ví
+  //Popup thêm ví
   showAddModal = false;
-  nameError = false;
+  showEditModal = false;
+  selectedWallet: any = null;
 
-  newWallet = {
-    name: '',
-    balance: 0,
-    description: '',
-    currency: 'VND'
-  };
-
-  // Popup sửa ví
-  editingWallet: any = null;
-
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private walletService: WalletService,
+    private cdr: ChangeDetectorRef,
+    private http: HttpClient
+  ) {}
 
   ngOnInit() {
     this.loadWallets();
+    if (sessionStorage.getItem('needRefreshWallets')) {
+      sessionStorage.removeItem('needRefreshWallets');
+      this.loadWallets();
+    }
   }
 
   loadWallets() {
     this.isLoading = true;
-    this.http.get(`http://localhost:8080/api/wallets?userId=${this.userId}`)
-      .subscribe({
-        next: (data: any) => {
-          this.wallets = data;
-          this.isLoading = false;
-          this.cdr.detectChanges();
-        },
-        error: (err) => {
-          console.error('Lỗi tải ví:', err);
-          this.isLoading = false;
-          this.cdr.detectChanges();
-        }
-      });
+    this.cdr.detectChanges();
+    
+    this.walletService.getWallets(this.userId).subscribe({
+      next: (data) => {
+        this.wallets = data || [];
+        this.isLoading = false;
+        this.cdr.detectChanges();
+        console.log('Wallets loaded:', this.wallets);
+      },
+      error: (err) => {
+        console.error('Lỗi tải ví:', err);
+        this.wallets = [];
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   getTotalBalance(): number {
-    return this.wallets.reduce((sum, wallet) => sum + (wallet.balance || 0), 0);
+    return this.wallets.reduce((sum, w) => sum + (w.balance || 0), 0);
   }
 
-  // Mở popup thêm ví
-  openAddModal() {
-    this.showAddModal = true;
-    this.nameError = false;
-    this.newWallet = {
-      name: '',
-      balance: 0,
-      description: '',
-      currency: 'VND'
-    };
+  openAddModal() { this.showAddModal = true; }
+  closeAddModal() { this.showAddModal = false; }
+  openEditModal(wallet: any) {
+    this.selectedWallet = wallet;
+    this.showEditModal = true;
   }
-
-  // Đóng popup thêm ví
-  closeAddModal() {
-    this.showAddModal = false;
-  }
-
-  createWallet() {
-    // Kiểm tra tên ví không được để trống
-    if (!this.newWallet.name || !this.newWallet.name.trim()) {
-      this.nameError = true;
-      this.cdr.detectChanges();
-      return;
-    }
-    this.nameError = false;
-
-    // Số dư mặc định = 0 nếu không nhập
-    if (!this.newWallet.balance || this.newWallet.balance < 0) {
-      this.newWallet.balance = 0;
-    }
-
-    this.http.post(`http://localhost:8080/api/wallets?userId=${this.userId}`, {
-      name: this.newWallet.name,
-      balance: this.newWallet.balance,
-      description: this.newWallet.description,
-      currency: this.newWallet.currency
-    }).subscribe({
-      next: () => {
-        this.loadWallets();
-        this.closeAddModal();
-        this.cdr.detectChanges();
-        alert('Thêm ví thành công!');
-      },
-      error: (err) => {
-        console.error('Lỗi tạo ví:', err);
-        alert('Thêm ví thất bại!');
-      }
-    });
-  }
-
-  editWallet(wallet: any) {
-    this.editingWallet = {
-      id: wallet.id,
-      name: wallet.name,
-      balance: wallet.balance,
-      description: wallet.description
-    };
-  }
-
-  updateWallet() {
-    if (!this.editingWallet.name || !this.editingWallet.name.trim()) {
-      alert('Tên ví không được để trống!');
-      return;
-    }
-
-    this.http.put(`http://localhost:8080/api/wallets/${this.editingWallet.id}?userId=${this.userId}`, {
-      name: this.editingWallet.name,
-      description: this.editingWallet.description
-    }).subscribe({
-      next: () => {
-        this.loadWallets();
-        this.editingWallet = null;
-        this.cdr.detectChanges();
-        alert('Sửa ví thành công!');
-      },
-      error: (err) => {
-        console.error('Lỗi sửa ví:', err);
-        alert('Sửa ví thất bại!');
-      }
-    });
-  }
-
-  cancelEdit() {
-    this.editingWallet = null;
-  }
+  closeEditModal() { this.showEditModal = false; }
 
   deleteWallet(id: number) {
-    // Kiểm tra ví có giao dịch không
     this.http.get(`http://localhost:8080/api/wallets/${id}/has-transactions?userId=${this.userId}`)
       .subscribe({
         next: (response: any) => {
           if (response.hasTransactions) {
-            alert('Ví này đã có giao dịch! Vui lòng xóa hoặc chuyển giao dịch trước khi xóa ví.');
+            if (confirm(' Ví này đã có giao dịch.\n\nBạn có muốn chuyển sang trạng thái NGƯNG HOẠT ĐỘNG (vẫn giữ lịch sử) không?')) {
+              this.http.delete(`http://localhost:8080/api/wallets/${id}?userId=${this.userId}`)
+                .subscribe({
+                  next: () => {
+                    this.loadWallets();
+                    alert(' Ví đã được chuyển sang trạng thái ngưng hoạt động!');
+                  },
+                  error: () => alert(' Thao tác thất bại!')
+                });
+            }
             return;
           }
           
-          // Nếu chưa có giao dịch, hỏi xác nhận
-          if (confirm('Bạn có chắc chắn muốn xóa ví này không?')) {
+          if (confirm(' Xóa ví này?')) {
             this.http.delete(`http://localhost:8080/api/wallets/${id}?userId=${this.userId}`)
               .subscribe({
                 next: () => {
                   this.loadWallets();
-                  alert('Xóa ví thành công!');
+                  alert(' Xóa ví thành công!');
                 },
-                error: (err) => {
-                  console.error('Lỗi xóa ví:', err);
-                  alert('Xóa ví thất bại!');
-                }
+                error: () => alert(' Xóa ví thất bại!')
               });
           }
         },
-        error: (err) => {
-          console.error('Lỗi kiểm tra giao dịch:', err);
-          // Nếu chưa có API kiểm tra, vẫn cho xóa nhưng cảnh báo
-          if (confirm('Bạn có chắc chắn muốn xóa ví này không? Hành động này không thể hoàn tác!')) {
+        error: () => {
+          if (confirm(' Xóa ví này?')) {
             this.http.delete(`http://localhost:8080/api/wallets/${id}?userId=${this.userId}`)
               .subscribe({
                 next: () => {
                   this.loadWallets();
-                  alert('Xóa ví thành công!');
+                  alert(' Xóa ví thành công!');
                 },
-                error: (err) => {
-                  console.error('Lỗi xóa ví:', err);
-                  alert('Xóa ví thất bại!');
-                }
+                error: () => alert(' Xóa ví thất bại!')
               });
           }
         }
       });
+  }
+
+  onWalletAdded() {
+    this.closeAddModal();
+    this.loadWallets();
+  }
+
+  onWalletUpdated() {
+    this.closeEditModal();
+    this.loadWallets();
   }
 }
