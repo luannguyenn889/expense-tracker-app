@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -6,30 +6,36 @@ import {HttpClient} from '@angular/common/http';
 import {GoogleSigninButtonDirective, SocialAuthService} from '@abacritt/angularx-social-login';
 import {Auth} from '../../services/auth';
 
-
+import {User} from '../../model/user';
+import { ReactiveFormsModule } from '@angular/forms';
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, FormsModule, GoogleSigninButtonDirective],
+  imports: [CommonModule, FormsModule, GoogleSigninButtonDirective, ReactiveFormsModule, FormsModule,CommonModule],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
 export class Login implements OnInit{
   showPassword = false;
   isLoading = false;
-  // tao login data
-  logindata = {
-    username: '',
-    password:'',
 
-  }
+  @Input() public user!: User;
+
+
   // Login fields
   email = '';
   password = '';
   rememberMe = false;
 
-  constructor(private router: Router, private http: HttpClient, private authService: SocialAuthService, private auth: Auth) {}
+  constructor(private router: Router, private http: HttpClient, private authService: SocialAuthService, private auth: Auth) {
 
+  }
 
+// tao login data
+  logindata = {
+    username: '',
+    password: ''
+
+  }
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
   }

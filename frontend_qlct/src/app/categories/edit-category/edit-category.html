@@ -1,0 +1,140 @@
+<div class="basic">
+  <div class="basic-header">
+    <h2 class="basic-title">Sửa Danh Mục</h2>
+    <button class="basic-btn-secondary" routerLink="/list-category">
+      <span class="material-symbols-outlined">arrow_back</span>
+      Quay lại Danh sách
+    </button>
+  </div>
+
+  @if (isLoading) {
+    <div class="basic-loading">Đang tải dữ liệu danh mục...</div>
+  } @else {
+    <form class="basic-form" (ngSubmit)="onSubmit()">
+      <!-- Tên danh mục -->
+      <div class="basic-form-group">
+        <label class="basic-label" for="categoryName">Tên Danh Mục <span class="basic-required">*</span></label>
+        <input type="text" id="categoryName" class="basic-input" name="name" [(ngModel)]="category.name" placeholder="Ví dụ: Ăn uống, Mua sắm..." #categorynameInput="ngModel" required>
+        @if (categorynameInput.invalid && (categorynameInput.dirty || categorynameInput.touched)) {
+          <div class="error-msg">
+            <!-- <span class="material-symbols-outlined error-icon">error</span> -->
+            <span *ngIf="categorynameInput.errors?.['required']" style="color: red;">Tên danh mục là bắt buộc.</span>
+            <span *ngIf="categorynameInput.errors?.['minlength']" style="color: red;">Tên danh mục phải có ít nhất 3 ký tự.</span>
+          </div>
+        }
+      </div>
+
+      <!-- Icon -->
+      <div class="basic-form-group">
+        <label class="basic-label" for="categoryIcon">Icon Danh Mục <span class="basic-required">*</span></label>
+        <div class="basic-icon-select-row">
+          <select id="categoryIcon" class="basic-input basic-icon-select" name="icon" [(ngModel)]="category.icon" required>
+            <option value="">-- Chọn icon --</option>
+            <optgroup label="💰 Chi tiêu">
+              <option value="restaurant">🍽️ Ăn uống (restaurant)</option>
+              <option value="fastfood">🍔 Đồ ăn nhanh (fastfood)</option>
+              <option value="local_cafe">☕ Cà phê (local_cafe)</option>
+              <option value="shopping_cart">🛒 Mua sắm (shopping_cart)</option>
+              <option value="shopping_bag">🛍️ Túi mua sắm (shopping_bag)</option>
+              <option value="checkroom">👔 Quần áo (checkroom)</option>
+              <option value="home">🏠 Nhà ở (home)</option>
+              <option value="electrical_services">⚡ Điện nước (electrical_services)</option>
+              <option value="directions_car">🚗 Xe cộ (directions_car)</option>
+              <option value="local_gas_station">⛽ Xăng dầu (local_gas_station)</option>
+              <option value="directions_bus">🚌 Xe buýt (directions_bus)</option>
+              <option value="flight">✈️ Du lịch (flight)</option>
+              <option value="hotel">🏨 Khách sạn (hotel)</option>
+              <option value="local_hospital">🏥 Y tế (local_hospital)</option>
+              <option value="medication">💊 Thuốc (medication)</option>
+              <option value="fitness_center">🏋️ Thể thao (fitness_center)</option>
+              <option value="school">🎓 Giáo dục (school)</option>
+              <option value="menu_book">📚 Sách vở (menu_book)</option>
+              <option value="celebration">🎉 Giải trí (celebration)</option>
+              <option value="sports_esports">🎮 Game (sports_esports)</option>
+              <option value="movie">🎬 Phim ảnh (movie)</option>
+              <option value="phone_iphone">📱 Điện thoại (phone_iphone)</option>
+              <option value="wifi">📶 Internet (wifi)</option>
+              <option value="pets">🐾 Thú cưng (pets)</option>
+              <option value="child_care">👶 Con cái (child_care)</option>
+              <option value="volunteer_activism">🤝 Từ thiện (volunteer_activism)</option>
+            </optgroup>
+            <optgroup label="💵 Thu nhập">
+              <option value="payments">💳 Lương (payments)</option>
+              <option value="account_balance">🏦 Ngân hàng (account_balance)</option>
+              <option value="trending_up">📈 Đầu tư (trending_up)</option>
+              <option value="business_center">💼 Kinh doanh (business_center)</option>
+              <option value="redeem">🎁 Thưởng / Quà (redeem)</option>
+              <option value="attach_money">💰 Thu nhập khác (attach_money)</option>
+            </optgroup>
+            <optgroup label="⚙️ Khác">
+              <option value="category">📂 Danh mục (category)</option>
+              <option value="more_horiz">... Khác (more_horiz)</option>
+            </optgroup>
+          </select>
+          @if (category.icon) {
+            <span class="basic-icon-dot material-symbols-outlined">{{ category.icon }}</span>
+          }
+        </div>
+      </div>
+
+      <!-- Loại danh mục -->
+      <div class="basic-form-group">
+        <label class="basic-label" for="categoryType">Loại Danh Mục</label>
+        <select id="categoryType" class="basic-input" name="type" [(ngModel)]="category.type" #categoryTypeInput="ngModel" required>
+          <option value="EXPENSE">Khoản chi (Expense)</option>
+          <option value="INCOME">Khoản thu (Income)</option>
+        </select>
+        @if (categoryTypeInput.invalid && (categoryTypeInput.dirty || categoryTypeInput.touched)) {
+          <div class="error-msg">
+            <!-- <span class="material-symbols-outlined error-icon">error</span> -->
+            <span *ngIf="categoryTypeInput.errors?.['required']">Loại danh mục là bắt buộc.</span>
+          </div>
+        }
+      </div>
+
+      <!-- Màu sắc -->
+      <div class="basic-form-group">
+        <label class="basic-label" for="categoryColor">Màu Sắc</label>
+        <div class="basic-color-select-row">
+          <select id="categoryColor" class="basic-input basic-color-select" name="color" [(ngModel)]="category.color">
+            <option value="">-- Chọn màu --</option>
+            <option value="#EF5350">🔴 Đỏ</option>
+            <option value="#EC407A">🩷 Hồng</option>
+            <option value="#AB47BC">🟣 Tím</option>
+            <option value="#5C6BC0">🔵 Xanh tím</option>
+            <option value="#42A5F5">🩵 Xanh dương</option>
+            <option value="#26C6DA">🩵 Xanh lam</option>
+            <option value="#26A69A">🟢 Xanh ngọc</option>
+            <option value="#66BB6A">🟢 Xanh lá</option>
+            <option value="#D4E157">🟡 Vàng xanh</option>
+            <option value="#FFCA28">🟡 Vàng</option>
+            <option value="#FFA726">🟠 Cam</option>
+            <option value="#FF7043">🟠 Cam đỏ</option>
+            <option value="#8D6E63">🟤 Nâu</option>
+            <option value="#78909C">⚫ Xám xanh</option>
+          </select>
+          @if (category.color) {
+            <span class="basic-color-dot" [style.background-color]="category.color"></span>
+          }
+        </div>
+      </div>
+
+      <!-- Mô tả -->
+      <div class="basic-form-group">
+        <label class="basic-label" for="categoryDescription">Mô Tả</label>
+        <textarea id="categoryDescription" class="basic-input basic-textarea" name="description" [(ngModel)]="category.description" placeholder="Mô tả ngắn về danh mục này..." rows="3"></textarea>
+      </div>
+
+      <!-- Ngân sách tháng -->
+      <div class="basic-form-group">
+        <label class="basic-label" for="categoryBudget">Ngân Sách Tháng (₫)</label>
+        <input type="number" id="categoryBudget" class="basic-input" name="monthlyBudget" [(ngModel)]="category.monthlyBudget" placeholder="Để trống nếu không giới hạn" min="0">
+      </div>
+
+      <div class="basic-form-actions">
+        <button type="button" class="basic-btn-outline" routerLink="/list-category">Hủy</button>
+        <button type="submit" class="basic-btn">Cập Nhật Danh Mục</button>
+      </div>
+    </form>
+  }
+</div>

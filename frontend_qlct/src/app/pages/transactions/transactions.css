@@ -1,0 +1,445 @@
+.transactions-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header và nút bấm */
+.header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.header-actions h2 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.btn-group {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-add {
+  background-color: #006493;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-add:hover {
+  background-color: #004b70;
+}
+
+.btn-transfer {
+  background-color: #0fa070;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-transfer:hover {
+  background-color: #059669;
+}
+/* =========================
+   So sánh chi tiêu
+========================= */
+.comparison-card {
+  background: linear-gradient(135deg, #eff6ff, #f8fafc);
+  border: 1px solid #dbeafe;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.comparison-card h3 {
+  margin: 0 0 16px;
+  color: #1e40af;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.comparison-content {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.comparison-item {
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+}
+
+.comparison-item .label {
+  color: #6b7280;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.comparison-item .value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.increase {
+  color: #dc2626 !important;
+}
+
+.decrease {
+  color: #16a34a !important;
+}
+
+/* =========================
+   Danh sách thông báo
+========================= */
+.notification-list {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+}
+
+.notification-list h3 {
+  margin: 0 0 16px;
+  color: #111827;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.notification-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #f9fafb;
+  margin-bottom: 10px;
+  border-left: 4px solid #3b82f6;
+  transition: all 0.2s ease;
+}
+
+.notification-item:hover {
+  background: #f3f4f6;
+}
+
+.notification-message {
+  flex: 1;
+  color: #374151;
+  font-size: 14px;
+  margin-right: 12px;
+}
+
+.read-btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.read-btn:hover {
+  background: #1d4ed8;
+}
+
+.empty-notification {
+  text-align: center;
+  color: #9ca3af;
+  padding: 20px;
+  font-style: italic;
+}
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filter-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.filter-group input {
+  width: 140px;
+  min-width: 140px;
+  flex-shrink: 0;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+}
+
+.filters select,
+.filter-select {
+  width: 140px;
+  min-width: 140px;
+  flex-shrink: 0;
+}
+
+/* Bộ lọc */
+.filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 12px;
+  align-items: flex-end;
+}
+
+.filters input,
+.filters select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  background: white;
+}
+
+.btn-search {
+  background-color: #006493;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 20px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-search:hover {
+  background-color: #004b70;
+}
+
+/* Danh sách giao dịch */
+.transaction-list {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.transaction-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  transition: 0.2s;
+}
+
+.transaction-item:hover {
+  background-color: #f9fafb;
+}
+
+.transaction-item:first-child {
+  border-top: 1px solid #e5e7eb;
+}
+
+.transaction-item:last-child {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tx-info {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.tx-icon {
+  font-size: 28px;
+}
+
+.tx-title {
+  font-weight: 600;
+  color: #111827;
+}
+
+.tx-date {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+
+.tx-amount {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.tx-amount.income {
+  color: #10b981;
+}
+
+.tx-amount.expense {
+  color: #ef4444;
+}
+
+.empty-transactions {
+  text-align: center;
+  padding: 60px;
+  color: #9ca3af;
+}
+
+/* Phân trang */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.pagination button {
+  background: #f3f4f6;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: #e5e7eb;
+}
+
+/* Modal overlay chung */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* Modal chuyển tiền */
+.transfer-modal {
+  background: white;
+  width: 100%;
+  max-width: 450px;
+  padding: 28px;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.transfer-modal h3 {
+  margin: 0 0 20px;
+  font-size: 24px;
+  color: #111827;
+}
+
+/* Form group */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.form-group select,
+.form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.form-group select:focus,
+.form-group input:focus {
+  outline: none;
+  border-color: #006493;
+  box-shadow: 0 0 0 3px rgba(0, 100, 147, 0.1);
+}
+
+/* Modal actions */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.save-btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.save-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.cancel-btn {
+  background: #f3f4f6;
+  color: #374151;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancel-btn:hover {
+  background: #e5e7eb;
+}
+
+/* Modal thêm giao dịch tạm thời */
+.add-transaction-modal {
+  background: white;
+  width: 100%;
+  max-width: 400px;
+  padding: 28px;
+  border-radius: 16px;
+  text-align: center;
+}
+
+.add-transaction-modal h3 {
+  margin: 0 0 10px;
+}
+
+.add-transaction-modal p {
+  color: #6b7280;
+}

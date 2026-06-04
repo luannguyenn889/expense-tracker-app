@@ -1,0 +1,337 @@
+.wallets-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.wallets-container h2 {
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+
+/* Nút thêm ví */
+.btn-add-wallet {
+  background-color: #006493;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 24px;
+  transition: 0.2s ease;
+}
+
+.btn-add-wallet:hover {
+  background-color: #004b70;
+  transform: translateY(-1px);
+}
+
+/* Tổng số dư */
+.total-balance {
+  border-radius: 0px;
+  padding: 20px;
+  margin-bottom: 18px;
+  color: black;
+  text-align: left;
+}
+
+.total-balance h3 {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.total-amount {
+  font-size: 32px;
+  font-weight: bold;
+  margin: 0;
+}
+
+/* Danh sách ví */
+.wallets-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+/* Thẻ ví */
+.wallet-card {
+  position: relative;
+  background: #fff;
+  border-radius: 10px;
+  padding: 22px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f1f1f1;
+  transition: 0.2s ease;
+}
+
+.wallet-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+.wallet-card h3 {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0;
+  color: #111827;
+}
+
+.balance {
+  font-size: 38px;
+  font-weight: 600;
+  color: #111827;
+  margin: 18px 0;
+  line-height: 1;
+}
+
+.description {
+  font-size: 18px;
+  color: #9ca3af;
+  margin-bottom: 10px;
+}
+
+.wallet-card small {
+  font-size: 14px;
+  color: #111827;
+}
+
+/* Nút hành động trong thẻ ví */
+.action-buttons {
+  margin-top: 22px;
+  display: flex;
+  gap: 12px;
+}
+
+.edit-btn {
+  background: #eef4ff;
+  color: #2563eb;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.edit-btn:hover {
+  background: #dbeafe;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: #fef2f2;
+  color: #dc2626;
+  border: none;
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.delete-btn:hover {
+  background: #fee2e2;
+  transform: scale(1.05);
+}
+
+/* Modal overlay chung */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Popup thêm ví */
+.add-wallet-modal {
+  background: white;
+  width: 100%;
+  max-width: 500px;
+  padding: 28px;
+  border-radius: 10px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.add-wallet-modal h3 {
+  margin: 0 0 10px;
+  font-size: 26px;
+  color: #111827;
+}
+
+/* Popup sửa ví */
+.edit-wallet-modal {
+  background: white;
+  width: 100%;
+  max-width: 500px;
+  padding: 28px;
+  border-radius: 10px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: slideUp 0.2s ease;
+}
+
+.disabled-input {
+  background-color: #f3f4f6;
+  color: #6b7280;
+  cursor: not-allowed;
+  border: 1px solid #e5e7eb;
+}
+
+.edit-wallet-modal h3 {
+  margin: 0 0 10px;
+  font-size: 26px;
+  color: #111827;
+}
+
+/* Form group - label trên input */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.form-group .required {
+  color: #dc2626;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 12px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 15px;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  transition: 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #006493;
+  box-shadow: 0 0 0 3px rgba(0, 100, 147, 0.1);
+}
+
+.form-group .hint {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.error-message {
+  color: #dc2626;
+  font-size: 12px;
+  margin-top: -4px;
+}
+
+/* Modal actions */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.save-btn {
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.save-btn:hover {
+  background: #1d4ed8;
+}
+
+.cancel-btn {
+  background: #f3f4f6;
+  color: #374151;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.cancel-btn:hover {
+  background: #e5e7eb;
+}
+
+/* Empty state (khi chưa có ví) */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
+.empty-state h3 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.empty-state p {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+/* Loading */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}

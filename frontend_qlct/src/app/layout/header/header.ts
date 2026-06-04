@@ -49,6 +49,7 @@ export class AppHeader {
   }
 
   onLogout() {
+
     this.auth.logout(); // Gọi hàm xóa session trong service
   }
 }

@@ -64,7 +64,7 @@
         </div>
 
         <!-- Form -->
-        <form (ngSubmit)="onSubmit()" class="auth-form" id="register-form">
+        <form #registerForm="ngForm" (ngSubmit)="registerForm.form.valid && loadData.password === confirmPassword && onSubmit()" class="auth-form" id="register-form" novalidate>
           <!-- Full Name -->
 <!--          <div class="form-group">-->
 <!--            <label class="form-label" for="fullName">-->
@@ -110,11 +110,19 @@
               <input
                 type="text"
                 id="username"
+                #usernameInput="ngModel"
                 class="form-input"
+                [class.is-invalid]="usernameInput.invalid && (usernameInput.dirty || usernameInput.touched || registerForm.submitted)"
                 placeholder="Tên đăng nhập của bạn"
                 [(ngModel)]="loadData.username"
                 name="username"
-                required />
+                required
+                minlength="3" />
+            </div>
+            <div *ngIf="usernameInput.invalid && (usernameInput.dirty || usernameInput.touched || registerForm.submitted)" class="error-msg">
+              <span class="material-symbols-outlined error-icon">error</span>
+              <span *ngIf="usernameInput.errors?.['required']">Tên đăng nhập là bắt buộc.</span>
+              <span *ngIf="usernameInput.errors?.['minlength']">Tên đăng nhập phải có ít nhất 3 ký tự.</span>
             </div>
           </div>
           <!--Firstname-->
@@ -127,11 +135,17 @@
               <input
                 type="text"
                 id="firstname"
+                #firstnameInput="ngModel"
                 class="form-input"
+                [class.is-invalid]="firstnameInput.invalid && (firstnameInput.dirty || firstnameInput.touched || registerForm.submitted)"
                 placeholder="Tên của bạn"
                 [(ngModel)]="loadData.firstname"
                 name="firstname"
                 required />
+            </div>
+            <div *ngIf="firstnameInput.invalid && (firstnameInput.dirty || firstnameInput.touched || registerForm.submitted)" class="error-msg">
+              <span class="material-symbols-outlined error-icon">error</span>
+              Tên là bắt buộc.
             </div>
           </div>
           <!--Lastname-->
@@ -144,11 +158,17 @@
               <input
                 type="text"
                 id="lastname"
+                #lastnameInput="ngModel"
                 class="form-input"
+                [class.is-invalid]="lastnameInput.invalid && (lastnameInput.dirty || lastnameInput.touched || registerForm.submitted)"
                 placeholder="Họ của bạn"
                 [(ngModel)]="loadData.lastname"
                 name="lastname"
                 required />
+            </div>
+            <div *ngIf="lastnameInput.invalid && (lastnameInput.dirty || lastnameInput.touched || registerForm.submitted)" class="error-msg">
+              <span class="material-symbols-outlined error-icon">error</span>
+              Họ là bắt buộc.
             </div>
           </div>
           <!--Date of birth-->
@@ -161,10 +181,16 @@
               <input
                 type="date"
                 id="dob"
+                #dobInput="ngModel"
                 class="form-input"
+                [class.is-invalid]="dobInput.invalid && (dobInput.dirty || dobInput.touched || registerForm.submitted)"
                 [(ngModel)]="loadData.dob"
                 name="dob"
                 required />
+            </div>
+            <div *ngIf="dobInput.invalid && (dobInput.dirty || dobInput.touched || registerForm.submitted)" class="error-msg">
+              <span class="material-symbols-outlined error-icon">error</span>
+              Ngày sinh là bắt buộc.
             </div>
           </div>
           <!-- Password -->
@@ -177,11 +203,14 @@
               <input
                 [type]="showPassword ? 'text' : 'password'"
                 id="password"
+                #passwordInput="ngModel"
                 class="form-input has-action"
+                [class.is-invalid]="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched || registerForm.submitted)"
                 placeholder="••••••••"
                 [(ngModel)]="loadData.password"
                 name="password"
-                required />
+                required
+                minlength="6" />
               <button
                 type="button"
                 class="form-input-action"
@@ -191,6 +220,11 @@
                   {{ showPassword ? 'visibility_off' : 'visibility' }}
                 </span>
               </button>
+            </div>
+            <div *ngIf="passwordInput.invalid && (passwordInput.dirty || passwordInput.touched || registerForm.submitted)" class="error-msg">
+              <span class="material-symbols-outlined error-icon">error</span>
+              <span *ngIf="passwordInput.errors?.['required']">Mật khẩu là bắt buộc.</span>
+              <span *ngIf="passwordInput.errors?.['minlength']">Mật khẩu phải có ít nhất 6 ký tự.</span>
             </div>
           </div>
 
@@ -204,7 +238,9 @@
               <input
                 [type]="showConfirmPassword ? 'text' : 'password'"
                 id="confirmPassword"
+                #confirmPasswordInput="ngModel"
                 class="form-input has-action"
+                [class.is-invalid]="(confirmPasswordInput.invalid || confirmPassword !== loadData.password) && (confirmPasswordInput.dirty || confirmPasswordInput.touched || registerForm.submitted)"
                 placeholder="••••••••"
                 [(ngModel)]="confirmPassword"
                 name="confirmPassword"
@@ -219,6 +255,11 @@
                 </span>
               </button>
             </div>
+            <div *ngIf="(confirmPasswordInput.invalid || confirmPassword !== loadData.password) && (confirmPasswordInput.dirty || confirmPasswordInput.touched || registerForm.submitted)" class="error-msg">
+              <span class="material-symbols-outlined error-icon">error</span>
+              <span *ngIf="confirmPasswordInput.errors?.['required']">Xác nhận mật khẩu là bắt buộc.</span>
+              <span *ngIf="!confirmPasswordInput.errors?.['required'] && confirmPassword !== loadData.password">Mật khẩu xác nhận không khớp.</span>
+            </div>
           </div>
 
           <!-- Submit Button -->
@@ -226,7 +267,7 @@
             type="submit"
             class="btn-primary"
             [class.is-loading]="isLoading"
-            [disabled]="isLoading"
+            [disabled]="isLoading || (registerForm.submitted && (registerForm.invalid || loadData.password !== confirmPassword))"
             id="submit-btn">
             <span class="btn-content" *ngIf="!isLoading">
               <span class="material-symbols-outlined btn-icon">person_add</span>
