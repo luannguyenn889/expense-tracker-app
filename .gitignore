@@ -18,7 +18,7 @@ yarn-error.log
 .classpath
 .c9/
 *.launch
-.settings/
+.settings
 *.sublime-workspace
 
 # Visual Studio Code
@@ -43,3 +43,15 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+# --- Backend (Java/Maven/Spring Boot) ---
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+.gradle/
+build/
+bin/
+hs_err_pid*
+.mvn/wrapper/maven-wrapper.jar
