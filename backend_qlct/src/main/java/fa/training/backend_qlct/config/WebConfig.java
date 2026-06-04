@@ -10,5 +10,6 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/api/**") // Mở khóa cho tất cả API bắt đầu bằng /api
                 .allowedOrigins("http://localhost:4200") // Chỉ cho phép Angular gọi
                 .allowedMethods("GET", "POST", "PUT", "DELETE");
+                // Bạn có thể thêm các cấu hình khác nếu cần, ví dụ: .allowedHeaders("*") để cho phép tất cả header
     }
 }

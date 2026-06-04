@@ -360,6 +360,42 @@
   box-shadow: 0 0 0 3px rgba(0, 100, 147, 0.1);
 }
 
+.form-input.is-invalid {
+  border-color: var(--color-error);
+}
+
+.form-input.is-invalid:focus {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px rgba(186, 26, 26, 0.15);
+}
+
+.error-msg {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-error);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  margin-top: 4px;
+  animation: error-enter 0.2s ease-out;
+}
+
+.error-icon {
+  font-size: 16px;
+}
+
+@keyframes error-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .form-input.has-action {
   padding-right: 48px;
 }

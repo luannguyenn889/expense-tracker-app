@@ -1,25 +1,21 @@
 import { Injectable } from '@angular/core';
-import {BehaviorSubject} from 'rxjs';
-
-import {Router} from '@angular/router';
+import { BehaviorSubject } from 'rxjs';
+import { Router } from '@angular/router';
+import { SocialAuthService } from '@abacritt/angularx-social-login'; // Giữ lại từ file 2
 
 @Injectable({
   providedIn: 'root',
 })
 export class Auth {
-  // BehaviorSubject lưu trạng thái đăng nhập, khởi tạo dựa trên việc có token trong localStorage hay không
   private loggedIn = new BehaviorSubject<boolean>(this.checkToken());
-
-  // Biến này để các component khác (như Header) subscribe (lắng nghe)
   isLoggedIn$ = this.loggedIn.asObservable();
 
-  // (Tùy chọn) Lưu thêm thông tin user như email, tên, avatar...
   private currentUser = new BehaviorSubject<any>(this.getUserFromStorage());
   currentUser$ = this.currentUser.asObservable();
 
-  constructor(private router: Router) { }
+  // Constructor có cả Router và SocialAuthService
+  constructor(private router: Router, private socialAuthService: SocialAuthService) { }
 
-  // Hàm kiểm tra xem token có tồn tại không (để giữ trạng thái khi F5 trang)
   private checkToken(): boolean {
     return !!localStorage.getItem('access_token');
   }
@@ -29,23 +25,40 @@ export class Auth {
     return userStr ? JSON.parse(userStr) : null;
   }
 
-  // Hàm này sẽ được gọi bên trong LoginComponent khi API trả về thành công
+  // GIỮ LẠI TỪ FILE 1: Hàm lấy dữ liệu nhanh cho Dashboard (Sửa lỗi TS2551)
+  getCurrentUser(): any {
+    return this.currentUser.value || this.getUserFromStorage();
+  }
+  getCurrentUserId(): number | null {
+      const user = this.getCurrentUser();
+      return user && user.id ? Number(user.id) : null;
+  }
   setLoginSession(token: string, userInfo: any) {
     localStorage.setItem('access_token', token);
-    localStorage.setItem('user_info', JSON.stringify(userInfo)); // Lưu thông tin user
+    localStorage.setItem('user_info', JSON.stringify(userInfo));
 
-    this.loggedIn.next(true); // Phát tín hiệu: Đã đăng nhập!
-    this.currentUser.next(userInfo); // Phát tín hiệu: Thông tin user đây!
+    this.loggedIn.next(true);
+    this.currentUser.next(userInfo);
   }
 
-  // Hàm gọi khi nhấn Đăng xuất ở Header
+  // GIỮ LẠI TỪ FILE 2: Cập nhật thông tin user (Avatar/Tên) ngay lập tức
+  updateCurrentUser(userInfo: any) {
+    localStorage.setItem('user_info', JSON.stringify(userInfo));
+    this.currentUser.next(userInfo);
+  }
+
+  // GIỮ LẠI TỪ FILE 2: Đăng xuất sạch sẽ cả localStorage lẫn Google
   logout() {
+    this.socialAuthService.signOut().catch(() => {
+        // Bỏ qua lỗi nếu user chưa từng đăng nhập Google
+    });
+
     localStorage.removeItem('access_token');
     localStorage.removeItem('user_info');
 
-    this.loggedIn.next(false); // Phát tín hiệu: Đã thoát!
+    this.loggedIn.next(false);
     this.currentUser.next(null);
 
-    this.router.navigate(['/login']); // Đẩy về trang đăng nhập
+    this.router.navigate(['/login']);
   }
 }
