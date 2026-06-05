@@ -198,6 +198,59 @@
   color: var(--color-outline-variant);
 }
 
+/* Chart card header (title + badge) */
+.chart-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+}
+
+.chart-card__badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary-container);
+  color: var(--color-on-primary-container);
+  white-space: nowrap;
+}
+
+/* Canvas wrapper — chiếm toàn bộ phần còn lại */
+.chart-card__canvas-wrap {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+  height: 300px;
+}
+
+.chart-card__canvas-wrap canvas {
+  display: block;
+}
+
+/* Link nhỏ trong empty state */
+.chart-card__link {
+  margin-top: var(--spacing-xs);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.chart-card__link:hover {
+  text-decoration: underline;
+}
+
+/* Loading spinner trong chart */
+.chart-loading-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--color-primary-fixed-dim);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
 /* ---- Table Card ---- */
 .table-card {
   background-color: var(--color-surface);
