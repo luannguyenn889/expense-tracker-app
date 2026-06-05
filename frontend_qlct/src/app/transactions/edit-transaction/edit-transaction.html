@@ -1,0 +1,65 @@
+<div class="modal-overlay">
+  <div class="edit-transaction-modal">
+    <h3>Sửa giao dịch</h3>
+
+    <div class="alert-warning" *ngIf="isTransfer">
+      <span class="material-symbols-outlined">warning</span>
+      <span>Không thể sửa giao dịch chuyển tiền. </span>
+    </div>
+
+    <div class="form-group">
+      <label>Loại</label>
+      <select [(ngModel)]="formData.type" [disabled]="isTransfer">
+        <option value="INCOME">Thu</option>
+        <option value="EXPENSE">Chi</option>
+        <option value="TRANSFER">Chuyển tiền</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Số tiền</label>
+      <input type="number" [(ngModel)]="formData.amount" [disabled]="isTransfer" placeholder="Nhập số tiền" />
+    </div>
+
+    <div class="form-group">
+      <label>Ngày</label>
+      <input type="date" [(ngModel)]="formData.transactionDate" [disabled]="isTransfer" />
+    </div>
+
+    <div class="form-group" *ngIf="!isTransfer">
+      <label>Danh mục</label>
+      <select [(ngModel)]="formData.categoryId">
+        <option [value]="null">-- Chọn danh mục --</option>
+        <option *ngFor="let cat of categories" [value]="cat.id">
+          {{ cat.name }} ({{ cat.type }})
+        </option>
+      </select>
+    </div>
+
+    <div class="form-group" *ngIf="isTransfer">
+      <label>Danh mục</label>
+      <input type="text" value="Chuyển tiền (không có danh mục)" disabled class="disabled-input" />
+    </div>
+
+    <!-- DROPDOWN VÍ -->
+    <div class="form-group">
+      <label>Ví</label>
+      <select [(ngModel)]="formData.walletId" [disabled]="isTransfer">
+        <option [value]="null">-- Chọn ví --</option>
+        <option *ngFor="let wallet of wallets" [value]="wallet.id">
+          {{ wallet.name }} ({{ wallet.balance | number:'1.0-0' }} ₫)
+        </option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Ghi chú</label>
+      <input [(ngModel)]="formData.note" [disabled]="isTransfer" placeholder="Ghi chú" />
+    </div>
+
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="cancel()">Hủy</button>
+      <button class="save-btn" (click)="save()" [disabled]="isTransfer">Lưu</button>
+    </div>
+  </div>
+</div>
