@@ -75,6 +75,7 @@
 
   <!-- Row 2: Charts -->
   <div class="charts-grid">
+    <!-- Bar chart placeholder (giữ nguyên) -->
     <div class="chart-card">
       <h3 class="chart-card__title">Income vs Expenses</h3>
       <div class="chart-card__placeholder">
@@ -82,12 +83,37 @@
         <p>Bar Chart Visualization Area</p>
       </div>
     </div>
+
+    <!-- Pie chart thực — Chi tiêu theo danh mục -->
     <div class="chart-card">
-      <h3 class="chart-card__title">Expenses by Category</h3>
-      <div class="chart-card__placeholder">
-        <span class="material-symbols-outlined chart-card__icon">pie_chart</span>
-        <p>Pie Chart Visualization Area</p>
+      <div class="chart-card__header">
+        <h3 class="chart-card__title">Chi tiêu theo danh mục</h3>
+        <span class="chart-card__badge">{{ userId ? 'Dữ liệu của bạn' : '' }}</span>
       </div>
+
+      <!-- Loading -->
+      @if (isCategoryLoading) {
+        <div class="chart-card__placeholder">
+          <div class="chart-loading-spinner"></div>
+          <p>Đang tải dữ liệu...</p>
+        </div>
+      }
+
+      <!-- Empty — chưa có danh mục Chi tiêu -->
+      @if (!isCategoryLoading && !hasExpenseCategories) {
+        <div class="chart-card__placeholder">
+          <span class="material-symbols-outlined chart-card__icon">pie_chart</span>
+          <p>Chưa có danh mục chi tiêu nào.</p>
+          <a class="chart-card__link" routerLink="/add-category">+ Tạo danh mục</a>
+        </div>
+      }
+
+      <!-- Canvas biểu đồ tròn -->
+      @if (!isCategoryLoading && hasExpenseCategories) {
+        <div class="chart-card__canvas-wrap">
+          <canvas id="categoryPieCanvas"></canvas>
+        </div>
+      }
     </div>
   </div>
 
