@@ -32,8 +32,11 @@ public class CategoryController {
         }
     }
     @GetMapping
-    public List<Categories> getAllCategories() {
-        return categoryService.getAllUsers();
+    public List<Categories> getAllCategories(@RequestParam(name = "userId", required = false) Long userId) {
+        if (userId != null) {
+            return categoryService.getCategoriesByUser(userId); // Lấy danh sách theo userId hoặc hệ thống
+        }
+        return categoryService.getCategoriesByUser(null); // Chỉ lấy danh mục mặc định của hệ thống
     }
     @DeleteMapping("/delete/{id}")
     public void deleteCategory(@PathVariable("id") String id) {

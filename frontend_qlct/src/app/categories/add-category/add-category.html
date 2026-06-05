@@ -1,39 +1,45 @@
 <div class="basic">
   <div class="basic-header">
-    <h2 class="basic-title">Add Category</h2>
+    <h2 class="basic-title">Thêm Danh Mục</h2>
     <button class="basic-btn-secondary" routerLink="/list-category">
       <span class="material-symbols-outlined">arrow_back</span>
-      Back to List
+      Quay lại Danh sách
     </button>
   </div>
 
   <form class="basic-form" (ngSubmit)="onSubmit()">
     <div class="basic-form-group">
-      <label class="basic-label" for="categoryName">Category Name <span class="basic-required">*</span></label>
-      <input type="text" id="categoryName" class="basic-input" name="name" [(ngModel)]="category.name" placeholder="e.g. Groceries" required>
-    </div>
-
-    <div class="basic-form-group">
-      <label class="basic-label" for="categoryIcon">Icon Name (Material Symbols) <span class="basic-required">*</span></label>
-      <input type="text" id="categoryIcon" class="basic-input" name="icon" [(ngModel)]="category.icon" placeholder="e.g. shopping_cart" required>
-      @if (category.icon) {
-        <div class="basic-icon-preview">
-          Preview: <span class="material-symbols-outlined">{{ category.icon }}</span>
+      <label class="basic-label" for="categoryName">Tên Danh Mục <span class="basic-required">*</span></label>
+      <input type="text" id="categoryName" class="basic-input" name="name" [(ngModel)]="category.name" placeholder="Ví dụ: Ăn uống, Mua sắm..." #categorynameInput="ngModel" required>
+      @if (categorynameInput.invalid && (categorynameInput.dirty || categorynameInput.touched)) {
+        <div class="error-msg">
+          <span *ngIf="categorynameInput.errors?.['required']" style="color: red;">Tên danh mục là bắt buộc.</span>
+          <span *ngIf="categorynameInput.errors?.['minlength']" style="color: red;">Tên danh mục phải có ít nhất 3 ký tự.</span>
         </div>
       }
     </div>
 
     <div class="basic-form-group">
-      <label class="basic-label" for="categoryType">Category Type</label>
+      <label class="basic-label" for="categoryIcon">Tên Icon (Material Symbols) <span class="basic-required">*</span></label>
+      <input type="text" id="categoryIcon" class="basic-input" name="icon" [(ngModel)]="category.icon" placeholder="Ví dụ: shopping_cart, fastfood..." required>
+      @if (category.icon) {
+        <div class="basic-icon-preview">
+          Xem trước: <span class="material-symbols-outlined">{{ category.icon }}</span>
+        </div>
+      }
+    </div>
+
+    <div class="basic-form-group">
+      <label class="basic-label" for="categoryType">Loại Danh Mục</label>
       <select id="categoryType" class="basic-input" name="type" [(ngModel)]="category.type">
-        <option value="EXPENSE">Expense</option>
-        <option value="INCOME">Income</option>
+        <option value="EXPENSE">Khoản chi (Expense)</option>
+        <option value="INCOME">Khoản thu (Income)</option>
       </select>
     </div>
 
     <div class="basic-form-actions">
-      <button type="button" class="basic-btn-outline" routerLink="/list-category">Cancel</button>
-      <button type="submit" class="basic-btn">Save Category</button>
+      <button type="button" class="basic-btn-outline" routerLink="/list-category">Hủy</button>
+      <button type="submit" class="basic-btn">Lưu Danh Mục</button>
     </div>
   </form>
 </div>
