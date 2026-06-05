@@ -10,13 +10,14 @@ import { WalletService } from '../../services/wallet-service';
   templateUrl: './edit-wallet.html',
   styleUrl: './edit-wallet.css'
 })
-export class EditWallet{
+export class EditWallet {
   @Input() wallet: any = null;
-  @Input() userId: number = 1;
   @Output() close = new EventEmitter<void>();
   @Output() updated = new EventEmitter<void>();
 
   editingWallet: any = null;
+
+  constructor(private walletService: WalletService) {}
 
   ngOnChanges() {
     if (this.wallet) {
@@ -30,7 +31,7 @@ export class EditWallet{
       return;
     }
 
-    this.walletService.updateWallet(this.editingWallet.id, this.userId, {
+    this.walletService.updateWallet(this.editingWallet.id, {
       name: this.editingWallet.name,
       description: this.editingWallet.description
     }).subscribe({
@@ -46,6 +47,4 @@ export class EditWallet{
   cancel() {
     this.close.emit();
   }
-
-  constructor(private walletService: WalletService) {}
 }

@@ -26,7 +26,6 @@ export class Transactions implements OnInit {
   currentPage = 0;
   pageSize = 10;
   totalPages = 1;
-  userId = 1;
 
   showAddModal = false;
   showEditModal = false;
@@ -52,7 +51,7 @@ export class Transactions implements OnInit {
 
   loadData() {
     this.loadWallets();
-    this.transactionService.getWallets(this.userId).subscribe(data => {
+    this.transactionService.getWallets().subscribe(data => {
       this.wallets = data;
       this.cdr.detectChanges();
     });
@@ -64,12 +63,12 @@ export class Transactions implements OnInit {
   }
 
   loadWallets() {
-    this.http.get(`http://localhost:8080/api/wallets/all?userId=${this.userId}`)
+    this.http.get(`http://localhost:8080/api/wallets/all?userId=${this.transactionService.getCurrentUserId()}`)
       .subscribe({
         next: (data: any) => {
-          this.allWallets = data;           // Tất cả ví (kể cả INACTIVE) cho lịch sử
-          this.activeWallets = data.filter((w: any) => w.status === 'ACTIVE'); // Chỉ ACTIVE cho dropdown
-          this.wallets = this.allWallets;   // ← QUAN TRỌNG: gán allWallets vào wallets
+          this.allWallets = data;
+          this.activeWallets = data.filter((w: any) => w.status === 'ACTIVE');
+          this.wallets = this.allWallets;
           this.cdr.detectChanges();
         },
         error: (err) => console.error('Lỗi tải ví:', err)
@@ -77,10 +76,9 @@ export class Transactions implements OnInit {
   }
 
   loadTransactions() {
-    this.transactionService.getTransactions(this.userId, this.currentPage, this.pageSize, this.filter)
+    this.transactionService.getTransactions(this.currentPage, this.pageSize, this.filter)
       .subscribe(data => {
         let transactions = data.content || [];
-        // Sắp xếp theo ngày giảm dần (mới nhất lên đầu)
         transactions.sort((a: any, b: any) => {
           const dateA = new Date(a.transactionDate);
           const dateB = new Date(b.transactionDate);
@@ -140,22 +138,19 @@ export class Transactions implements OnInit {
 
   deleteTransaction(id: number) {
     if (confirm('Xóa giao dịch này?')) {
-      this.transactionService.deleteTransaction(id, this.userId).subscribe({
+      this.transactionService.deleteTransaction(id).subscribe({
         next: (res: any) => {
           console.log('Delete response:', res);
-          
           this.transactions = this.transactions.filter(t => t.id !== id);
           this.cdr.detectChanges();
           alert('Xóa giao dịch thành công!');
-          this.transactionService.getWallets(this.userId).subscribe(data => {
+          this.transactionService.getWallets().subscribe(data => {
             this.wallets = data;
             this.cdr.detectChanges();
           });
-          
         },
         error: (err) => {
           console.error('Lỗi chi tiết:', err);
-          
           if (err.status === 200 || err.status === 204) {
             this.transactions = this.transactions.filter(t => t.id !== id);
             this.cdr.detectChanges();
