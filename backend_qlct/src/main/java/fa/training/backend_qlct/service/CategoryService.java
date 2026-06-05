@@ -25,6 +25,9 @@ public class CategoryService {
          categories.setIcon(request.getIcon());
          categories.setType(request.getType());
          categories.setUserId(request.getUserId()); // Thiết lập userId của người dùng
+         categories.setColor(request.getColor()); // Màu sắc danh mục
+         categories.setDescription(request.getDescription()); // Mô tả danh mục
+         categories.setMonthlyBudget(request.getMonthlyBudget()); // Ngân sách tháng
          return categoryRepository.save(categories);
 
      }
@@ -49,6 +52,9 @@ public class CategoryService {
         categories.setIcon(request.getIcon());
         categories.setType(request.getType());
         categories.setUserId(request.getUserId()); // Cập nhật userId
+        categories.setColor(request.getColor()); // Cập nhật màu sắc
+        categories.setDescription(request.getDescription()); // Cập nhật mô tả
+        categories.setMonthlyBudget(request.getMonthlyBudget()); // Cập nhật ngân sách tháng
         return categoryRepository.save(categories);
     }
 
