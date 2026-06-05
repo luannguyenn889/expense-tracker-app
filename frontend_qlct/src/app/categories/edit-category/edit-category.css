@@ -114,20 +114,29 @@
   box-shadow: 0 0 0 1px var(--color-primary);
 }
 
-.basic-icon-preview {
-  margin-top: var(--spacing-xs);
-  font-size: 14px;
-  color: var(--color-on-surface-variant);
+/* Icon select row */
+.basic-icon-select-row {
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm);
 }
 
-.basic-icon-preview .material-symbols-outlined {
+.basic-icon-select-row .basic-input {
+  flex: 1;
+}
+
+.basic-icon-dot {
+  font-size: 28px;
   color: var(--color-primary);
   background-color: var(--color-primary-fixed);
-  padding: 4px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: var(--radius-full);
+  flex-shrink: 0;
+  transition: color 0.2s ease, background-color 0.2s ease;
 }
 
 .basic-form-actions {
@@ -137,4 +146,39 @@
   margin-top: var(--spacing-md);
   padding-top: var(--spacing-md);
   border-top: 1px solid var(--color-surface-variant);
+}
+
+/* Color select row */
+.basic-color-select-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.basic-color-select-row .basic-input {
+  flex: 1;
+}
+
+.basic-color-select {
+  border-left: 5px solid transparent;
+  transition: border-left-color 0.2s ease;
+}
+
+.basic-color-dot {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--color-outline-variant);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+  flex-shrink: 0;
+  transition: background-color 0.2s ease;
+}
+
+/* Textarea */
+.basic-textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+  line-height: 1.5;
 }
