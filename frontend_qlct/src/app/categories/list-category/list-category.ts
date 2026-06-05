@@ -2,6 +2,7 @@ import {Component, OnInit, ChangeDetectorRef} from '@angular/core';
 import {CategoryService} from '../../services/category-service';
 import {Category} from '../../model/category';
 import {RouterLink, Router} from '@angular/router';
+import {Auth} from '../../services/auth'; // Import Auth service để lấy thông tin đăng nhập
 
 @Component({
   selector: 'app-list-category',
@@ -13,6 +14,7 @@ export class ListCategory implements OnInit {
 
   categories: Category[] = [];
   paginatedCategories: Category[] = [];
+  userId: number | null = null; // Lưu trữ ID người dùng đang đăng nhập
   
   // Pagination properties
   currentPage: number = 1; // trang hiện tại
@@ -23,18 +25,35 @@ export class ListCategory implements OnInit {
   constructor(
     private categoryService: CategoryService,
     private cdr: ChangeDetectorRef,
-    private router: Router
+    private router: Router,
+    private auth: Auth // Inject Auth service
   ) {}
 
   ngOnInit(): void {
-    this.loadCategories();
+    // Lắng nghe thông tin người dùng đăng nhập để lấy userId
+    this.auth.currentUser$.subscribe({
+      next: (user) => {
+        if (user && user.id) {
+          this.userId = user.id;
+          this.loadCategories(); // Tải danh mục sau khi đã xác định được người dùng
+        } else {
+          this.userId = null;
+          this.router.navigate(['/login']); // Chưa đăng nhập thì chuyển về trang login
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching user info in ListCategory:', err);
+        this.router.navigate(['/login']);
+      }
+    });
   }
 
   loadCategories(): void {
-    this.categoryService.getAllCategories().subscribe({
+    // Truyền userId vào getAllCategories để lọc danh mục theo người dùng hoặc hệ thống
+    this.categoryService.getAllCategories(this.userId || undefined).subscribe({
       next: (data) => {
         this.categories = data.map((item: any) =>
-          new Category(item.id, item.name, item.icon, item.type)
+          new Category(item.id, item.name, item.icon, item.type, item.userId)
         );
         this.updatePagination();
         this.cdr.detectChanges();

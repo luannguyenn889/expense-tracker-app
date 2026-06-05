@@ -1,9 +1,9 @@
 <div class="basic">
   <div class="basic-header">
-    <h2 class="basic-title">Categories</h2>
+    <h2 class="basic-title">Danh Sách Danh Mục</h2>
     <button class="basic-btn" routerLink="/categories/add">
       <span class="material-symbols-outlined">add</span>
-      Add Category
+      Thêm Danh Mục
     </button>
   </div>
   
@@ -11,10 +11,10 @@
     <table class="basic-table">
       <thead>
         <tr>
-          <th>Icon</th>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Actions</th>
+          <th>Biểu tượng</th>
+          <th>Tên Danh Mục</th>
+          <th>Loại</th>
+          <th>Hành động</th>
         </tr>
       </thead>
       <tbody>
@@ -26,21 +26,21 @@
             <td>{{ category.name }}</td>
             <td>
               <span class="basic-badge" [class.income]="category.type === 'INCOME'" [class.expense]="category.type === 'EXPENSE'">
-                {{ category.type }}
+                {{ category.type === 'INCOME' ? 'Khoản thu' : 'Khoản chi' }}
               </span>
             </td>
             <td class="basic-actions">
-              <button class="basic-action-btn edit" title="Edit" (click)="updateCategory(category.id)">
+              <button class="basic-action-btn edit" title="Sửa" (click)="updateCategory(category.id)">
                 <span class="material-symbols-outlined">edit</span>
               </button>
-              <button class="basic-action-btn delete" title="Delete" (click)="deleteCategory(category.id)">
+              <button class="basic-action-btn delete" title="Xóa" (click)="deleteCategory(category.id)">
                 <span class="material-symbols-outlined">delete</span>
               </button>
             </td>
           </tr>
         } @empty {
           <tr>
-            <td colspan="4" class="basic-empty">No categories found.</td>
+            <td colspan="4" class="basic-empty">Không tìm thấy danh mục nào.</td>
           </tr>
         }
       </tbody>

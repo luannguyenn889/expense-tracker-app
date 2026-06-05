@@ -13,12 +13,12 @@ export class UserService {
   constructor(private http: HttpClient) {}
 
   // Lấy thông tin user theo ID
-  getUserById(id: string): Observable<User>{
+  getUserById(id: number): Observable<User>{
     return this.http.get<User>(`${this.apiUrl}/${id}`);
   }
 
   // Cập nhật thông tin user
-  updateUser(id: string, user: User): Observable<User> {
+  updateUser(id: number, user: User): Observable<User> {
     return this.http.put<User>(`${this.apiUrl}/${id}`, user);
   }
 }

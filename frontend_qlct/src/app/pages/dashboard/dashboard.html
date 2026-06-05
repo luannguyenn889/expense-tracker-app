@@ -52,6 +52,27 @@
     </div>
   </div>
 
+  <!-- Row 1.5: AI Assistant Card -->
+  <div class="ai-assistant-card">
+    <div class="header">
+      <h3>🤖 Trợ lý Tài chính AI</h3>
+      <button (click)="askAiForAdvice()" [disabled]="isAiThinking">
+        {{ isAiThinking ? 'Đang phân tích dữ liệu...' : 'Xin lời khuyên tháng này' }}
+      </button>
+    </div>
+
+    <div class="advice-content" *ngIf="aiAdvice || isAiThinking">
+      <div class="loading-spinner" *ngIf="isAiThinking">
+        <div class="spinner-ring"></div>
+        <p>AI đang xem xét các khoản chi của bạn...</p>
+      </div>
+
+      <div class="result" *ngIf="aiAdvice && !isAiThinking">
+        <p style="white-space: pre-wrap;">{{ aiAdvice }}</p>
+      </div>
+    </div>
+  </div>
+
   <!-- Row 2: Charts -->
   <div class="charts-grid">
     <div class="chart-card">
