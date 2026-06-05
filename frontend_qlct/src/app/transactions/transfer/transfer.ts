@@ -24,6 +24,9 @@ export class Transfer {
 
   constructor(private transactionService: TransactionService) {}
 
+  /**
+   * Kiểm tra tính hợp lệ của dữ liệu form chuyển tiền
+   */
   isValid(): boolean {
     return !!this.transferData.fromWalletId &&
            !!this.transferData.toWalletId &&
@@ -31,24 +34,31 @@ export class Transfer {
            this.transferData.amount > 0;
   }
 
+  /**
+   * Thực hiện gọi API chuyển tiền liên ví
+   */
   transfer() {
     if (!this.isValid()) {
-      alert('Vui lòng chọn đầy đủ thông tin!');
+      alert('Vui lòng điền đầy đủ và chính xác thông tin chuyển tiền!');
       return;
     }
 
     this.transactionService.transfer(this.transferData).subscribe({
       next: (res: any) => {
         alert(res.message || 'Chuyển tiền thành công!');
-        this.completed.emit();
-        this.close.emit();
+        this.completed.emit(); // Thông báo cho component cha tải lại dữ liệu ví/giao dịch
+        this.close.emit();     // Đóng modal/form chuyển tiền
       },
       error: (err) => {
+        // Đọc thông báo lỗi trả về từ Backend (Khớp với các Exception trả về từ Java Controller)
         alert(err.error?.message || err.error || 'Chuyển tiền thất bại!');
       }
     });
   }
 
+  /**
+   * Hủy bỏ thao tác
+   */
   cancel() {
     this.close.emit();
   }

@@ -19,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.pdf.PdfDocument;
@@ -29,11 +30,17 @@ import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 
+import fa.training.backend_qlct.dto.request.TransactionRequest;
 import fa.training.backend_qlct.entities.Notification;
 import fa.training.backend_qlct.entities.Transaction;
+import fa.training.backend_qlct.entities.Wallet;
+import fa.training.backend_qlct.respository.NotificationRepository;
+import fa.training.backend_qlct.respository.TransactionRepository;
+import fa.training.backend_qlct.repository.WalletRepository;
 import fa.training.backend_qlct.respository.NotificationRepository;
 import fa.training.backend_qlct.respository.TransactionRepository;
 import jakarta.persistence.criteria.Predicate;
+
 @Service
 public class TransactionService {
 
@@ -41,19 +48,151 @@ public class TransactionService {
     private TransactionRepository transactionRepository;
 
     @Autowired
+    private WalletRepository walletRepository;
+
+    @Autowired
     private NotificationRepository notificationRepository;
 
-public BigDecimal getTotalExpenseByMonth(Long userId, int month, int year) {
+    // ==========================================
+    // NGHIỆP VỤ CRUD & THAY ĐỔI SỐ DƯ VÍ
+    // ==========================================
 
-    BigDecimal total =
-                transactionRepository.sumExpenseByMonth(
-                        userId,
-                        month,
-                        year);
+    @Transactional
+    public Transaction createTransaction(TransactionRequest request, Long userId) {
+        Wallet wallet = walletRepository.findById(request.getWalletId())
+                .orElseThrow(() -> new RuntimeException("Ví không tồn tại"));
 
-        return total != null
-                ? total
-                : BigDecimal.ZERO;
+        if (!wallet.getUserId().equals(userId)) {
+            throw new RuntimeException("Ví không thuộc về bạn");
+        }
+
+        if (request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("Số tiền phải lớn hơn 0");
+        }
+
+        BigDecimal balanceChange;
+        if ("INCOME".equals(request.getType())) {
+            balanceChange = request.getAmount();
+        } else if ("EXPENSE".equals(request.getType())) {
+            balanceChange = request.getAmount().negate();
+            if (wallet.getBalance().compareTo(request.getAmount()) < 0) {
+                throw new RuntimeException("Số dư không đủ");
+            }
+        } else {
+            balanceChange = BigDecimal.ZERO;
+        }
+
+        walletRepository.updateBalance(request.getWalletId(), balanceChange);
+
+        Transaction transaction = new Transaction();
+        transaction.setAmount(request.getAmount());
+        transaction.setNote(request.getNote());
+        transaction.setTransactionDate(request.getTransactionDate() != null ? request.getTransactionDate() : LocalDate.now());
+        transaction.setType(request.getType());
+        transaction.setCategoryId(request.getCategoryId());
+        transaction.setWalletId(request.getWalletId());
+        
+        if ("TRANSFER".equals(request.getType())) {
+            transaction.setToWalletId(request.getToWalletId());
+        }
+        transaction.setUserId(userId);
+
+        return transactionRepository.save(transaction);
+    }
+
+    @Transactional
+    public Transaction updateTransaction(Long id, TransactionRequest request, Long userId) {
+        Transaction transaction = transactionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Giao dịch không tồn tại"));
+        
+        if (!transaction.getUserId().equals(userId)) {
+            throw new RuntimeException("Không có quyền sửa giao dịch này");
+        }
+        
+        if ("TRANSFER".equals(transaction.getType())) {
+            throw new RuntimeException("Không thể sửa giao dịch chuyển tiền. Vui lòng xóa và tạo mới.");
+        }
+        
+        // Hoàn tác số dư cũ trước khi áp dụng số tiền mới
+        if ("INCOME".equals(transaction.getType())) {
+            walletRepository.updateBalance(transaction.getWalletId(), transaction.getAmount().negate());
+        } else if ("EXPENSE".equals(transaction.getType())) {
+            walletRepository.updateBalance(transaction.getWalletId(), transaction.getAmount());
+        }
+        
+        transaction.setAmount(request.getAmount());
+        transaction.setNote(request.getNote());
+        transaction.setTransactionDate(request.getTransactionDate());
+        transaction.setType(request.getType());
+        
+        if (request.getCategoryId() != null && !request.getCategoryId().isEmpty()) {
+            transaction.setCategoryId(request.getCategoryId());
+        } else {
+            transaction.setCategoryId(null);
+        }
+        
+        transaction.setWalletId(request.getWalletId());
+        
+        // Cập nhật số dư mới
+        BigDecimal newBalanceChange;
+        if ("INCOME".equals(request.getType())) {
+            newBalanceChange = request.getAmount();
+        } else {
+            newBalanceChange = request.getAmount().negate();
+            Wallet wallet = walletRepository.findById(request.getWalletId()).orElseThrow();
+            if (wallet.getBalance().compareTo(request.getAmount()) < 0) {
+                throw new RuntimeException("Số dư không đủ");
+            }
+        }
+        walletRepository.updateBalance(request.getWalletId(), newBalanceChange);
+        
+        return transactionRepository.save(transaction);
+    }
+
+    @Transactional
+    public void deleteTransaction(Long id, Long userId) {
+        Transaction transaction = transactionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Giao dịch không tồn tại"));
+        
+        if (!transaction.getUserId().equals(userId)) {
+            throw new RuntimeException("Không có quyền xóa giao dịch này");
+        }
+        
+        Long walletId = transaction.getWalletId();
+        Long toWalletId = transaction.getToWalletId();
+        
+        // HOÀN TÁC SỐ DƯ KHI XÓA
+        if ("INCOME".equals(transaction.getType())) {
+            walletRepository.updateBalance(walletId, transaction.getAmount().negate());
+        } else if ("EXPENSE".equals(transaction.getType())) {
+            walletRepository.updateBalance(walletId, transaction.getAmount());
+        } else if ("TRANSFER".equals(transaction.getType())) {
+            walletRepository.updateBalance(walletId, transaction.getAmount());
+            if (toWalletId != null) {
+                walletRepository.updateBalance(toWalletId, transaction.getAmount().negate());
+            }
+        }
+        
+        transactionRepository.deleteById(id);
+        
+        // KIỂM TRA VÀ KHÔI PHỤC TRẠNG THÁI VÍ NẾU CẦN
+        boolean stillHasTransactions = transactionRepository.existsByWalletIdOrToWalletId(walletId, userId);
+        if (!stillHasTransactions) {
+            Wallet wallet = walletRepository.findById(walletId).orElse(null);
+            if (wallet != null && "INACTIVE".equals(wallet.getStatus())) {
+                wallet.setStatus("ACTIVE");
+                walletRepository.save(wallet);
+            }
+        }
+    }
+
+    // ==========================================
+    // TRUY VẤN & TÌM KIẾM NÂNG CAO (SPECIFICATION)
+    // ==========================================
+
+    public BigDecimal getTotalExpenseByMonth(Long userId, int month, int year) {
+        BigDecimal total = transactionRepository.sumExpenseByMonth(userId, month, year);
+        return total != null ? total : BigDecimal.ZERO;
     }
 
     public Page<Transaction> searchTransactions(Long userId, String keyword, LocalDate startDate, LocalDate endDate,
@@ -73,6 +212,7 @@ public BigDecimal getTotalExpenseByMonth(Long userId, int month, int year) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.equal(root.get("userId"), userId));
+            
             if (keyword != null && !keyword.trim().isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("note")), "%" + keyword.toLowerCase() + "%"));
             }
@@ -82,11 +222,15 @@ public BigDecimal getTotalExpenseByMonth(Long userId, int month, int year) {
             if (walletId != null) predicates.add(cb.equal(root.get("walletId"), walletId));
             if (minAmount != null) predicates.add(cb.greaterThanOrEqualTo(root.get("amount"), BigDecimal.valueOf(minAmount)));
             if (maxAmount != null) predicates.add(cb.lessThanOrEqualTo(root.get("amount"), BigDecimal.valueOf(maxAmount)));
+            
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
  
-    // [UC30] Xuất báo cáo Excel bằng Apache POI
+    // ==========================================
+    // XUẤT BÁO CÁO FILE (EXCEL & PDF)
+    // ==========================================
+
     public ByteArrayInputStream exportExcel(Long userId, String keyword, LocalDate startDate, LocalDate endDate,
                                              String type, Long walletId, Double minAmount, Double maxAmount) throws Exception {
         List<Transaction> list = getFilteredList(userId, keyword, startDate, endDate, type, walletId, minAmount, maxAmount);
@@ -94,7 +238,6 @@ public BigDecimal getTotalExpenseByMonth(Long userId, int month, int year) {
         try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet("Báo cáo giao dịch");
  
-            // Tạo style cho header
             CellStyle headerStyle = workbook.createCellStyle();
             Font headerFont = workbook.createFont();
             headerFont.setBold(true);
@@ -111,7 +254,6 @@ public BigDecimal getTotalExpenseByMonth(Long userId, int month, int year) {
             int rowIdx = 1;
             for (Transaction tx : list) {
                 Row row = sheet.createRow(rowIdx++);
-                // FIX #1: tx.getId() trả về Long — cần null-check trước khi dùng
                 row.createCell(0).setCellValue(tx.getId() != null ? tx.getId() : 0L);
                 row.createCell(1).setCellValue(tx.getTransactionDate() != null ? tx.getTransactionDate().toString() : "");
                 row.createCell(2).setCellValue(tx.getNote() != null ? tx.getNote() : "Giao dịch");
@@ -119,7 +261,6 @@ public BigDecimal getTotalExpenseByMonth(Long userId, int month, int year) {
                 row.createCell(4).setCellValue(tx.getAmount() != null ? tx.getAmount().doubleValue() : 0.0);
             }
  
-            // Tự động điều chỉnh độ rộng cột
             for (int i = 0; i < columns.length; i++) {
                 sheet.autoSizeColumn(i);
             }
@@ -129,7 +270,6 @@ public BigDecimal getTotalExpenseByMonth(Long userId, int month, int year) {
         }
     }
  
-    // [UC30] Xuất báo cáo PDF bằng iText 7
     public ByteArrayInputStream exportPdf(Long userId, String keyword, LocalDate startDate, LocalDate endDate,
                                            String type, Long walletId, Double minAmount, Double maxAmount) throws Exception {
         List<Transaction> list = getFilteredList(userId, keyword, startDate, endDate, type, walletId, minAmount, maxAmount);
@@ -138,8 +278,6 @@ public BigDecimal getTotalExpenseByMonth(Long userId, int month, int year) {
         PdfWriter writer = new PdfWriter(out);
         PdfDocument pdfDocument = new PdfDocument(writer);
  
-        // FIX #2: Dùng try-with-resources để đảm bảo Document luôn được đóng
-        // kể cả khi xảy ra exception — tránh resource leak
         try (Document document = new Document(pdfDocument)) {
  
             Paragraph title = new Paragraph("BAO CAO GIAO DICH TAI CHINH")
@@ -169,19 +307,24 @@ public BigDecimal getTotalExpenseByMonth(Long userId, int month, int year) {
             }
  
             document.add(table);
-        } // document.close() được gọi tự động ở đây
+        }
  
         return new ByteArrayInputStream(out.toByteArray());
     }
 
-    // Giả định bạn có bảng Notification, thêm các method (cho UC31)
+    // ==========================================
+    // THÔNG BÁO (NOTIFICATIONS)
+    // ==========================================
+
     public List<Notification> getNotifications(Long userId) {
         return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
+
+    @Transactional
     public void markAsRead(Long notificationId) {
-        Notification n = notificationRepository.findById(notificationId).orElseThrow();
+        Notification n = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new RuntimeException("Thông báo không tồn tại"));
         n.setRead(true);
         notificationRepository.save(n);
     }
-   
 }
