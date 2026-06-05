@@ -306,6 +306,65 @@
   color: var(--color-primary);
 }
 
+/* Icon badge circle */
+.txn-table__cat-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Color dot next to name */
+.txn-table__cat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* Category name */
+.txn-table__cat-name {
+  font-weight: 500;
+  color: var(--color-on-surface);
+}
+
+/* Description cell */
+.txn-table__desc {
+  color: var(--color-on-surface-variant);
+  font-size: 13px;
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Type badge pill */
+.txn-table__type-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  background-color: var(--color-surface-variant);
+  color: var(--color-on-surface-variant);
+  white-space: nowrap;
+}
+
+.txn-table__type-badge--income {
+  background-color: var(--color-income-bg);
+  color: var(--color-income);
+}
+
+.txn-table__type-badge--expense {
+  background-color: var(--color-error-container);
+  color: var(--color-on-error-container);
+}
+
 /* ---- AI Assistant Card ---- */
 .ai-assistant-card {
   background: linear-gradient(135deg, var(--color-surface) 0%, rgba(3, 169, 244, 0.05) 100%);
@@ -433,4 +492,221 @@
     width: 100%;
     text-align: center;
   }
+}
+
+/* ---- Recent Categories Section ---- */
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+}
+
+@media (min-width: 768px) {
+  .cat-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .cat-grid {
+    grid-template-columns: repeat(7, 1fr);
+  }
+}
+
+/* Cat card */
+.cat-card {
+  position: relative;
+  background-color: var(--color-surface-container-lowest);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+  text-align: center;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  cursor: default;
+  overflow: hidden;
+}
+
+.cat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.10);
+  border-color: var(--color-primary-fixed-dim);
+}
+
+/* Icon wrapper */
+.cat-card__icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.cat-card:hover .cat-card__icon-wrap {
+  transform: scale(1.1);
+}
+
+.cat-card__icon {
+  font-size: 26px;
+}
+
+/* Info */
+.cat-card__info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+}
+
+.cat-card__name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-on-surface);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.cat-card__type {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-variant);
+  color: var(--color-on-surface-variant);
+}
+
+.cat-card__type--income {
+  background-color: var(--color-income-bg);
+  color: var(--color-income);
+}
+
+.cat-card__type--expense {
+  background-color: var(--color-error-container);
+  color: var(--color-on-error-container);
+}
+
+/* Budget badge */
+.cat-card__budget {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--color-on-surface-variant);
+  background-color: var(--color-surface-variant);
+  border-radius: var(--radius-full);
+  padding: 2px 8px;
+  margin-top: 2px;
+}
+
+/* Color dot */
+.cat-card__dot {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--color-surface);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+}
+
+/* Add card */
+.cat-card--add {
+  border: 2px dashed var(--color-outline-variant);
+  background-color: transparent;
+  color: var(--color-on-surface-variant);
+  text-decoration: none;
+  justify-content: center;
+  cursor: pointer;
+  min-height: 120px;
+}
+
+.cat-card--add:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background-color: var(--color-primary-container);
+}
+
+.cat-card__add-icon {
+  font-size: 32px;
+  color: inherit;
+  transition: transform 0.2s ease;
+}
+
+.cat-card--add:hover .cat-card__add-icon {
+  transform: rotate(90deg) scale(1.1);
+}
+
+.cat-card__add-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: inherit;
+}
+
+/* Loading state */
+.cat-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xl);
+  color: var(--color-on-surface-variant);
+  font-size: 14px;
+}
+
+.cat-loading__spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-primary-fixed-dim);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+/* Empty state */
+.cat-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xl);
+  color: var(--color-on-surface-variant);
+  text-align: center;
+}
+
+.cat-empty__icon {
+  font-size: 48px;
+  color: var(--color-outline-variant);
+}
+
+.cat-empty p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.cat-empty__btn {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
+  padding: 8px 20px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.cat-empty__btn:hover {
+  background-color: var(--color-on-primary-fixed-variant);
 }

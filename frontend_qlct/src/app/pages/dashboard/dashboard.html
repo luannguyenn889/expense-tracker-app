@@ -91,80 +91,93 @@
     </div>
   </div>
 
-  <!-- Row 3: Recent Transactions -->
+  <!-- Row 3: Hoạt động gần đây — danh mục của user -->
   <div class="table-card">
     <div class="table-card__header">
       <h3 class="table-card__title">Hoạt động gần đây</h3>
-      <button class="table-card__view-all">View All</button>
+      <a class="table-card__view-all" routerLink="/list-category">Xem tất cả</a>
     </div>
+
     <div class="table-card__body">
-      <table class="txn-table">
-        <thead>
-          <tr>
-            <th>Ngày</th>
-            <th>Danh mục</th>
-            <th>Nội dung</th>
-            <th class="txn-table__right">Số tiền</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>15 Oct 2023</td>
-            <td>
-              <div class="txn-table__category">
-                <span class="material-symbols-outlined txn-table__cat-icon">restaurant</span>
-                <span>Food &amp; Dining</span>
-              </div>
-            </td>
-            <td>Dinner at Sushi Bar</td>
-            <td class="txn-table__right txn-table__amount">- 850,000 ₫</td>
-          </tr>
-          <tr>
-            <td>12 Oct 2023</td>
-            <td>
-              <div class="txn-table__category">
-                <span class="material-symbols-outlined txn-table__cat-icon txn-table__cat-icon--primary">work</span>
-                <span>Salary</span>
-              </div>
-            </td>
-            <td>October Salary</td>
-            <td class="txn-table__right txn-table__amount txn-table__amount--income">+ 45,200,000 ₫</td>
-          </tr>
-          <tr>
-            <td>10 Oct 2023</td>
-            <td>
-              <div class="txn-table__category">
-                <span class="material-symbols-outlined txn-table__cat-icon">home</span>
-                <span>Housing</span>
-              </div>
-            </td>
-            <td>Monthly Rent</td>
-            <td class="txn-table__right txn-table__amount">- 12,000,000 ₫</td>
-          </tr>
-          <tr>
-            <td>08 Oct 2023</td>
-            <td>
-              <div class="txn-table__category">
-                <span class="material-symbols-outlined txn-table__cat-icon">directions_car</span>
-                <span>Transport</span>
-              </div>
-            </td>
-            <td>Gas Station</td>
-            <td class="txn-table__right txn-table__amount">- 500,000 ₫</td>
-          </tr>
-          <tr>
-            <td>05 Oct 2023</td>
-            <td>
-              <div class="txn-table__category">
-                <span class="material-symbols-outlined txn-table__cat-icon">shopping_cart</span>
-                <span>Groceries</span>
-              </div>
-            </td>
-            <td>Supermarket Run</td>
-            <td class="txn-table__right txn-table__amount">- 1,200,000 ₫</td>
-          </tr>
-        </tbody>
-      </table>
+
+      <!-- Loading -->
+      @if (isCategoryLoading) {
+        <div class="cat-loading">
+          <div class="cat-loading__spinner"></div>
+          <span>Đang tải danh mục...</span>
+        </div>
+      }
+
+      <!-- Empty state -->
+      @if (!isCategoryLoading && recentCategories.length === 0) {
+        <div class="cat-empty">
+          <span class="material-symbols-outlined cat-empty__icon">inbox</span>
+          <p>Bạn chưa tạo danh mục nào.</p>
+          <a class="cat-empty__btn" routerLink="/add-category">+ Tạo danh mục mới</a>
+        </div>
+      }
+
+      <!-- Table -->
+      @if (!isCategoryLoading && recentCategories.length > 0) {
+        <table class="txn-table">
+          <thead>
+            <tr>
+              <th>Danh mục</th>
+              <th>Mô tả</th>
+              <th>Loại</th>
+              <th class="txn-table__right">Ngân sách / tháng</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (cat of recentCategories; track cat.id) {
+              <tr>
+                <!-- Danh mục: icon + tên + chấm màu -->
+                <td>
+                  <div class="txn-table__category">
+                    <span class="txn-table__cat-badge"
+                          [style.background-color]="getCategoryBgColor(cat)">
+                      <span class="material-symbols-outlined txn-table__cat-icon"
+                            [style.color]="getCategoryIconColor(cat)">
+                        {{ cat.icon || 'category' }}
+                      </span>
+                    </span>
+                    <span class="txn-table__cat-name">{{ cat.name }}</span>
+                    @if (cat.color) {
+                      <span class="txn-table__cat-dot" [style.background-color]="cat.color"></span>
+                    }
+                  </div>
+                </td>
+
+                <!-- Mô tả -->
+                <td class="txn-table__desc">
+                  {{ cat.description || '—' }}
+                </td>
+
+                <!-- Loại -->
+                <td>
+                  <span class="txn-table__type-badge"
+                        [class.txn-table__type-badge--income]="cat.type === 'INCOME'"
+                        [class.txn-table__type-badge--expense]="cat.type === 'EXPENSE'">
+                    {{ cat.type === 'INCOME' ? '↑ Thu nhập' : '↓ Chi tiêu' }}
+                  </span>
+                </td>
+
+                <!-- Ngân sách tháng -->
+                <td class="txn-table__right txn-table__amount"
+                    [class.txn-table__amount--income]="cat.type === 'INCOME'">
+                  @if (cat.monthlyBudget) {
+                    {{ cat.monthlyBudget | number:'1.0-0' }} ₫
+                  } @else {
+                    <span style="color: var(--color-outline)">Không giới hạn</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+
     </div>
   </div>
 </div>
+
