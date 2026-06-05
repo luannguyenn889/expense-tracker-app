@@ -1,0 +1,54 @@
+<p>add-transaction works!</p>
+<div class="modal-overlay">
+  <div class="add-transaction-modal">
+    <h3>Thêm giao dịch</h3>
+
+    <div class="form-group">
+      <label>Loại</label>
+      <select [(ngModel)]="transactionData.type">
+        <option value="INCOME">Thu</option>
+        <option value="EXPENSE">Chi</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Số tiền</label>
+      <input type="number" [(ngModel)]="transactionData.amount" placeholder="Nhập số tiền" />
+    </div>
+
+    <div class="form-group">
+      <label>Ngày</label>
+      <input type="date" [(ngModel)]="transactionData.transactionDate" />
+    </div>
+
+    <div class="form-group">
+      <label>Danh mục</label>
+      <select [(ngModel)]="transactionData.categoryId">
+        <option [value]="null">-- Chọn danh mục --</option>
+        <option *ngFor="let cat of categories" [value]="cat.id">
+          {{ cat.name }} ({{ cat.type }})
+        </option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Ví</label>
+      <select [(ngModel)]="transactionData.walletId">
+        <option [value]="null">-- Chọn ví --</option>
+        <option *ngFor="let wallet of wallets" [value]="wallet.id">
+          {{ wallet.name }} ({{ wallet.balance | number:'1.0-0' }} ₫)
+        </option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Ghi chú</label>
+      <input [(ngModel)]="transactionData.note" placeholder="Ghi chú" />
+    </div>
+
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="cancel()">Hủy</button>
+      <button class="save-btn" (click)="save()">Lưu</button>
+    </div>
+  </div>
+</div>

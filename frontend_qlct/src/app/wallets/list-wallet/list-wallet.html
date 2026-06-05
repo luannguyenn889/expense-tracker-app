@@ -1,0 +1,14 @@
+<div class="wallets-list">
+  <div class="wallet-card" *ngFor="let wallet of wallets">
+    <div class="wallet-info">
+      <h3>{{ wallet.name }}</h3>
+      <p class="balance">{{ wallet.balance | number:'1.0-0' }} ₫</p>
+      <p class="description">{{ wallet.description }}</p>
+      <small>Ngày tạo: {{ wallet.createdAt | date:'dd/MM/yyyy' }}</small>
+    </div>
+    <div class="action-buttons">
+      <button class="edit-btn" (click)="edit.emit(wallet)">Sửa</button>
+      <button class="delete-btn" (click)="delete.emit(wallet.id)">Xóa</button>
+    </div>
+  </div>
+</div>
