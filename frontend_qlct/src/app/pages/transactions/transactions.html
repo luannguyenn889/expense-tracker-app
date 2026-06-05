@@ -2,23 +2,28 @@
   <div class="header-actions">
     <h2>Giao dịch</h2>
     <div class="btn-group">
-      <button class="btn-transfer" (click)="openTransferModal()"> Chuyển tiền</button>
-      <button class="btn-add" (click)="openAddTransaction()">+ Thêm giao dịch</button>
+      <button class="btn-transfer" (click)="openTransferModal()">
+        <span class="material-symbols-outlined">swap_horiz</span>
+        Chuyển tiền
+      </button>
+      <button class="btn-add" (click)="openAddTransaction()">
+        <span class="material-symbols-outlined">add</span>
+        Thêm giao dịch
+      </button>
     </div>
   </div>
 
-  <!-- BỘ LỌC -->
-<div class="filters">
+  <div class="filters">
     <div class="filter-group">
-        <label>Từ </label>
-        <input type="date" [(ngModel)]="filter.startDate" />
+      <label>Từ</label>
+      <input type="date" [(ngModel)]="filter.startDate" />
     </div>
     <div class="filter-group">
-        <label>Đến </label>
-        <input type="date" [(ngModel)]="filter.endDate" />
+      <label>Đến</label>
+      <input type="date" [(ngModel)]="filter.endDate" />
     </div>
     <div class="filter-group">
-      <label>Loại </label>
+      <label>Loại</label>
       <select [(ngModel)]="filter.type">
         <option value="">Tất cả</option>
         <option value="INCOME">Thu</option>
@@ -27,82 +32,58 @@
       </select>
     </div>
     <div class="filter-group">
-      <label>Ví </label>
-      <select [(ngModel)]="filter.walletId" class="filter-select">
+      <label>Ví</label>
+      <select [(ngModel)]="filter.walletId">
         <option [value]="null">Tất cả ví</option>
-        <option *ngFor="let wallet of wallets" [value]="wallet.id">{{ wallet.name }}</option>
+        <option *ngFor="let wallet of allWallets" [value]="wallet.id">{{ wallet.name }}</option>
       </select>
     </div>
-    <button (click)="search()" class="btn-search">Tìm kiếm</button>
-    </div>
-
-  <!-- DANH SÁCH GIAO DỊCH -->
-  <div class="transaction-list">
-    <div class="transaction-item" *ngFor="let tx of transactions">
-      <div class="tx-info">
-        <span class="tx-icon">{{ tx.type === 'TRANSFER' ? '' : (tx.type === 'INCOME' ? '💰' : '📉') }}</span>
-        <div>
-          <div class="tx-title">{{ tx.note || (tx.type === 'TRANSFER' ? 'Chuyển tiền' : 'Giao dịch') }}</div>
-          <div class="tx-date">{{ tx.transactionDate | date:'dd/MM/yyyy' }}</div>
-        </div>
-      </div>
-      <div class="tx-amount" [class.income]="tx.type === 'INCOME'" [class.expense]="tx.type === 'EXPENSE'">
-        {{ tx.type === 'INCOME' ? '+' : '-' }}{{ tx.amount | number:'1.0-0' }} ₫
-      </div>
-    </div>
-    <div class="empty-transactions" *ngIf="transactions.length === 0">
-      <p>Chưa có giao dịch nào</p>
+    <div class="filter-actions">
+      <button (click)="search()" class="btn-search">
+        <span class="material-symbols-outlined">search</span>
+        Tìm kiếm
+      </button>
+      <button (click)="clearFilter()" class="btn-clear">
+        <span class="material-symbols-outlined">clear</span>
+        Xóa lọc
+      </button>
     </div>
   </div>
 
-  <!-- PHÂN TRANG -->
-  <div class="pagination" *ngIf="totalPages > 1">
-    <button (click)="changePage(currentPage - 1)" [disabled]="currentPage === 0">◀</button>
-    <span>Trang {{ currentPage + 1 }} / {{ totalPages }}</span>
-    <button (click)="changePage(currentPage + 1)" [disabled]="currentPage + 1 >= totalPages">▶</button>
-  </div>
+  <app-list-transaction 
+    [transactions]="transactions"
+    [wallets]="allWallets"
+    [currentPage]="currentPage"
+    [totalPages]="totalPages"
+    (pageChange)="changePage($event)"
+    (edit)="openEditModal($event)"
+    (delete)="deleteTransaction($event)">
+  </app-list-transaction>
 </div>
+
+<!-- POPUP THÊM GIAO DỊCH -->
+<app-add-transaction 
+  *ngIf="showAddModal"
+  [wallets]="wallets"
+  [categories]="categories"
+  (close)="closeAddModal()"
+  (added)="onTransactionAdded()">
+</app-add-transaction>
+
+<!-- POPUP SỬA GIAO DỊCH -->
+<app-edit-transaction 
+  *ngIf="showEditModal"
+  [transaction]="selectedTransaction"
+  [wallets]="wallets"
+  [categories]="categories"
+  (close)="closeEditModal()"
+  (updated)="onTransactionUpdated()">
+</app-edit-transaction>
 
 <!-- POPUP CHUYỂN TIỀN -->
-<div class="modal-overlay" *ngIf="showTransferModal">
-  <div class="transfer-modal">
-    <h3>Chuyển tiền</h3>
-    <div class="form-group">
-      <label>Ví gửi</label>
-      <select [(ngModel)]="transferData.fromWalletId">
-        <option [value]="null">-- Chọn ví gửi --</option>
-        <option *ngFor="let wallet of wallets" [value]="wallet.id">{{ wallet.name }} ({{ wallet.balance | number:'1.0-0' }} ₫)</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Ví nhận</label>
-      <select [(ngModel)]="transferData.toWalletId">
-        <option [value]="null">-- Chọn ví nhận --</option>
-        <option *ngFor="let wallet of wallets" [value]="wallet.id">{{ wallet.name }}</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Số tiền</label>
-      <input type="number" [(ngModel)]="transferData.amount" placeholder="0" />
-    </div>
-    <div class="form-group">
-      <label>Nội dung</label>
-      <input [(ngModel)]="transferData.note" placeholder="Ghi chú" />
-    </div>
-    <div class="modal-actions">
-      <button class="save-btn" (click)="doTransfer()" [disabled]="!isTransferValid()">Xác nhận</button>
-      <button class="cancel-btn" (click)="closeTransferModal()">Hủy</button>
-    </div>
-  </div>
-</div>
-
-<!-- POPUP THÊM GIAO DỊCH  -->
-<div class="modal-overlay" *ngIf="showAddModal">
-  <div class="add-transaction-modal">
-    <h3>Thêm giao dịch</h3>
-    <p style="text-align: center; padding: 20px;"></p>
-    <div class="modal-actions">
-      <button class="cancel-btn" (click)="closeAddModal()">Đóng</button>
-    </div>
-  </div>
-</div>
+<app-transfer 
+  *ngIf="showTransferModal"
+  [wallets]="wallets"
+  (close)="closeTransferModal()"
+  (completed)="onTransferCompleted()">
+</app-transfer>

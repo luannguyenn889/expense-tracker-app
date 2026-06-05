@@ -8,7 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/wallets")
@@ -27,21 +29,21 @@ public class WalletController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    // Lấy danh sách ví của user (GET)
+    // Lấy tổng số dư
     @GetMapping
     public ResponseEntity<List<WalletResponse>> getUserWallets(@RequestParam Long userId) {
         List<WalletResponse> wallets = walletService.getUserWallets(userId);
         return ResponseEntity.ok(wallets);
     }
 
-    // Lấy tổng số dư (GET)
+    // Lấy tổng số dư 
     @GetMapping("/total-balance")
     public ResponseEntity<BigDecimal> getTotalBalance(@RequestParam Long userId) {
         BigDecimal total = walletService.getTotalBalance(userId);
         return ResponseEntity.ok(total);
     }
 
-    // Cập nhật ví (PUT)
+    // Cập nhật ví
     @PutMapping("/{id}")
     public ResponseEntity<WalletResponse> updateWallet(
             @PathVariable Long id,
@@ -51,12 +53,28 @@ public class WalletController {
         return ResponseEntity.ok(response);
     }
 
-    // Xóa ví (DELETE)
+    // Xóa ví
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteWallet(
             @PathVariable Long id,
             @RequestParam Long userId) {
         walletService.deleteWallet(id, userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/has-transactions")
+    public ResponseEntity<Map<String, Boolean>> hasTransactions(
+            @PathVariable Long id,
+            @RequestParam Long userId) {
+        boolean hasTransactions = walletService.hasTransactions(id, userId);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("hasTransactions", hasTransactions);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<WalletResponse>> getAllWalletsForHistory(@RequestParam Long userId) {
+        List<WalletResponse> wallets = walletService.getAllWalletsForHistory(userId);
+        return ResponseEntity.ok(wallets);
     }
 }

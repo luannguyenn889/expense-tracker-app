@@ -9,6 +9,7 @@ public class WalletResponse {
     private BigDecimal balance;
     private String description;
     private LocalDateTime createdAt;
+    private String status;
 
     public Long getId() {
         return id;
@@ -48,5 +49,13 @@ public class WalletResponse {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getStatus() { 
+        return status; 
+    }
+
+    public void setStatus(String status) { 
+        this.status = status; 
     }
 }
