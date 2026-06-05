@@ -1,0 +1,82 @@
+.wallets-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.wallet-card {
+  position: relative;
+  background: white;
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.wallet-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.wallet-card h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  color: #0f172a;
+}
+
+.balance {
+  font-size: 32px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 16px 0;
+  line-height: 1;
+}
+
+.description {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 10px;
+}
+
+.wallet-card small {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.action-buttons {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+}
+
+.edit-btn {
+  background: #eef4ff;
+  color: #2563eb;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.edit-btn:hover {
+  background: #dbeafe;
+}
+
+.delete-btn {
+  background: #fef2f2;
+  color: #dc2626;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background: #fee2e2;
+}
