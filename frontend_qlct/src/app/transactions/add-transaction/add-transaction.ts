@@ -13,7 +13,6 @@ import { TransactionService } from '../../services/transaction-service';
 export class AddTransaction {
   @Input() wallets: any[] = [];
   @Input() categories: any[] = [];
-  @Input() userId: number = 1;
   @Output() close = new EventEmitter<void>();
   @Output() added = new EventEmitter<void>();
 
@@ -42,7 +41,7 @@ export class AddTransaction {
       return;
     }
 
-    this.transactionService.addTransaction(this.userId, this.transactionData).subscribe({
+    this.transactionService.addTransaction(this.transactionData).subscribe({
       next: () => {
         alert('Thêm giao dịch thành công!');
         this.added.emit();

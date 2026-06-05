@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Wallet } from '../model/wallet';
 
 @Injectable({ providedIn: 'root' })
 export class WalletService {
@@ -9,23 +8,47 @@ export class WalletService {
 
   constructor(private http: HttpClient) {}
 
-  getWallets(userId: number): Observable<Wallet[]> {
-    return this.http.get<Wallet[]>(`${this.apiUrl}?userId=${userId}`);
+  private getUserId(): number | null {
+    const storedUser = localStorage.getItem('user_info');
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      return user.id;
+    }
+    return null;
   }
 
-  addWallet(userId: number, data: any): Observable<Wallet> {
-    return this.http.post<Wallet>(`${this.apiUrl}?userId=${userId}`, data);
+  getWallets(): Observable<any[]> {
+    const userId = this.getUserId();
+    return this.http.get<any[]>(`${this.apiUrl}?userId=${userId}`);
   }
 
-  updateWallet(id: number, userId: number, data: any): Observable<Wallet> {
-    return this.http.put<Wallet>(`${this.apiUrl}/${id}?userId=${userId}`, data);
+  getAllWallets(): Observable<any[]> {
+    const userId = this.getUserId();
+    return this.http.get<any[]>(`${this.apiUrl}/all?userId=${userId}`);
   }
 
-  deleteWallet(id: number, userId: number): Observable<any> {
+  getTotalBalance(): Observable<number> {
+    const userId = this.getUserId();
+    return this.http.get<number>(`${this.apiUrl}/total-balance?userId=${userId}`);
+  }
+
+  addWallet(walletData: any): Observable<any> {
+    const userId = this.getUserId();
+    return this.http.post(`${this.apiUrl}?userId=${userId}`, walletData);
+  }
+
+  updateWallet(id: number, walletData: any): Observable<any> {
+    const userId = this.getUserId();
+    return this.http.put(`${this.apiUrl}/${id}?userId=${userId}`, walletData);
+  }
+
+  deleteWallet(id: number): Observable<any> {
+    const userId = this.getUserId();
     return this.http.delete(`${this.apiUrl}/${id}?userId=${userId}`);
   }
 
-  hasTransactions(id: number, userId: number): Observable<{ hasTransactions: boolean }> {
-    return this.http.get<{ hasTransactions: boolean }>(`${this.apiUrl}/${id}/has-transactions?userId=${userId}`);
+  hasTransactions(id: number): Observable<any> {
+    const userId = this.getUserId();
+    return this.http.get(`${this.apiUrl}/${id}/has-transactions?userId=${userId}`);
   }
 }

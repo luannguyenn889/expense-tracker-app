@@ -14,7 +14,6 @@ export class EditTransaction implements OnInit {
   @Input() transaction: any = null;
   @Input() wallets: any[] = [];
   @Input() categories: any[] = [];
-  @Input() userId: number = 1;
   @Output() close = new EventEmitter<void>();
   @Output() updated = new EventEmitter<void>();
 
@@ -63,7 +62,7 @@ export class EditTransaction implements OnInit {
       ? { ...this.formData, categoryId: null }
       : this.formData;
 
-    this.transactionService.updateTransaction(this.transaction.id, this.userId, dataToSend).subscribe({
+    this.transactionService.updateTransaction(this.transaction.id, dataToSend).subscribe({
       next: () => {
         alert('Sửa giao dịch thành công!');
         this.updated.emit();

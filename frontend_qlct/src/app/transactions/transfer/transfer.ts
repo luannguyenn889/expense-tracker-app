@@ -12,7 +12,6 @@ import { TransactionService } from '../../services/transaction-service';
 })
 export class Transfer {
   @Input() wallets: any[] = [];
-  @Input() userId: number = 1;
   @Output() close = new EventEmitter<void>();
   @Output() completed = new EventEmitter<void>();
 
@@ -38,7 +37,7 @@ export class Transfer {
       return;
     }
 
-    this.transactionService.transfer(this.userId, this.transferData).subscribe({
+    this.transactionService.transfer(this.transferData).subscribe({
       next: (res: any) => {
         alert(res.message || 'Chuyển tiền thành công!');
         this.completed.emit();

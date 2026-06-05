@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { WalletService } from '../../services/wallet-service';
@@ -11,7 +11,6 @@ import { WalletService } from '../../services/wallet-service';
   styleUrl: './add-wallet.css'
 })
 export class AddWallet {
-  @Input() userId: number = 1;
   @Output() close = new EventEmitter<void>();
   @Output() added = new EventEmitter<void>();
 
@@ -36,7 +35,7 @@ export class AddWallet {
       this.newWallet.balance = 0;
     }
 
-    this.walletService.addWallet(this.userId, this.newWallet).subscribe({
+    this.walletService.addWallet(this.newWallet).subscribe({
       next: () => {
         alert('Thêm ví thành công!');
         this.added.emit();
