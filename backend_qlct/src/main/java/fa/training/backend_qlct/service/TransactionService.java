@@ -43,11 +43,6 @@ public class TransactionService {
             if (wallet.getBalance().compareTo(request.getAmount()) < 0) {
                 throw new RuntimeException("Số dư không đủ");
             }
-        } else if ("TRANSFER".equals(request.getType())) {
-            balanceChange = request.getAmount().negate();
-            if (wallet.getBalance().compareTo(request.getAmount()) < 0) {
-                throw new RuntimeException("Số dư không đủ để chuyển");
-            }
         } else {
             balanceChange = BigDecimal.ZERO;
         }
