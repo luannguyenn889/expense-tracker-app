@@ -47,13 +47,6 @@ public class WalletService {
                 .collect(Collectors.toList());
     }
 
-    public BigDecimal getTotalBalance(Long userId) {
-        return walletRepository.findActiveByUserId(userId)
-                .stream()
-                .map(Wallet::getBalance)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
     public WalletResponse updateWallet(Long id, WalletRequest request, Long userId) {
         Wallet wallet = walletRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Wallet not found"));

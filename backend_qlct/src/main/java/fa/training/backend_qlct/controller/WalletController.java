@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +19,7 @@ public class WalletController {
     @Autowired
     private WalletService walletService;
 
-    // Tạo ví mới (POST)
+    // Tạo ví mới
     @PostMapping
     public ResponseEntity<WalletResponse> createWallet(
             @RequestBody WalletRequest request,
@@ -34,13 +33,6 @@ public class WalletController {
     public ResponseEntity<List<WalletResponse>> getUserWallets(@RequestParam Long userId) {
         List<WalletResponse> wallets = walletService.getUserWallets(userId);
         return ResponseEntity.ok(wallets);
-    }
-
-    // Lấy tổng số dư 
-    @GetMapping("/total-balance")
-    public ResponseEntity<BigDecimal> getTotalBalance(@RequestParam Long userId) {
-        BigDecimal total = walletService.getTotalBalance(userId);
-        return ResponseEntity.ok(total);
     }
 
     // Cập nhật ví
