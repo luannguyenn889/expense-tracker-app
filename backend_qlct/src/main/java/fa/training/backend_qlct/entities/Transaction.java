@@ -117,20 +117,4 @@ public class Transaction {
     public void setUserId(Long userId) { 
         this.userId = userId; 
     }
-
-    public Wallet getWallet() { 
-        return wallet; 
-    }
-
-    public void setWallet(Wallet wallet) { 
-        this.wallet = wallet; 
-    }
-
-    public Wallet getToWallet() { 
-        return toWallet; 
-    }
-
-    public void setToWallet(Wallet toWallet) { 
-        this.toWallet = toWallet; 
-    }
 }
