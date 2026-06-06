@@ -245,3 +245,94 @@
 .dropdown-item:hover .material-symbols-outlined {
   color: var(--color-primary);
 }
+/* Container chuông */
+.topbar__notifications-container {
+  position: relative;
+}
+
+/* Nút chuông */
+.topbar__icon-btn {
+  position: relative; /* Để chứa badge */
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.topbar__icon-btn:hover {
+  background-color: var(--color-surface-container-high);
+}
+
+/* Dropdown thông báo */
+.notification-dropdown {
+  position: absolute;
+  top: 52px;
+  right: 0;
+  width: 340px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: 16px; /* Bo góc mềm mại hơn */
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease-out; /* Hiệu ứng hiện ra nhẹ nhàng */
+}
+
+/* Header */
+.dropdown-header {
+  padding: 16px 20px;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--color-on-surface);
+  background-color: rgba(0,0,0,0.02);
+  border-bottom: 1px solid var(--color-outline-variant);
+}
+
+/* Danh sách */
+.dropdown-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Từng thông báo */
+.notify-item {
+  padding: 14px 20px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-on-surface-variant);
+  border-bottom: 1px solid var(--color-outline-variant);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.notify-item:hover {
+  background-color: var(--color-surface-container-low);
+  color: var(--color-on-surface);
+}
+
+/* Trạng thái trống */
+.empty-notify {
+  padding: 32px 20px;
+  text-align: center;
+  color: var(--color-outline);
+  font-style: italic;
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 10px;
+  height: 10px;
+  background-color: #d32f2f;
+  border-radius: 50%;
+  border: 2px solid var(--color-surface); /* Tạo viền trắng xung quanh chấm để nổi bật */
+}

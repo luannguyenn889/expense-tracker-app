@@ -101,7 +101,7 @@ export class Transactions implements OnInit, OnDestroy {
     this.loadWallets();
     this.loadTransactions();
     this.loadComparison();
-    this.loadNotifications();
+    // this.loadNotifications();
     
     // Tải danh mục phân loại giao dịch
     this.transactionService.getCategories().subscribe(data => {
@@ -183,21 +183,21 @@ loadTransactions(): void {
   /**
    * Tải danh sách thông báo nhắc nhở tài chính
    */
-  loadNotifications(): void {
-    this.transactionService.getNotifications(this.userId).subscribe(res => {
-      this.notifications = res || [];
-      this.cdr.detectChanges();
-    });
-  }
+  // loadNotifications(): void {
+  //   this.transactionService.getNotifications(this.userId).subscribe(res => {
+  //     this.notifications = res || [];
+  //     this.cdr.detectChanges();
+  //   });
+  // }
 
   /**
    * Đánh dấu thông báo đã đọc
    */
-  markAsRead(id: number): void {
-    this.transactionService.markNotificationAsRead(id).subscribe(() => {
-      this.loadNotifications();
-    });
-  }
+  // markAsRead(id: number): void {
+  //   this.transactionService.markNotificationAsRead(id).subscribe(() => {
+  //     this.loadNotifications();
+  //   });
+  // }
 
   /**
    * Kích hoạt khi người dùng thay đổi dữ liệu trên bộ lọc đầu vào
