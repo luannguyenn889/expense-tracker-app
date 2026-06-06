@@ -32,12 +32,25 @@ public class TransactionController {
             @RequestParam(required = false) LocalDate endDate,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) Long walletId,
+            @RequestParam(required = false) String query,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         
         Page<Transaction> transactions = transactionService.getTransactions(
-            userId, startDate, endDate, type, walletId, PageRequest.of(page, size));
+            userId, startDate, endDate, type, walletId, query, PageRequest.of(page, size));
         return ResponseEntity.ok(transactions);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Transaction> getTransaction(
+            @PathVariable Long id,
+            @RequestParam Long userId) {
+        try {
+            Transaction transaction = transactionService.getTransactionById(id, userId);
+            return ResponseEntity.ok(transaction);
+        } catch (Exception e) {
+            return ResponseEntity.status(404).body(null);
+        }
     }
 
     @PostMapping

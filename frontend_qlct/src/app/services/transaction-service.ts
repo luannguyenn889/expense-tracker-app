@@ -55,7 +55,13 @@ export class TransactionService {
       url += `&type=${filter.type}`;
     }
     if (filter.walletId) url += `&walletId=${filter.walletId}`;
+    if (filter.query) url += `&query=${encodeURIComponent(filter.query)}`;
     return this.http.get(url);
+  }
+
+  getTransactionById(id: number): Observable<any> {
+    const userId = this.getUserId();
+    return this.http.get<any>(`${this.apiUrl}/${id}?userId=${userId}`);
   }
 
   addTransaction(data: any): Observable<Transaction> {
