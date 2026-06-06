@@ -63,15 +63,21 @@ export class Transactions implements OnInit {
   }
 
   loadWallets() {
+    this.transactionService.getWallets().subscribe({
+      next: (data: any) => {
+        this.allWallets = data;        
+        this.wallets = data;          
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Lỗi tải ví:', err)
+    });
+    
     this.http.get(`http://localhost:8080/api/wallets/all?userId=${this.transactionService.getCurrentUserId()}`)
       .subscribe({
         next: (data: any) => {
-          this.allWallets = data;
-          this.activeWallets = data.filter((w: any) => w.status === 'ACTIVE');
-          this.wallets = this.allWallets;
-          this.cdr.detectChanges();
+          this.allWallets = data; 
         },
-        error: (err) => console.error('Lỗi tải ví:', err)
+        error: (err) => console.error('Lỗi tải all ví:', err)
       });
   }
 
