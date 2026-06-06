@@ -3,7 +3,9 @@ package fa.training.backend_qlct.service;
 import fa.training.backend_qlct.dto.request.TransactionRequest;
 import fa.training.backend_qlct.entities.Transaction;
 import fa.training.backend_qlct.entities.Wallet;
+import fa.training.backend_qlct.entities.Categories;
 import fa.training.backend_qlct.respository.TransactionRepository;
+import fa.training.backend_qlct.respository.CategoryRepository;
 import fa.training.backend_qlct.repository.WalletRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -12,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TransactionService {
@@ -21,6 +25,9 @@ public class TransactionService {
 
     @Autowired
     private WalletRepository walletRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     @Transactional
     public Transaction createTransaction(TransactionRequest request, Long userId) {
@@ -151,7 +158,26 @@ public class TransactionService {
     }
     
     public Page<Transaction> getTransactions(Long userId, LocalDate startDate, LocalDate endDate, 
-                                              String type, Long walletId, Pageable pageable) {
-        return transactionRepository.searchTransactions(userId, startDate, endDate, type, walletId, pageable);
+                                              String type, Long walletId, String query, Pageable pageable) {
+        List<String> categoryIds = List.of(""); // default dummy ID to avoid SQL syntax issue on empty IN
+        if (query != null && !query.trim().isEmpty()) {
+            List<String> foundIds = categoryRepository.findByUserIdAndNameContaining(userId, query)
+                    .stream()
+                    .map(Categories::getId)
+                    .collect(Collectors.toList());
+            if (!foundIds.isEmpty()) {
+                categoryIds = foundIds;
+            }
+        }
+        return transactionRepository.searchTransactions(userId, startDate, endDate, type, walletId, query, categoryIds, pageable);
+    }
+
+    public Transaction getTransactionById(Long id, Long userId) {
+        Transaction transaction = transactionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Giao dịch không tồn tại"));
+        if (!transaction.getUserId().equals(userId)) {
+            throw new RuntimeException("Không có quyền truy cập giao dịch này");
+        }
+        return transaction;
     }
 }

@@ -12,4 +12,7 @@ import java.util.List;
 public interface CategoryRepository extends JpaRepository<Categories, String> {
     @Query("SELECT c FROM Categories c WHERE c.userId IS NULL OR c.userId = :userId")
     List<Categories> findByUserIdOrUserIdIsNull(@Param("userId") Long userId);
+
+    @Query("SELECT c FROM Categories c WHERE (c.userId IS NULL OR c.userId = :userId) AND LOWER(c.name) LIKE LOWER(CONCAT('%', :query, '%'))")
+    List<Categories> findByUserIdAndNameContaining(@Param("userId") Long userId, @Param("query") String query);
 }
