@@ -5,12 +5,18 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
+// FIX #1: Đổi từ GenerationType.UUID + String sang IDENTITY + Long
+// để khớp với kiểu bigint(20) trong database schema.
+// Lỗi cũ khiến INSERT thất bại và JOIN với transactions không ra kết quả.
 @Entity
+@Table(name = "categories")
 public class Categories {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // FIX: UUID → IDENTITY
+    private Long id; // FIX: String → Long
 
     private String name;
 
@@ -19,23 +25,23 @@ public class Categories {
     private String type; // EXPENSE | INCOME
 
     @Column(name = "user_id")
-    private Long userId; // ID của người dùng sở hữu danh mục này (null nếu là danh mục hệ thống)
+    private Long userId;
 
-    private String color; // Màu sắc hiển thị của danh mục (hex, ví dụ: #FF5733)
+    private String color;
 
     @Column(length = 500)
-    private String description; // Mô tả ngắn về danh mục
+    private String description;
 
     @Column(name = "monthly_budget")
-    private Double monthlyBudget; // Ngân sách tháng cho danh mục (null nếu không giới hạn)
+    private Double monthlyBudget;
 
     // ==================== Getters & Setters ====================
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

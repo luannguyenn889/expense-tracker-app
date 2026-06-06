@@ -86,28 +86,48 @@ export class TransactionService {
   /**
    * Tìm kiếm nâng cao bằng HttpParams động map chuẩn cấu trúc Backend (Đoạn 2)
    */
-  getAdvancedSearch(userId: number, filter: any, page: number, size: number): Observable<any> {
-    let params = new HttpParams()
-      .set('userId', userId.toString())
-      .set('page', page.toString())
-      .set('size', size.toString());
+getAdvancedSearch(
+  userId: number,
+  filter: any,
+  page: number,
+  size: number
+): Observable<any> {
 
-    if (filter.keyword) params = params.set('keyword', filter.keyword);
-    if (filter.startDate) params = params.set('startDate', filter.startDate);
-    if (filter.endDate) params = params.set('endDate', filter.endDate);
-    if (filter.type) params = params.set('type', filter.type);
-    if (filter.walletId) params = params.set('walletId', filter.walletId.toString());
-    
-    if (filter.minAmount !== null && filter.minAmount !== undefined) {
-      params = params.set('minAmount', filter.minAmount.toString());
-    }
-    if (filter.maxAmount !== null && filter.maxAmount !== undefined) {
-      params = params.set('maxAmount', filter.maxAmount.toString());
-    }
+  let params = new HttpParams()
+    .set('userId', userId.toString())
+    .set('page', page.toString())
+    .set('size', size.toString());
 
-    return this.http.get<any>(this.apiUrl, { params });
-  }
+  if (filter.keyword)
+    params = params.set('keyword', filter.keyword);
 
+  if (filter.startDate)
+    params = params.set('startDate', filter.startDate);
+
+  if (filter.endDate)
+    params = params.set('endDate', filter.endDate);
+
+  if (filter.type)
+    params = params.set('type', filter.type);
+
+  if (filter.walletId)
+    params = params.set('walletId', filter.walletId.toString());
+
+  if (filter.minAmount !== null && filter.minAmount !== undefined)
+    params = params.set('minAmount', filter.minAmount.toString());
+
+  if (filter.maxAmount !== null && filter.maxAmount !== undefined)
+    params = params.set('maxAmount', filter.maxAmount.toString());
+
+  // DEBUG
+  console.log('API URL:', this.apiUrl);
+  console.log('PARAMS:', params.toString());
+
+  return this.http.get<any>(
+    this.apiUrl,
+    { params }
+  );
+}
   // ==========================================
   // THAO TÁC CRUD GIAO DỊCH (CUD & TRANSFER)
   // ==========================================

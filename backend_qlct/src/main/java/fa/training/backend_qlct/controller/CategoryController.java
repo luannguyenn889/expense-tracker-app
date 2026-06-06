@@ -39,12 +39,12 @@ public class CategoryController {
         return categoryService.getCategoriesByUser(null); // Chỉ lấy danh mục mặc định của hệ thống
     }
     @DeleteMapping("/delete/{id}")
-    public void deleteCategory(@PathVariable("id") String id) {
+    public void deleteCategory(@PathVariable("id") Long id) {
         categoryService.deleteCategory(id);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Categories> getCategory(@PathVariable("id") String id) {
+    public ResponseEntity<Categories> getCategory(@PathVariable("id") Long id) {
         try {
             Categories category = categoryService.getCategory(id);
             return ResponseEntity.ok(category);
@@ -53,7 +53,7 @@ public class CategoryController {
         }
     }
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateCategory(@PathVariable("id") String id, @RequestBody CategoryUpdateRequest request) {
+    public ResponseEntity<?> updateCategory(@PathVariable("id") Long id, @RequestBody CategoryUpdateRequest request) {
         try{
             Categories categories = categoryService.updateCategoryRequest(id, request);
             return ResponseEntity.ok(categories);

@@ -12,7 +12,7 @@ import jakarta.persistence.Id;
 public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "`userId`", nullable = false) // Thêm dấu bao ` ` để giữ nguyên chữ hoa/thường
+    @Column(name = "`id`", nullable = false) // Thêm dấu bao ` ` để giữ nguyên chữ hoa/thường
     private Long id;
 
     private String username;

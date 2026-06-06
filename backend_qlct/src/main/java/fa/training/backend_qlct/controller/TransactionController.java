@@ -39,24 +39,142 @@ public class TransactionController {
     /**
      * API Tìm kiếm nâng cao kết hợp phân trang (Khớp với getAdvancedSearch của Angular)
      */
-    @GetMapping
-    public ResponseEntity<Page<Transaction>> getAdvancedSearch(
-            @RequestParam Long userId,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam(required = false) String type,
-            @RequestParam(required = false) Long walletId,
-            @RequestParam(required = false) Double minAmount,
-            @RequestParam(required = false) Double maxAmount,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        
-        Page<Transaction> result = transactionService.searchTransactions(
-                userId, keyword, startDate, endDate, type, walletId, minAmount, maxAmount, page, size);
-        return ResponseEntity.ok(result);
-    }
+// @GetMapping
+// public ResponseEntity<?> getAdvancedSearch(
+//         @RequestParam(required = false) Long userId,
+//         @RequestParam(required = false) String keyword,
+//         @RequestParam(required = false)
+//         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+//         LocalDate startDate,
 
+//         @RequestParam(required = false)
+//         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+//         LocalDate endDate,
+
+//         @RequestParam(required = false) String type,
+//         @RequestParam(required = false) Long walletId,
+//         @RequestParam(required = false) Double minAmount,
+//         @RequestParam(required = false) Double maxAmount,
+//         @RequestParam(defaultValue = "0") int page,
+//         @RequestParam(defaultValue = "10") int size) {
+
+//     try {
+
+//         if (userId == null || userId <= 0) {
+//             return ResponseEntity.badRequest().body(
+//                     Map.of(
+//                             "success", false,
+//                             "message", "UserId không hợp lệ"
+//                     )
+//             );
+//         }
+
+//         if (startDate != null
+//                 && endDate != null
+//                 && startDate.isAfter(endDate)) {
+
+//             return ResponseEntity.badRequest().body(
+//                     Map.of(
+//                             "success", false,
+//                             "message", "Ngày bắt đầu phải nhỏ hơn ngày kết thúc"
+//                     )
+//             );
+//         }
+
+//         if (minAmount != null
+//                 && maxAmount != null
+//                 && minAmount > maxAmount) {
+
+//             return ResponseEntity.badRequest().body(
+//                     Map.of(
+//                             "success", false,
+//                             "message", "Khoảng tiền không hợp lệ"
+//                     )
+//             );
+//         }
+
+//         Page<Transaction> result =
+//                 transactionService.searchTransactions(
+//                         userId,
+//                         keyword,
+//                         startDate,
+//                         endDate,
+//                         type,
+//                         walletId,
+//                         minAmount,
+//                         maxAmount,
+//                         page,
+//                         size
+//                 );
+
+//         return ResponseEntity.ok(result);
+
+//     } catch (Exception e) {
+
+//         e.printStackTrace();
+
+//         return ResponseEntity.internalServerError().body(
+//                 Map.of(
+//                         "success", false,
+//                         "message", e.getMessage()
+//                 )
+//         );
+//     }
+// }
+@GetMapping
+public ResponseEntity<?> getAdvancedSearch(
+        @RequestParam(required = false) Long userId,
+        @RequestParam(required = false) String keyword,
+
+        @RequestParam(required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        LocalDate startDate,
+
+        @RequestParam(required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+        LocalDate endDate,
+
+        @RequestParam(required = false) String type,
+        @RequestParam(required = false) Long walletId,
+        @RequestParam(required = false) Double minAmount,
+        @RequestParam(required = false) Double maxAmount,
+
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+) {
+
+    try {
+
+        Page<Transaction> result =
+                transactionService.searchTransactions(
+                        userId,
+                        keyword,
+                        startDate,
+                        endDate,
+                        type,
+                        walletId,
+                        minAmount,
+                        maxAmount,
+                        page,
+                        size
+                );
+
+        System.out.println("SO GIAO DICH = " + result.getContent().size());
+
+        return ResponseEntity.ok(result);
+
+    } catch (Exception e) {
+
+        e.printStackTrace();
+
+        return ResponseEntity.internalServerError().body(
+                Map.of(
+                        "success", false,
+                        "message", e.getMessage()
+                )
+        );
+    }
+}
     // ==========================================
     // THAO TÁC CRUD GIAO DỊCH VÀ CHUYỂN KHOẢN
     // ==========================================

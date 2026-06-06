@@ -41,37 +41,40 @@ export class Login implements OnInit{
   }
 
   onSubmit() {
-    if(!this.logindata.username || !this.logindata.password){
-      alert('Vui lòng nhập đầy đủ thông tin đăng nhập');
-      return;
-    }
-    // URL cua Spring Boot
-    const backend_url = 'http://localhost:8080/api/auth/login';
-
-    this.isLoading = true;
-
-    // Bắn request POST mang theo object loginData (Angular tự động biến nó thành JSON)
-    this.http.post(backend_url, this.logindata).subscribe(
-      (response: any) => {
-        // Xử lý phản hồi từ server
-        console.log("Đăng nhập thường thành công", response);
-        this.isLoading = false;
-
-        // GỌI HÀM SET SESSION TẠI ĐÂY ĐỂ CẬP NHẬT HEADER
-        // Truyền một token giả định và thông tin user vừa nhận được từ backend
-        this.auth.setLoginSession('normal_login_token', response);
-
-        this.router.navigate(['/']);
-      },
-      (error) => {
-        // Xử lý lỗi
-        console.error(error);
-        this.isLoading = false;
-        alert('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.');
-      }
-    );
+  if (!this.logindata.username || !this.logindata.password) {
+    alert('Vui lòng nhập đầy đủ thông tin đăng nhập');
+    return;
   }
+  
+  const backend_url = 'http://localhost:8080/api/auth/login';
+  this.isLoading = true;
 
+  this.http.post(backend_url, this.logindata).subscribe(
+    (response: any) => {
+      console.log("Đăng nhập thường thành công", response);
+      this.isLoading = false;
+
+      // FIX: Kiểm tra và bóc tách chuẩn dữ liệu từ AuthResponse của Spring Boot
+      if (response && response.accessToken && response.user) {
+        // Lưu đúng Token thật từ DB và đối tượng user đã tách biệt
+        this.auth.setLoginSession(response.accessToken, response.user);
+        this.router.navigate(['/']);
+      } else {
+        // Trường hợp cấu trúc trả về dạng cũ (không bọc trong wrapper)
+        // hoặc phòng hờ khi Java trả thẳng Object Users
+        const token = response.accessToken || 'normal_login_token';
+        const userObj = response.user || response;
+        this.auth.setLoginSession(token, userObj);
+        this.router.navigate(['/']);
+      }
+    },
+    (error) => {
+      console.error("Lỗi đăng nhập:", error);
+      this.isLoading = false;
+      alert('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.');
+    }
+  );
+}
   ngOnInit() {
     // Lắng nghe trạng thái trả về từ thư viện Google
     this.authService.authState.subscribe((googleUser) => {

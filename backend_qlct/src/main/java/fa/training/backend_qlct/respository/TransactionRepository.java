@@ -86,20 +86,30 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
             @Param("year") int year);
 
     // 7. Tìm kiếm và lọc giao dịch nâng cao (Phân trang)
-    @Query("SELECT t FROM Transaction t " +
-           "LEFT JOIN FETCH t.wallet w " +
-           "WHERE t.userId = :userId " +
-           "AND (:startDate IS NULL OR t.transactionDate >= :startDate) " +
-           "AND (:endDate IS NULL OR t.transactionDate <= :endDate) " +
-           "AND (:type IS NULL OR t.type = :type) " +
-           "AND (:walletId IS NULL OR t.walletId = :walletId) " + 
-           "ORDER BY t.transactionDate DESC, t.id DESC")
-    Page<Transaction> searchTransactions(@Param("userId") Long userId,
-                                         @Param("startDate") LocalDate startDate,
-                                         @Param("endDate") LocalDate endDate,
-                                         @Param("type") String type,  
-                                         @Param("walletId") Long walletId,
-                                         Pageable pageable);
+//     @Query("""
+//         SELECT t
+//         FROM Transaction t
+//         WHERE t.userId = :userId
+//         AND (:keyword IS NULL OR LOWER(t.note) LIKE LOWER(CONCAT('%', :keyword, '%')))
+//         AND (:startDate IS NULL OR t.transactionDate >= :startDate)
+//         AND (:endDate IS NULL OR t.transactionDate <= :endDate)
+//         AND (:type IS NULL OR t.type = :type)
+//         AND (:walletId IS NULL OR t.walletId = :walletId)
+//         AND (:minAmount IS NULL OR t.amount >= :minAmount)
+//         AND (:maxAmount IS NULL OR t.amount <= :maxAmount)
+//         ORDER BY t.transactionDate DESC, t.id DESC
+//         """)
+//         Page<Transaction> searchTransactions(
+//                 @Param("userId") Long userId,
+//                 @Param("keyword") String keyword,
+//                 @Param("startDate") LocalDate startDate,
+//                 @Param("endDate") LocalDate endDate,
+//                 @Param("type") String type,
+//                 @Param("walletId") Long walletId,
+//                 @Param("minAmount") Double minAmount,
+//                 @Param("maxAmount") Double maxAmount,
+//                 Pageable pageable);
+
 
     // 8. Kiểm tra giao dịch tồn tại liên quan tới ví mục tiêu (Phục vụ việc xóa ví bảo mật)
     @Query("SELECT CASE WHEN COUNT(t) > 0 THEN true ELSE false END FROM Transaction t " +
