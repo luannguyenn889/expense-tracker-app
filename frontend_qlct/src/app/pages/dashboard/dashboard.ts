@@ -126,9 +126,9 @@ export class Dashboard implements OnInit, OnDestroy {
     ];
 
     const labels     = expenseCategories.map(c => c.name);
-    const dataValues = expenseCategories.map(c => c.monthlyBudget ?? 1);
+    const dataValues = expenseCategories.map(c => Math.abs(c.monthlyBudget ?? 1));
     const bgColors   = expenseCategories.map((c, i) =>
-      c.color ?? defaultPalette[i % defaultPalette.length]
+      (c.color && c.color.trim() !== '') ? c.color : defaultPalette[i % defaultPalette.length]
     );
     const borderColors = bgColors.map(c => c + 'bb');
 
@@ -177,28 +177,31 @@ export class Dashboard implements OnInit, OnDestroy {
 
   /** Màu nền icon */
   getCategoryBgColor(category: Category): string {
-    return category.color ? category.color + '22' : 'var(--color-primary-container)';
+    return (category.color && category.color.trim() !== '') ? category.color + '22' : 'var(--color-primary-container)';
   }
 
   /** Màu icon */
   getCategoryIconColor(category: Category): string {
-    return category.color ?? 'var(--color-primary)';
+    return (category.color && category.color.trim() !== '') ? category.color : 'var(--color-primary)';
   }
 
   askAiForAdvice() {
     this.isAiThinking = true;
     this.aiAdvice = '';
+    this.cdr.detectChanges(); // Cập nhật ngay để disable nút, tránh spam click
 
     const url = `http://localhost:8080/api/ai/advice?username=${this.username}`;
     this.http.get(url).subscribe({
       next: (res: any) => {
         this.aiAdvice = res.message;
         this.isAiThinking = false;
+        this.cdr.detectChanges(); // Hiển thị kết quả lời khuyên ngay lập tức
       },
       error: (err) => {
         console.error('Lỗi AI:', err);
         this.aiAdvice = 'Xin lỗi, trợ lý AI hiện đang đi vắng. Hãy thử lại sau nhé.';
         this.isAiThinking = false;
+        this.cdr.detectChanges(); // Hiển thị thông báo lỗi ngay lập tức
       }
     });
   }

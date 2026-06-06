@@ -7,6 +7,7 @@ import { EditTransaction } from '../../transactions/edit-transaction/edit-transa
 import { Transfer } from '../../transactions/transfer/transfer';
 import { TransactionService } from '../../services/transaction-service';
 import { HttpClient } from '@angular/common/http';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-transactions',
@@ -35,7 +36,9 @@ export class Transactions implements OnInit {
   constructor(
     private transactionService: TransactionService,
     private cdr: ChangeDetectorRef,
-    private http: HttpClient
+    private http: HttpClient,
+    private route: ActivatedRoute,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -47,6 +50,29 @@ export class Transactions implements OnInit {
         this.openAddTransaction();
       }, 500);
     }
+
+    // Lắng nghe query parameter editTxId từ chức năng tìm kiếm
+    this.route.queryParams.subscribe(params => {
+      const editTxId = params['editTxId'];
+      if (editTxId) {
+        const txId = Number(editTxId);
+        // Xóa query param ngay để không bị mở lại khi reload trang
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: { editTxId: null },
+          queryParamsHandling: 'merge'
+        });
+        
+        this.transactionService.getTransactionById(txId).subscribe({
+          next: (tx) => {
+            setTimeout(() => {
+              this.openEditModal(tx);
+            }, 300);
+          },
+          error: (err) => console.error('Lỗi tải giao dịch để sửa từ tìm kiếm:', err)
+        });
+      }
+    });
   }
 
   loadData() {
