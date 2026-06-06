@@ -34,12 +34,14 @@ import fa.training.backend_qlct.dto.request.TransactionRequest;
 import fa.training.backend_qlct.entities.Notification;
 import fa.training.backend_qlct.entities.Transaction;
 import fa.training.backend_qlct.entities.Wallet;
-import fa.training.backend_qlct.respository.NotificationRepository;
-import fa.training.backend_qlct.respository.TransactionRepository;
 import fa.training.backend_qlct.repository.WalletRepository;
 import fa.training.backend_qlct.respository.NotificationRepository;
 import fa.training.backend_qlct.respository.TransactionRepository;
 import jakarta.persistence.criteria.Predicate;
+
+import java.util.Optional;
+
+import fa.training.backend_qlct.dto.request.TransactionResponse;
 
 @Service
 public class TransactionService {
@@ -125,7 +127,8 @@ public class TransactionService {
         transaction.setTransactionDate(request.getTransactionDate());
         transaction.setType(request.getType());
         
-        if (request.getCategoryId() != null && !request.getCategoryId().isEmpty()) {
+        // SỬA LẠI THÀNH
+        if (request.getCategoryId() != null) {
             transaction.setCategoryId(request.getCategoryId());
         } else {
             transaction.setCategoryId(null);
@@ -195,11 +198,35 @@ public class TransactionService {
         return total != null ? total : BigDecimal.ZERO;
     }
 
-    public Page<Transaction> searchTransactions(Long userId, String keyword, LocalDate startDate, LocalDate endDate,
-                                                String type, Long walletId, Double minAmount, Double maxAmount, int page, int size) {
-        Specification<Transaction> spec = buildSpecification(userId, keyword, startDate, endDate, type, walletId, minAmount, maxAmount);
-        return transactionRepository.findAll(spec, PageRequest.of(page, size));
-    }
+    public Page<Transaction> searchTransactions(
+        Long userId,
+        String keyword,
+        LocalDate startDate,
+        LocalDate endDate,
+        String type,
+        Long walletId,
+        Double minAmount,
+        Double maxAmount,
+        int page,
+        int size) {
+
+    Specification<Transaction> spec =
+            buildSpecification(
+                    userId,
+                    keyword,
+                    startDate,
+                    endDate,
+                    type,
+                    walletId,
+                    minAmount,
+                    maxAmount
+            );
+
+    return transactionRepository.findAll(
+            spec,
+            PageRequest.of(page, size)
+    );
+}
 
     private List<Transaction> getFilteredList(Long userId, String keyword, LocalDate startDate, LocalDate endDate,
                                               String type, Long walletId, Double minAmount, Double maxAmount) {
@@ -226,7 +253,36 @@ public class TransactionService {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
- 
+
+ private TransactionResponse convert(Transaction tx) {
+
+    TransactionResponse dto = new TransactionResponse();
+
+    dto.setId(tx.getId());
+    dto.setAmount(tx.getAmount());
+    dto.setNote(tx.getNote());
+    dto.setTransactionDate(tx.getTransactionDate());
+    dto.setType(tx.getType());
+
+    dto.setCategoryId(tx.getCategoryId());
+
+    dto.setWalletId(tx.getWalletId());
+    dto.setToWalletId(tx.getToWalletId());
+
+    dto.setUserId(tx.getUserId());
+
+    if (tx.getWalletId() != null) {
+        walletRepository.findById(tx.getWalletId())
+                .ifPresent(w -> dto.setWalletName(w.getName()));
+    }
+
+    if (tx.getToWalletId() != null) {
+        walletRepository.findById(tx.getToWalletId())
+                .ifPresent(w -> dto.setToWalletName(w.getName()));
+    }
+
+    return dto;
+}
     // ==========================================
     // XUẤT BÁO CÁO FILE (EXCEL & PDF)
     // ==========================================

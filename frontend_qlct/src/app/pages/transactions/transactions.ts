@@ -138,27 +138,37 @@ export class Transactions implements OnInit, OnDestroy {
   /**
    * Tải danh sách giao dịch dựa trên bộ lọc nâng cao và phân trang
    */
-  loadTransactions(): void {
-    // Sử dụng hàm tìm kiếm nâng cao (getAdvancedSearch hoặc getTransactions tùy tên định nghĩa ở Service của bạn)
-    this.transactionService.getAdvancedSearch(this.userId, this.filter, this.currentPage, this.pageSize)
-      .subscribe({
-        next: (res: any) => {
-          let content = res.content || [];
-          
-          // Sắp xếp giao dịch mới nhất lên đầu (Đoạn 2)
-          content.sort((a: any, b: any) => {
-            const dateA = new Date(a.transactionDate);
-            const dateB = new Date(b.transactionDate);
-            return dateB.getTime() - dateA.getTime();
-          });
+loadTransactions(): void {
+  this.transactionService.getAdvancedSearch(
+    this.userId,
+    this.filter,
+    this.currentPage,
+    this.pageSize
+  )
+  .subscribe({
+    next: (res: any) => {
 
-          this.transactions = content;
-          this.totalPages = res.totalPages || 1;
-          this.cdr.detectChanges();
-        },
-        error: (err) => console.error('Lỗi tải danh sách giao dịch:', err)
+      let content = res.content || [];
+
+      content.sort((a: any, b: any) => {
+        const dateA = new Date(a.transactionDate);
+        const dateB = new Date(b.transactionDate);
+        return dateB.getTime() - dateA.getTime();
       });
-  }
+
+      this.transactions = content;
+      this.totalPages = res.totalPages || 1;
+      this.cdr.detectChanges();
+    },
+
+    error: (err) => {
+      console.error('FULL ERROR:', err);
+      console.error('STATUS:', err.status);
+      console.error('MESSAGE:', err.message);
+      console.error('ERROR BODY:', err.error);
+    }
+  });
+}
 
   /**
    * Tải dữ liệu biến động chi tiêu tháng hiện tại

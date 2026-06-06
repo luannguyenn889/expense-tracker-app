@@ -21,119 +21,61 @@ public class Transaction {
     private LocalDate transactionDate;
 
     @Column(nullable = false)
-    private String type; // Bao gồm: INCOME, EXPENSE, TRANSFER
+    private String type; // INCOME, EXPENSE, TRANSFER
 
+    // FIX #1 liên quan: đổi String → Long để khớp với categories.id kiểu bigint
     @Column(name = "category_id")
-    private String categoryId;  
+    private Long categoryId;
 
     @Column(name = "wallet_id", nullable = false)
     private Long walletId;
 
     @Column(name = "to_wallet_id")
-    private Long toWalletId;  // Chỉ dùng định danh cho giao dịch TRANSFER
+    private Long toWalletId;
 
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    // --- CÁC MỐI QUAN HỆ LIÊN KẾT (DANH GIÁ CHẬM - LAZY FETCH) ---
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "wallet_id", insertable = false, updatable = false)
-    private Wallet wallet;
+    // @ManyToOne(fetch = FetchType.LAZY)
+    // @JoinColumn(name = "wallet_id", insertable = false, updatable = false)
+    // private Wallet wallet;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "to_wallet_id", insertable = false, updatable = false)
-    private Wallet toWallet;
+    // @ManyToOne(fetch = FetchType.LAZY)
+    // @JoinColumn(name = "to_wallet_id", insertable = false, updatable = false)
+    // private Wallet toWallet;
 
-    // Constructor mặc định (Bắt buộc phải có trong JPA Entity)
     public Transaction() {}
 
-    // --- GETTER & SETTER VIẾT TAY (KHÔNG PHỤ THUỘC LOMBOK) ---
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public Long getId() { 
-        return id; 
-    }
+    public BigDecimal getAmount() { return amount; }
+    public void setAmount(BigDecimal amount) { this.amount = amount; }
 
-    public void setId(Long id) { 
-        this.id = id;
-    }
+    public String getNote() { return note; }
+    public void setNote(String note) { this.note = note; }
 
-    public BigDecimal getAmount() { 
-        return amount;
-    }
+    public LocalDate getTransactionDate() { return transactionDate; }
+    public void setTransactionDate(LocalDate transactionDate) { this.transactionDate = transactionDate; }
 
-    public void setAmount(BigDecimal amount) { 
-        this.amount = amount; 
-    }
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
 
-    public String getNote() { 
-        return note; 
-    }
+    public Long getCategoryId() { return categoryId; }
+    public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
 
-    public void setNote(String note) { 
-        this.note = note; 
-    }
+    public Long getWalletId() { return walletId; }
+    public void setWalletId(Long walletId) { this.walletId = walletId; }
 
-    public LocalDate getTransactionDate() { 
-        return transactionDate; 
-    }
+    public Long getToWalletId() { return toWalletId; }
+    public void setToWalletId(Long toWalletId) { this.toWalletId = toWalletId; }
 
-    public void setTransactionDate(LocalDate transactionDate) { 
-        this.transactionDate = transactionDate;
-    }
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
 
-    public String getType() { 
-        return type; 
-    }
+    // public Wallet getWallet() { return wallet; }
+    // public void setWallet(Wallet wallet) { this.wallet = wallet; }
 
-    public void setType(String type) { 
-        this.type = type; 
-    }
-
-    public String getCategoryId() { 
-        return categoryId; 
-    }
-
-    public void setCategoryId(String categoryId) { 
-        this.categoryId = categoryId; 
-    }
-
-    public Long getWalletId() { 
-        return walletId; 
-    }
-
-    public void setWalletId(Long walletId) { 
-        this.walletId = walletId; 
-    }
-
-    public Long getToWalletId() { 
-        return toWalletId; 
-    }
-
-    public void setToWalletId(Long toWalletId) { 
-        this.toWalletId = toWalletId; 
-    }
-
-    public Long getUserId() { 
-        return userId; 
-    }
-
-    public void setUserId(Long userId) { 
-        this.userId = userId; 
-    }
-
-    public Wallet getWallet() {
-        return wallet;
-    }
-
-    public void setWallet(Wallet wallet) {
-        this.wallet = wallet;
-    }
-
-    public Wallet getToWallet() {
-        return toWallet;
-    }
-
-    public void setToWallet(Wallet toWallet) {
-        this.toWallet = toWallet;
-    }
+    // public Wallet getToWallet() { return toWallet; }
+    // public void setToWallet(Wallet toWallet) { this.toWallet = toWallet; }
 }

@@ -1,6 +1,4 @@
 package fa.training.backend_qlct.service;
-
-
 import fa.training.backend_qlct.dto.request.CategoryCreationRequest;
 import fa.training.backend_qlct.dto.request.CategoryUpdateRequest;
 import fa.training.backend_qlct.entities.Categories;
@@ -39,15 +37,16 @@ public class CategoryService {
         return categoryRepository.findByUserIdOrUserIdIsNull(userId); // Lấy danh sách category theo userId hoặc mặc định hệ thống
     }
 
-    public Categories getCategory(String id){
+    public Categories getCategory(Long id){
        return categoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
     }
 
-    public void deleteCategory(String id) {
+    public void deleteCategory(Long id) {
         categoryRepository.deleteById(id);
     }
-    public Categories updateCategoryRequest(String id, CategoryUpdateRequest request){
+    public Categories updateCategoryRequest(Long id, CategoryUpdateRequest request){
          Categories categories = getCategory(id);
+         
         categories.setName(request.getName());
         categories.setIcon(request.getIcon());
         categories.setType(request.getType());
