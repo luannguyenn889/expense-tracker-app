@@ -28,7 +28,7 @@ public class Wallet {
     private LocalDateTime createdAt = LocalDateTime.now();
     
     @Column(nullable = false)
-    private String status = "ACTIVE"; // ACTIVE, INACTIVE, DELETED
+    private String status = "ACTIVE"; // ACTIVE, INACTIVE
     
     // Constructor
     public Wallet() {
@@ -103,34 +103,6 @@ public class Wallet {
     // Phương thức kiểm tra
     public boolean isActive() {
         return "ACTIVE".equals(this.status);
-    }
-    
-    public boolean isInactive() {
-        return "INACTIVE".equals(this.status);
-    }
-
-    // Phương thức business logic
-    public void addAmount(BigDecimal amount) {
-        if (!isActive()) {
-            throw new IllegalStateException("Ví đang ngưng hoạt động, không thể thực hiện giao dịch!");
-        }
-        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Số tiền phải lớn hơn 0");
-        }
-        this.balance = this.balance.add(amount);
-    }
-
-    public void subtractAmount(BigDecimal amount) {
-        if (!isActive()) {
-            throw new IllegalStateException("Ví đang ngưng hoạt động, không thể thực hiện giao dịch!");
-        }
-        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Số tiền phải lớn hơn 0");
-        }
-        if (this.balance.compareTo(amount) < 0) {
-            throw new IllegalStateException("Số dư không đủ!");
-        }
-        this.balance = this.balance.subtract(amount);
     }
 
     @Override
