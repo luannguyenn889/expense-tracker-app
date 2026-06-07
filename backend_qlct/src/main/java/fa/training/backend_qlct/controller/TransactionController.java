@@ -312,14 +312,36 @@ public ResponseEntity<?> getAdvancedSearch(
     }
 
     // ==========================================
-    // THÔNG BÁO HỆ THỐNG
-    // ==========================================
+// THÔNG BÁO HỆ THỐNG
+// ==========================================
 
-    /**
-     * API Lấy danh sách các thông báo cảnh báo tài chính
-     */
-    @GetMapping("/notifications")
-    public ResponseEntity<?> getNotifications(@RequestParam Long userId) {
-        return ResponseEntity.ok(transactionService.getNotifications(userId));
+@GetMapping("/notifications")
+public ResponseEntity<?> getNotifications(@RequestParam Long userId) {
+    return ResponseEntity.ok(
+            transactionService.getNotifications(userId));
+}
+
+    @PutMapping("/notifications/{id}/read")
+    public ResponseEntity<?> markNotificationAsRead(
+            @PathVariable Long id) {
+
+        try {
+
+            transactionService.markAsRead(id);
+
+            return ResponseEntity.ok(
+                    Map.of(
+                            "success", true,
+                            "message", "Đã đánh dấu đã đọc"
+                    ));
+
+        } catch (Exception e) {
+
+            return ResponseEntity.badRequest().body(
+                    Map.of(
+                            "success", false,
+                            "message", e.getMessage()
+                    ));
+        }
     }
 }

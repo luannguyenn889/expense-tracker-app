@@ -336,3 +336,31 @@
   border-radius: 50%;
   border: 2px solid var(--color-surface); /* Tạo viền trắng xung quanh chấm để nổi bật */
 }
+.btn-mark-read {
+  margin-top: 8px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+
+  background-color: #1976d2;
+  color: white;
+
+  font-size: 13px;
+  font-weight: 500;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-mark-read:hover {
+  background-color: #1565c0;
+}
+
+.btn-mark-read:active {
+  transform: scale(0.97);
+}
+
+.btn-mark-read:disabled {
+  background-color: #bdbdbd;
+  cursor: not-allowed;
+}

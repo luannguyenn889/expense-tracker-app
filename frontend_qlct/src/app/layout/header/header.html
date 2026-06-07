@@ -23,7 +23,6 @@
   </div>
 
   <div class="topbar__actions">
-
     <ng-container *ngIf="isLoggedIn">
 
       <!-- Quick Add -->
@@ -43,35 +42,35 @@
           <span class="material-symbols-outlined">notifications</span>
           <span class="badge" *ngIf="notifications.length > 0"></span>
         </button>
-
         <div
           class="notification-dropdown"
           *ngIf="isNotificationsOpen"
           (click)="$event.stopPropagation()">
 
-          <div class="dropdown-header">
-            Thông báo
-          </div>
-
-          <ul class="dropdown-list">
+          <ul class="notification-list">
 
             <li
               *ngFor="let n of notifications"
               class="notify-item">
 
-              {{ n.message }}
+              <div class="notify-content">
+                {{ n.message }}
+              </div>
+
+                <button
+                  class="btn-mark-read"
+                  (click)="markAsRead(n.id, $event)">
+                  Đã đọc
+                </button>
+  
             </li>
-
-            <li
-              *ngIf="notifications.length === 0"
-              class="empty-notify">
-
-              Không có thông báo mới
-            </li>
-
+            <li *ngIf="notifications.length === 0"
+                  class="empty-notify">
+                Không có thông báo mới
+              </li>
           </ul>
-        </div>
 
+        </div>
       </div>
 
     </ng-container>
