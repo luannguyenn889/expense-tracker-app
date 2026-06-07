@@ -372,15 +372,22 @@ public class TransactionService {
     // THÔNG BÁO (NOTIFICATIONS)
     // ==========================================
 
-    public List<Notification> getNotifications(Long userId) {
-        return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
-    }
+    // Chỉ lấy thông báo chưa đọc
+public List<Notification> getNotifications(Long userId) {
+    return notificationRepository.findByUserIdAndIsReadFalseOrderByCreatedAtDesc(userId);
+}
 
-    @Transactional
-    public void markAsRead(Long notificationId) {
-        Notification n = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new RuntimeException("Thông báo không tồn tại"));
-        n.setRead(true);
-        notificationRepository.save(n);
-    }
+
+        @Transactional
+        public void markAsRead(Long notificationId) {
+
+            Notification notification =
+                    notificationRepository.findById(notificationId)
+                    .orElseThrow(() ->
+                            new RuntimeException("Thông báo không tồn tại"));
+
+            notification.setIsRead(true);
+
+            notificationRepository.save(notification);
+        }
 }

@@ -10,16 +10,18 @@ export class notificationService {
 
   constructor(private http: HttpClient) {}
 
-  getNotifications(userId: number): Observable<any[]> {
-    return this.http.get<any[]>(
-      `${this.apiUrl}?userId=${userId}`
-    );
-  }
+getNotifications(userId: number): Observable<any[]> {
+  return this.http.get<any[]>(
+    `${this.apiUrl}?userId=${userId}`
+  );
+}
 
-  markAsRead(notificationId: number): Observable<any> {
-    return this.http.post(
-      `${this.apiUrl}/read/${notificationId}`,
-      {}
-    );
-  }
+
+
+markAsRead(notificationId: number) {
+  return this.http.put(
+    `${this.apiUrl}/${notificationId}/read`,
+    {}
+  );
+}
 }

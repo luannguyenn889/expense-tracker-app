@@ -57,15 +57,13 @@ public class Notification {
     public void setMessage(String message) {
         this.message = message;
     }
-
     public Boolean getIsRead() {
         return isRead;
     }
 
-    public void setRead(Boolean read) {
-        this.isRead = read;
+    public void setIsRead(Boolean isRead) {
+        this.isRead = isRead;
     }
-
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
