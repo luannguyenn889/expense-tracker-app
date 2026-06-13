@@ -92,28 +92,22 @@
       </div>
 
       <!-- Loading -->
-      @if (isCategoryLoading) {
-        <div class="chart-card__placeholder">
-          <div class="chart-loading-spinner"></div>
-          <p>Đang tải dữ liệu...</p>
-        </div>
-      }
+      <div *ngIf="isCategoryLoading" class="chart-card__placeholder">
+        <div class="chart-loading-spinner"></div>
+        <p>Đang tải dữ liệu...</p>
+      </div>
 
       <!-- Empty — chưa có danh mục Chi tiêu -->
-      @if (!isCategoryLoading && !hasExpenseCategories) {
-        <div class="chart-card__placeholder">
-          <span class="material-symbols-outlined chart-card__icon">pie_chart</span>
-          <p>Chưa có danh mục chi tiêu nào.</p>
-          <a class="chart-card__link" routerLink="/add-category">+ Tạo danh mục</a>
-        </div>
-      }
+      <div *ngIf="!isCategoryLoading && !hasExpenseCategories" class="chart-card__placeholder">
+        <span class="material-symbols-outlined chart-card__icon">pie_chart</span>
+        <p>Chưa có danh mục chi tiêu nào.</p>
+        <a class="chart-card__link" routerLink="/add-category">+ Tạo danh mục</a>
+      </div>
 
       <!-- Canvas biểu đồ tròn -->
-      @if (!isCategoryLoading && hasExpenseCategories) {
-        <div class="chart-card__canvas-wrap">
-          <canvas id="categoryPieCanvas"></canvas>
-        </div>
-      }
+      <div *ngIf="!isCategoryLoading && hasExpenseCategories" class="chart-card__canvas-wrap">
+        <canvas id="categoryPieCanvas"></canvas>
+      </div>
     </div>
   </div>
 
@@ -127,81 +121,72 @@
     <div class="table-card__body">
 
       <!-- Loading -->
-      @if (isCategoryLoading) {
-        <div class="cat-loading">
-          <div class="cat-loading__spinner"></div>
-          <span>Đang tải danh mục...</span>
-        </div>
-      }
+      <div *ngIf="isCategoryLoading" class="cat-loading">
+        <div class="cat-loading__spinner"></div>
+        <span>Đang tải danh mục...</span>
+      </div>
 
       <!-- Empty state -->
-      @if (!isCategoryLoading && recentCategories.length === 0) {
-        <div class="cat-empty">
-          <span class="material-symbols-outlined cat-empty__icon">inbox</span>
-          <p>Bạn chưa tạo danh mục nào.</p>
-          <a class="cat-empty__btn" routerLink="/add-category">+ Tạo danh mục mới</a>
-        </div>
-      }
+      <div *ngIf="!isCategoryLoading && recentCategories.length === 0" class="cat-empty">
+        <span class="material-symbols-outlined cat-empty__icon">inbox</span>
+        <p>Bạn chưa tạo danh mục nào.</p>
+        <a class="cat-empty__btn" routerLink="/add-category">+ Tạo danh mục mới</a>
+      </div>
 
       <!-- Table -->
-      @if (!isCategoryLoading && recentCategories.length > 0) {
-        <table class="txn-table">
-          <thead>
-            <tr>
-              <th>Danh mục</th>
-              <th>Mô tả</th>
-              <th>Loại</th>
-              <th class="txn-table__right">Ngân sách / tháng</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (cat of recentCategories; track cat.id) {
-              <tr>
-                <!-- Danh mục: icon + tên + chấm màu -->
-                <td>
-                  <div class="txn-table__category">
-                    <span class="txn-table__cat-badge"
-                          [style.background-color]="getCategoryBgColor(cat)">
-                      <span class="material-symbols-outlined txn-table__cat-icon"
-                            [style.color]="getCategoryIconColor(cat)">
-                        {{ cat.icon || 'category' }}
-                      </span>
-                    </span>
-                    <span class="txn-table__cat-name">{{ cat.name }}</span>
-                    @if (cat.color) {
-                      <span class="txn-table__cat-dot" [style.background-color]="cat.color"></span>
-                    }
-                  </div>
-                </td>
-
-                <!-- Mô tả -->
-                <td class="txn-table__desc">
-                  {{ cat.description || '—' }}
-                </td>
-
-                <!-- Loại -->
-                <td>
-                  <span class="txn-table__type-badge"
-                        [class.txn-table__type-badge--income]="cat.type === 'INCOME'"
-                        [class.txn-table__type-badge--expense]="cat.type === 'EXPENSE'">
-                    {{ cat.type === 'INCOME' ? '↑ Thu nhập' : '↓ Chi tiêu' }}
+      <table *ngIf="!isCategoryLoading && recentCategories.length > 0" class="txn-table">
+        <thead>
+          <tr>
+            <th>Danh mục</th>
+            <th>Mô tả</th>
+            <th>Loại</th>
+            <th class="txn-table__right">Ngân sách / tháng</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cat of recentCategories">
+            <!-- Danh mục: icon + tên + chấm màu -->
+            <td>
+              <div class="txn-table__category">
+                <span class="txn-table__cat-badge"
+                      [style.background-color]="getCategoryBgColor(cat)">
+                  <span class="material-symbols-outlined txn-table__cat-icon"
+                        [style.color]="getCategoryIconColor(cat)">
+                    {{ cat.icon || 'category' }}
                   </span>
-                </td>
+                </span>
+                <span class="txn-table__cat-name">{{ cat.name }}</span>
+                <span *ngIf="cat.color" class="txn-table__cat-dot" [style.background-color]="cat.color"></span>
+              </div>
+            </td>
 
-                <!-- Ngân sách tháng -->
-                <td class="txn-table__right txn-table__amount"
-                    [class.txn-table__amount--income]="cat.type === 'INCOME'">
-                  @if (cat.monthlyBudget) {
-                    {{ cat.monthlyBudget | number:'1.0-0' }} ₫
-                  } @else {
-                    <span style="color: var(--color-outline)">Không giới hạn</span>
-                  }
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      }
+            <!-- Mô tả -->
+            <td class="txn-table__desc">
+              {{ cat.description || '—' }}
+            </td>
+
+            <!-- Loại -->
+            <td>
+              <span class="txn-table__type-badge"
+                    [class.txn-table__type-badge--income]="cat.type === 'INCOME'"
+                    [class.txn-table__type-badge--expense]="cat.type === 'EXPENSE'">
+                {{ cat.type === 'INCOME' ? '↑ Thu nhập' : '↓ Chi tiêu' }}
+              </span>
+            </td>
+
+            <!-- Ngân sách tháng -->
+            <td class="txn-table__right txn-table__amount"
+                [class.txn-table__amount--income]="cat.type === 'INCOME'">
+              <span *ngIf="cat.monthlyBudget; else noBudget">
+                {{ cat.monthlyBudget | number:'1.0-0' }} ₫
+              </span>
+              <ng-template #noBudget>
+                <span style="color: var(--color-outline)">Không giới hạn</span>
+              </ng-template>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
     </div>
   </div>

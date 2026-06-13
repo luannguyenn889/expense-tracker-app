@@ -18,7 +18,7 @@ public class TransferService {
 
     @Autowired
     private TransactionRepository transactionRepository;
-
+    // Phuong thuc chuyen tien
     @Transactional
     public String transfer(TransferRequest request, Long userId) {
         Wallet fromWallet = walletRepository.findById(request.getFromWalletId()).orElse(null);
