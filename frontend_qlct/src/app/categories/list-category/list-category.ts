@@ -2,11 +2,12 @@ import {Component, OnInit, ChangeDetectorRef} from '@angular/core';
 import {CategoryService} from '../../services/category-service';
 import {Category} from '../../model/category';
 import {RouterLink, Router} from '@angular/router';
+import {CommonModule} from '@angular/common';
 import {Auth} from '../../services/auth'; // Import Auth service để lấy thông tin đăng nhập
 
 @Component({
   selector: 'app-list-category',
-  imports: [RouterLink],
+  imports: [RouterLink, CommonModule],
   templateUrl: './list-category.html',
   styleUrl: './list-category.css',
 })

@@ -1,0 +1,79 @@
+<div class="chat-widget" [class.chat-widget--open]="isOpen">
+  <!-- Nút tròn nổi ở góc màn hình -->
+  <button class="chat-widget__trigger" (click)="toggleChat()">
+    <span class="material-symbols-outlined chat-widget__trigger-icon">
+      {{ isOpen ? 'close' : 'smart_toy' }}
+    </span>
+    <span class="chat-widget__pulse" *ngIf="!isOpen"></span>
+  </button>
+
+  <!-- Hộp chat -->
+  <div class="chat-widget__box" *ngIf="isOpen">
+    <!-- Header -->
+    <div class="chat-widget__header">
+      <div class="chat-widget__bot-info">
+        <span class="material-symbols-outlined chat-widget__bot-avatar">smart_toy</span>
+        <div class="chat-widget__bot-meta">
+          <span class="chat-widget__bot-name">Trợ lý Tài chính AI</span>
+          <span class="chat-widget__bot-status">
+            <span class="chat-widget__status-dot"></span> Đang trực tuyến
+          </span>
+        </div>
+      </div>
+      <button class="chat-widget__close-btn" (click)="toggleChat()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <!-- Khung tin nhắn -->
+    <div class="chat-widget__body">
+      <div *ngFor="let msg of messages" class="chat-widget__msg-row" [class.chat-widget__msg-row--user]="msg.sender === 'user'">
+        <!-- Avatar của AI -->
+        <span *ngIf="msg.sender === 'ai'" class="material-symbols-outlined chat-widget__msg-avatar">smart_toy</span>
+        
+        <div class="chat-widget__msg-bubble" [class.chat-widget__msg-bubble--user]="msg.sender === 'user'">
+          <p class="chat-widget__msg-text">{{ msg.text }}</p>
+          <span class="chat-widget__msg-time">{{ msg.time | date:'HH:mm' }}</span>
+        </div>
+      </div>
+
+      <!-- Hiệu ứng đang gõ tin nhắn -->
+      <div class="chat-widget__msg-row" *ngIf="isSending">
+        <span class="material-symbols-outlined chat-widget__msg-avatar">smart_toy</span>
+        <div class="chat-widget__msg-bubble">
+          <div class="chat-widget__typing">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gợi ý nhanh -->
+    <div class="chat-widget__suggestions" *ngIf="!isSending">
+      <button 
+        *ngFor="let suggestion of suggestions" 
+        class="chat-widget__suggestion-btn" 
+        (click)="selectSuggestion(suggestion)">
+        {{ suggestion }}
+      </button>
+    </div>
+
+    <!-- Khung nhập liệu -->
+    <form class="chat-widget__footer" (ngSubmit)="submitChat()">
+      <input 
+        type="text" 
+        name="chatMessage"
+        [(ngModel)]="chatMessage" 
+        placeholder="Gõ giao dịch mới (VD: ăn trưa 45k)..." 
+        [disabled]="isSending"
+        autocomplete="off"
+        class="chat-widget__input"
+      />
+      <button type="submit" class="chat-widget__send-btn" [disabled]="!chatMessage.trim() || isSending">
+        <span class="material-symbols-outlined">send</span>
+      </button>
+    </form>
+  </div>
+</div>

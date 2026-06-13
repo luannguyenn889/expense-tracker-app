@@ -13,6 +13,11 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import fa.training.backend_qlct.dto.request.ChatRequest;
+import java.security.Principal;
+import java.util.Collections;
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -107,6 +112,23 @@ public class TransactionController {
             return ResponseEntity.ok().body("Xóa giao dịch thành công");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/chat")
+    public ResponseEntity<?> addTransactionByChat(@RequestBody ChatRequest request, Principal principal) {
+        try {
+            String username = (principal != null) ? principal.getName() : null;
+            List<Transaction> transactions = transactionService.createTransactionsFromChat(
+                    request.getMessage(),
+                    request.getUserId(),
+                    request.getWalletId(),
+                    username
+            );
+            return ResponseEntity.ok(Collections.singletonMap("message", "Đã lưu thành công " + transactions.size() + " giao dịch!"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Không thể lưu giao dịch từ câu chat. Lỗi: " + e.getMessage());
         }
     }
 }

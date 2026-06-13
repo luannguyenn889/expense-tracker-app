@@ -18,7 +18,7 @@ public class CategoryService {
      @Autowired
      private CategoryRepository categoryRepository;
 
-     // Insert Category in Database
+     // Them danh muc
      public Categories categoryRequest(CategoryCreationRequest request){
          Categories categories = new Categories();
          categories.setName(request.getName());
@@ -31,21 +31,23 @@ public class CategoryService {
          return categoryRepository.save(categories);
 
      }
+     // Lay danh sach danh muc
     public List<Categories> getAllUsers() {
         return categoryRepository.findAll();
     }
-
+    // Lay danh sach danh muc cua nguoi dung
     public List<Categories> getCategoriesByUser(Long userId) {
         return categoryRepository.findByUserIdOrUserIdIsNull(userId); // Lấy danh sách category theo userId hoặc mặc định hệ thống
     }
-
+    // Lay danh muc theo id
     public Categories getCategory(String id){
        return categoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
     }
-
+    // Xoa danh muc theo id
     public void deleteCategory(String id) {
         categoryRepository.deleteById(id);
     }
+    // Cap nhat danh muc theo id
     public Categories updateCategoryRequest(String id, CategoryUpdateRequest request){
          Categories categories = getCategory(id);
         categories.setName(request.getName());

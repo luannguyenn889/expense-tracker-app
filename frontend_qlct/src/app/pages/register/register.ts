@@ -39,15 +39,15 @@ export class Register implements OnInit{
   ngOnInit(): void {
         throw new Error("Method not implemented.");
     }
-
+  // Toggle hiển thị mật khẩu
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
   }
-
+  // Toggle hiển thị xác nhận mật khẩu
   toggleConfirmPasswordVisibility() {
     this.showConfirmPassword = !this.showConfirmPassword;
   }
-
+  
   onSubmit() {
     if (this.loadData.password !== this.confirmPassword) {
       alert('Mật khẩu và xác nhận mật khẩu không khớp!');
