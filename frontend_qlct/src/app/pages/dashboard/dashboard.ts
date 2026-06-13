@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
 import { Auth } from '../../services/auth';
 import { CategoryService } from '../../services/category-service';
 import { Category } from '../../model/category';
+import { TransactionService } from '../../services/transaction-service';
 import {
   Chart,
   ArcElement,
@@ -43,6 +44,7 @@ export class Dashboard implements OnInit, OnDestroy {
     private http: HttpClient,
     private auth: Auth,
     private categoryService: CategoryService,
+    private transactionService: TransactionService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -58,6 +60,12 @@ export class Dashboard implements OnInit, OnDestroy {
           this.userId = user.id;
           this.loadRecentCategories(user.id);
         }
+      }
+    });
+
+    this.transactionService.transactionChanges$.subscribe(() => {
+      if (this.userId) {
+        this.loadRecentCategories(this.userId);
       }
     });
   }
@@ -131,7 +139,7 @@ export class Dashboard implements OnInit, OnDestroy {
       (c.color && c.color.trim() !== '') ? c.color : defaultPalette[i % defaultPalette.length]
     );
     const borderColors = bgColors.map(c => c + 'bb');
-
+    // Tạo biểu đồ tròn phân bổ chi tiêu
     this.pieChart = new Chart(canvas, {
       type: 'doughnut',
       data: {
