@@ -43,6 +43,10 @@ export class Transactions implements OnInit {
 
   ngOnInit() {
     this.loadData();
+
+    this.transactionService.transactionChanges$.subscribe(() => {
+      this.loadData();
+    });
     
     if (sessionStorage.getItem('openAddTransaction') === 'true') {
       sessionStorage.removeItem('openAddTransaction');

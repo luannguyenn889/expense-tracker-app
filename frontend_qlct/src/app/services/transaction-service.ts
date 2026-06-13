@@ -1,11 +1,17 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { Transaction, TransferData } from '../model/transaction';
 import { Auth } from './auth';
 
 @Injectable({ providedIn: 'root' })
 export class TransactionService {
+  public transactionChanges$ = new Subject<void>();
+
+  notifyTransactionChange() {
+    this.transactionChanges$.next();
+  }
+
   private apiUrl = 'http://localhost:8080/api/transactions';
   private walletUrl = 'http://localhost:8080/api/wallets';
   private categoryUrl = 'http://localhost:8080/categories';
