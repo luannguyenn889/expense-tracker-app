@@ -6,6 +6,7 @@ import { Auth } from '../../services/auth';
 import { CategoryService } from '../../services/category-service';
 import { Category } from '../../model/category';
 import { TransactionService } from '../../services/transaction-service';
+import { WalletService } from '../../services/wallet-service';
 import {
   Chart,
   ArcElement,
@@ -14,6 +15,8 @@ import {
   DoughnutController,
   Title,
 } from 'chart.js';
+import { Wallet } from '../../model/wallet';
+import { Wallets } from '../wallets/wallets';
 
 // Đăng ký các thành phần Chart.js cần dùng
 Chart.register(ArcElement, Tooltip, Legend, DoughnutController, Title);
@@ -43,6 +46,7 @@ export class Dashboard implements OnInit, OnDestroy {
   constructor(
     private http: HttpClient,
     private auth: Auth,
+     private walletService: WalletService,
     private categoryService: CategoryService,
     private transactionService: TransactionService,
     private cdr: ChangeDetectorRef
@@ -59,6 +63,7 @@ export class Dashboard implements OnInit, OnDestroy {
         if (user && user.id) {
           this.userId = user.id;
           this.loadRecentCategories(user.id);
+          this.loadWallets();
         }
       }
     });
@@ -66,8 +71,14 @@ export class Dashboard implements OnInit, OnDestroy {
     this.transactionService.transactionChanges$.subscribe(() => {
       if (this.userId) {
         this.loadRecentCategories(this.userId);
+        this.loadWallets();
       }
     });
+
+    if (sessionStorage.getItem('needRefreshWallets')) {
+      sessionStorage.removeItem('needRefreshWallets');
+      this.loadWallets();
+    }
   }
 
   ngOnDestroy() {
@@ -213,4 +224,36 @@ export class Dashboard implements OnInit, OnDestroy {
       }
     });
   }
+
+  /** Lấy danh sách tất cả các ví của user */
+
+    wallets: any[] = [];
+  isLoading = true;
+  showAddModal = false;
+  showEditModal = false;
+  selectedWallet: any = null;
+     loadWallets() {
+    this.isLoading = true;
+    this.cdr.detectChanges();
+
+    this.walletService.getWallets().subscribe({
+      next: (data) => {
+        this.wallets = data || [];
+        this.isLoading = false;
+        this.cdr.detectChanges();
+        console.log('Wallets loaded:', this.wallets);
+      },
+      error: (err) => {
+        console.error('Lỗi tải ví:', err);
+        this.wallets = [];
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  getTotalBalance(): number {
+    return this.wallets.reduce((sum, w) => sum + (w.balance || 0), 0);
+  }
+
 }

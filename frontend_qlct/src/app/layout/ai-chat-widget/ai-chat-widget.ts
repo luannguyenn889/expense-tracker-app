@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { TransactionService } from '../../services/transaction-service';
+import { Auth } from '../../services/auth';
 
 interface Message {
   sender: 'user' | 'ai';
@@ -22,22 +23,34 @@ export class AiChatWidget implements OnInit {
   chatMessage: string = '';
   isSending: boolean = false;
   messages: Message[] = [];
+  userId: number | null = null;
 
   // Gợi ý cho người dùng
   suggestions = [
     'Ăn phở 45k',
     'Nhận lương 15tr',
-    'Mua cafe 30k',
-    'Đổ xăng 50k'
+    'Tháng này mình tiêu thế nào?',
+    'Tổng tiền của mình là bao nhiêu?'
   ];
 
   constructor(
     private http: HttpClient,
     private transactionService: TransactionService,
+    private auth: Auth,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
+    this.auth.currentUser$.subscribe({
+      next: (user) => {
+        if (user && user.id) {
+          this.userId = user.id;
+        } else {
+          this.userId = null;
+        }
+      }
+    });
+
     this.messages.push({
       sender: 'ai',
       text: 'Xin chào! Mình là Trợ lý tài chính AI. Bạn có thể nhập nhanh các giao dịch (ví dụ: "ăn phở 35k", "mua sắm quần áo 500k") để mình tự động phân tích và lưu trữ giúp bạn nhé!',
@@ -72,8 +85,25 @@ export class AiChatWidget implements OnInit {
     this.isSending = true; // Hiển thị hiệu ứng đang gõ
     this.scrollToBottom(); // Cuộn xuống cuối khung chat
     this.cdr.detectChanges();
-    // Tạo payload từ user input
-    const payload = { message: userText };
+
+    if (!this.userId) {
+      this.messages.push({
+        sender: 'ai',
+        text: 'Vui lòng đăng nhập tài khoản của bạn để sử dụng Trợ lý tài chính AI nhé!',
+        time: new Date()
+      });
+      this.isSending = false;
+      this.scrollToBottom();
+      this.cdr.detectChanges();
+      return;
+    }
+
+    // Tạo payload từ user input bao gồm cả thông tin người dùng đang đăng nhập
+    const payload = { 
+      message: userText,
+      userId: this.userId
+    };
+
     // Gửi request đến backend
     this.http.post('http://localhost:8080/api/transactions/chat', payload).subscribe({
       next: (res: any) => {

@@ -10,7 +10,7 @@
         <h3 class="card__title">Số dư hiện tại</h3>
       </div>
       <div class="card__body">
-        <p class="card__amount card__amount--primary">245,500,000 ₫</p>
+        <p class="card__amount card__amount--primary">{{ getTotalBalance() | number:'1.0-0' }} ₫</p>
         <p class="card__meta">Updated just now</p>
       </div>
     </div>
