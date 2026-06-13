@@ -119,16 +119,16 @@ public class TransactionController {
     public ResponseEntity<?> addTransactionByChat(@RequestBody ChatRequest request, Principal principal) {
         try {
             String username = (principal != null) ? principal.getName() : null;
-            List<Transaction> transactions = transactionService.createTransactionsFromChat(
+            String result = transactionService.processChat(
                     request.getMessage(),
                     request.getUserId(),
                     request.getWalletId(),
                     username
             );
-            return ResponseEntity.ok(Collections.singletonMap("message", "Đã lưu thành công " + transactions.size() + " giao dịch!"));
+            return ResponseEntity.ok(Collections.singletonMap("message", result));
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.badRequest().body("Không thể lưu giao dịch từ câu chat. Lỗi: " + e.getMessage());
+            return ResponseEntity.badRequest().body("Không thể xử lý tin nhắn từ câu chat. Lỗi: " + e.getMessage());
         }
     }
 }

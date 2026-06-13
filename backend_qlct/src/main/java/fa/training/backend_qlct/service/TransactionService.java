@@ -72,6 +72,11 @@ public class TransactionService {
             if (wallet.getBalance().compareTo(request.getAmount()) < 0) {
                 throw new RuntimeException("Số dư không đủ");
             }
+        } else if ("TRANSFER".equals(request.getType())) {
+            balanceChange = request.getAmount().negate();
+            if (wallet.getBalance().compareTo(request.getAmount()) < 0) {
+                throw new RuntimeException("Số dư không đủ để chuyển");
+            }
         } else {
             balanceChange = BigDecimal.ZERO;
         }
@@ -289,9 +294,10 @@ public class TransactionService {
         }
         return sb.toString();
     }
-    // Tao giao dich tu nhap du lieu tu AI
+
+    // Phân tích và xử lý câu chat từ người dùng (Smart Wallet Resolution + Conversational support)
     @Transactional
-    public List<Transaction> createTransactionsFromChat(String userInput, Long userId, Long walletId, String username) {
+    public String processChat(String userInput, Long userId, Long walletId, String username) {
         // 1. Phân giải User
         Users user = null;
         if (userId != null) {
@@ -304,42 +310,133 @@ public class TransactionService {
             user = userRepository.findAll().stream().findFirst().orElse(null);
         }
         if (user == null) {
-            throw new RuntimeException("Không tìm thấy thông tin người dùng trong hệ thống");
+            return "Không tìm thấy thông tin người dùng trong hệ thống. Vui lòng đăng nhập lại!";
         }
         Long resolvedUserId = user.getId();
 
-        // 2. Phân giải Ví
-        Long finalWalletId = walletId;
-        if (finalWalletId == null) {
-            List<Wallet> activeWallets = walletRepository.findActiveByUserId(resolvedUserId);
-            if (!activeWallets.isEmpty()) {
-                finalWalletId = activeWallets.get(0).getId();
-            } else {
-                List<Wallet> allWallets = walletRepository.findByUserId(resolvedUserId);
-                if (!allWallets.isEmpty()) {
-                    finalWalletId = allWallets.get(0).getId();
-                } else {
-                    throw new RuntimeException("Bạn cần tạo ít nhất một ví tài khoản trước khi thực hiện giao dịch bằng AI");
-                }
+        // 2. Lấy dữ liệu ngữ cảnh tài chính của user
+        List<Wallet> wallets = walletRepository.findActiveByUserId(resolvedUserId);
+        BigDecimal totalBalance = BigDecimal.ZERO;
+        StringBuilder walletsInfo = new StringBuilder();
+        for (Wallet wallet : wallets) {
+            walletsInfo.append(String.format("- Ví '%s' (ID: %d): %,.0f VNĐ\n", wallet.getName(), wallet.getId(), wallet.getBalance()));
+            totalBalance = totalBalance.add(wallet.getBalance());
+        }
+
+        List<Categories> categories = categoryRepository.findByUserIdOrUserIdIsNull(resolvedUserId);
+        Map<String, Categories> categoryMap = categories.stream()
+                .collect(Collectors.toMap(Categories::getId, c -> c, (c1, c2) -> c1));
+
+        LocalDate startDate = LocalDate.now().withDayOfMonth(1);
+        LocalDate endDate = LocalDate.now();
+        List<Transaction> monthlyTxns = transactionRepository.findByUserIdAndTransactionDateBetween(resolvedUserId, startDate, endDate);
+
+        BigDecimal totalIncome = BigDecimal.ZERO;
+        BigDecimal totalExpense = BigDecimal.ZERO;
+        for (Transaction txn : monthlyTxns) {
+            if ("INCOME".equals(txn.getType())) {
+                totalIncome = totalIncome.add(txn.getAmount());
+            } else if ("EXPENSE".equals(txn.getType())) {
+                totalExpense = totalExpense.add(txn.getAmount());
             }
         }
 
-        // 3. Lấy chuỗi JSON từ AI
-        String jsonResult = extractTransactionJson(userInput);
+        List<Transaction> recentTxns = transactionRepository.findTop10ByUserIdOrderByTransactionDateDescIdDesc(resolvedUserId);
+        StringBuilder recentSummary = new StringBuilder();
+        if (recentTxns.isEmpty()) {
+            recentSummary.append("- Chưa có giao dịch nào gần đây.\n");
+        } else {
+            for (Transaction txn : recentTxns) {
+                String typeStr = "INCOME".equals(txn.getType()) ? "Thu nhập" : ("EXPENSE".equals(txn.getType()) ? "Chi tiêu" : "Chuyển tiền");
+                String catName = "Chưa phân loại";
+                if (txn.getCategoryId() != null) {
+                    Categories cat = categoryMap.get(txn.getCategoryId());
+                    if (cat != null) {
+                        catName = cat.getName();
+                    }
+                }
+                recentSummary.append(String.format("- Ngày %s: %s %,.0f VNĐ (Danh mục: %s) - Ghi chú: %s\n",
+                        txn.getTransactionDate(), typeStr, txn.getAmount(), catName, (txn.getNote() != null ? txn.getNote() : "Không có")));
+            }
+        }
 
-        // 4. Chuyển JSON thành danh sách
+        // 3. Xây dựng prompt thông minh gửi đến Gemini
+        String prompt = String.format(
+            "Bạn là một trợ lý tài chính cá nhân người Việt thông minh, tận tâm và thân thiện.\n" +
+            "Dưới đây là thông tin tài chính thực tế của khách hàng (tên: %s, username: %s):\n\n" +
+            "💰 Tình hình các ví tài khoản:\n%s" +
+            "Tổng tài sản hiện tại: %,.0f VNĐ\n\n" +
+            "📊 Thống kê thu chi trong tháng này (từ %s đến %s):\n" +
+            "- Tổng thu nhập: %,.0f VNĐ\n" +
+            "- Tổng chi tiêu: %,.0f VNĐ\n" +
+            "- Thặng dư/thâm hụt: %,.0f VNĐ\n\n" +
+            "📜 Lịch sử 10 giao dịch gần nhất nhất:\n%s\n" +
+            "Người dùng gửi lời nhắn sau: '%s'\n\n" +
+            "Nhiệm vụ của bạn:\n" +
+            "Hãy phân loại tin nhắn của người dùng thuộc một trong hai loại sau:\n" +
+            "1. 'CHAT': Nếu người dùng đang chào hỏi, hỏi về tình hình tài chính của họ (ví dụ: 'tháng này mình tiêu thế nào', 'tổng số dư là bao nhiêu', 'ví Momo còn bao nhiêu tiền'), muốn xin lời khuyên tiết kiệm hoặc trò chuyện thông thường.\n" +
+            "2. 'TRANSACTION': Nếu người dùng muốn ghi chép/lưu lại một hoặc nhiều giao dịch mới vừa xảy ra (ví dụ: 'mua cafe 30k', 'ăn sáng 35.000', 'nhận lương 15tr', 'đổ xăng 50k ngày hôm qua').\n\n" +
+            "Hãy trả về MỘT chuỗi JSON duy nhất, định dạng chính xác như sau, không có bất kỳ văn bản giải thích nào trước hoặc sau nó:\n" +
+            "{\n" +
+            "  \"type\": \"CHAT\" hoặc \"TRANSACTION\",\n" +
+            "  \"reply\": \"Câu trả lời của bạn gửi cho người dùng (nếu type là CHAT. Hãy trả lời ngắn gọn, thân thiện, mang tính cá nhân hóa cao dựa trên dữ liệu tài chính ở trên, sử dụng emoji và xuống dòng hợp lý. Không dùng ký tự tiêu đề markdown #)\",\n" +
+            "  \"transactions\": [\n" +
+            "    {\n" +
+            "      \"note\": \"Mô tả ngắn gọn về giao dịch (ví dụ: 'Ăn phở', 'Mua cafe', 'Nhận lương')\",\n" +
+            "      \"amount\": Số_tiền_VNĐ_bằng_số,\n" +
+            "      \"type\": \"EXPENSE\" hoặc \"INCOME\",\n" +
+            "      \"category_name\": \"Tên danh mục gợi ý phù hợp (ví dụ: 'Ăn uống', 'Di chuyển', 'Lương', 'Mua sắm', 'Học tập', ...)\",\n" +
+            "      \"wallet_name\": \"Tên ví mà người dùng đề cập (ví dụ: 'Momo', 'Ví chính') hoặc null nếu không đề cập\",\n" +
+            "      \"date\": \"Ngày giao dịch theo định dạng YYYY-MM-DD (nếu người dùng đề cập thời gian khác ngày hôm nay, ví dụ 'hôm qua' thì tính ngày thích hợp, ngược lại trả về null)\"\n" +
+            "    }\n" +
+            "  ]\n" +
+            "}",
+            (user.getFirstname() != null ? user.getFirstname() : "") + " " + (user.getLastname() != null ? user.getLastname() : ""),
+            user.getUsername(),
+            walletsInfo.toString(),
+            totalBalance,
+            startDate,
+            endDate,
+            totalIncome,
+            totalExpense,
+            totalIncome.subtract(totalExpense),
+            recentSummary.toString(),
+            userInput
+        );
+
+        // 4. Gọi Gemini
+        String aiResponse = callGeminiApi(prompt);
         ObjectMapper mapper = new ObjectMapper();
-        List<Map<String, Object>> chatTransactions;
+        Map<String, Object> responseMap;
         try {
-            chatTransactions = mapper.readValue(jsonResult, new TypeReference<List<Map<String, Object>>>(){});
+            String cleanJson = aiResponse.replace("```json", "").replace("```", "").trim();
+            responseMap = mapper.readValue(cleanJson, new TypeReference<Map<String, Object>>(){});
         } catch (Exception e) {
-            throw new RuntimeException("AI trả về định dạng không hợp lệ hoặc không thể phân tích cú pháp: " + jsonResult);
+            e.printStackTrace();
+            return "Trợ lý AI gặp khó khăn trong việc hiểu câu lệnh của bạn. Bạn có thể gõ rõ hơn (ví dụ: 'ăn trưa 40k').";
+        }
+
+        if (responseMap == null) {
+            return "Trợ lý AI gặp lỗi xử lý thông tin. Vui lòng thử lại sau!";
+        }
+
+        String responseType = (String) responseMap.get("type");
+        if ("CHAT".equalsIgnoreCase(responseType)) {
+            String reply = (String) responseMap.get("reply");
+            return reply != null ? reply : "Chào bạn! Tôi có thể giúp gì cho bạn về tài chính cá nhân?";
+        }
+
+        // 5. Xử lý ghi nhận TRANSACTION
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> trxList = (List<Map<String, Object>>) responseMap.get("transactions");
+        if (trxList == null || trxList.isEmpty()) {
+            return "Tôi không tìm thấy thông tin giao dịch nào cần ghi chép trong câu chat của bạn. Bạn hãy gõ rõ ràng hơn nhé (ví dụ: 'mua cafe 35k').";
         }
 
         List<Transaction> savedTransactions = new ArrayList<>();
+        StringBuilder resultMessage = new StringBuilder("🤖 Đã ghi nhận giao dịch thành công:\n");
 
-        // 5. Lặp qua danh sách, tìm Category tương ứng và lưu vào DB
-        for (Map<String, Object> trx : chatTransactions) {
+        for (Map<String, Object> trx : trxList) {
             String note = (String) trx.get("note");
             
             Object amountObj = trx.get("amount");
@@ -353,10 +450,82 @@ public class TransactionService {
                     amount = BigDecimal.ZERO;
                 }
             }
+            if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+                continue;
+            }
 
             String categoryName = (String) trx.get("category_name");
+            String walletNameFromAi = (String) trx.get("wallet_name");
+            String txnType = (String) trx.get("type");
+            if (txnType == null || (!"INCOME".equals(txnType) && !"EXPENSE".equals(txnType))) {
+                txnType = "EXPENSE";
+            }
+            
+            String dateStr = (String) trx.get("date");
+            LocalDate txnDate = LocalDate.now();
+            if (dateStr != null && !dateStr.trim().isEmpty()) {
+                try {
+                    txnDate = LocalDate.parse(dateStr);
+                } catch (Exception e) {
+                    // Mặc định hôm nay
+                }
+            }
 
-            // Tìm Category theo tên
+            // Giải quyết ví thông minh
+            Wallet selectedWallet = null;
+            List<Wallet> activeWallets = walletRepository.findActiveByUserId(resolvedUserId);
+            
+            // 1. Tìm ví khớp với tên do AI nhận diện
+            if (walletNameFromAi != null && !walletNameFromAi.trim().isEmpty()) {
+                String normalizedAiName = walletNameFromAi.toLowerCase().trim();
+                for (Wallet w : activeWallets) {
+                    if (w.getName().toLowerCase().contains(normalizedAiName) || 
+                        normalizedAiName.contains(w.getName().toLowerCase())) {
+                        selectedWallet = w;
+                        break;
+                    }
+                }
+            }
+
+            // 2. Chọn ví từ dropdown UI nếu truyền qua walletId
+            if (selectedWallet == null && walletId != null) {
+                selectedWallet = activeWallets.stream()
+                        .filter(w -> w.getId().equals(walletId))
+                        .findFirst()
+                        .orElse(null);
+            }
+
+            // 3. Nếu là EXPENSE và chưa chọn được ví, tìm ví hoạt động có số dư >= amount (chọn ví nhiều tiền nhất)
+            if (selectedWallet == null && "EXPENSE".equals(txnType)) {
+                final BigDecimal finalAmount = amount;
+                List<Wallet> walletsWithSufficientBalance = activeWallets.stream()
+                        .filter(w -> w.getBalance().compareTo(finalAmount) >= 0)
+                        .sorted((w1, w2) -> w2.getBalance().compareTo(w1.getBalance()))
+                        .collect(Collectors.toList());
+                
+                if (!walletsWithSufficientBalance.isEmpty()) {
+                    selectedWallet = walletsWithSufficientBalance.get(0);
+                }
+            }
+
+            // 4. Nếu vẫn chưa chọn được ví, chọn ví hoạt động có số dư cao nhất
+            if (selectedWallet == null && !activeWallets.isEmpty()) {
+                selectedWallet = activeWallets.stream()
+                        .max((w1, w2) -> w1.getBalance().compareTo(w2.getBalance()))
+                        .orElse(activeWallets.get(0));
+            }
+
+            // 5. Fallback cuối cùng
+            if (selectedWallet == null) {
+                List<Wallet> allWallets = walletRepository.findByUserId(resolvedUserId);
+                if (!allWallets.isEmpty()) {
+                    selectedWallet = allWallets.get(0);
+                } else {
+                    return "Bạn cần tạo ít nhất một ví tài khoản trước khi thực hiện giao dịch bằng AI.";
+                }
+            }
+
+            // Giải quyết danh mục
             String categoryId = null;
             if (categoryName != null && !categoryName.trim().isEmpty()) {
                 List<Categories> matchingCategories = categoryRepository.findByUserIdAndNameContaining(resolvedUserId, categoryName);
@@ -374,20 +543,60 @@ public class TransactionService {
                 }
             }
 
-            // Tạo request cho Transaction
-            TransactionRequest request = new TransactionRequest();
-            request.setAmount(amount);
-            request.setNote(note);
-            request.setTransactionDate(LocalDate.now());
-            request.setType("EXPENSE"); // Mặc định là chi tiêu
-            request.setCategoryId(categoryId);
-            request.setWalletId(finalWalletId);
+            if (categoryId == null) {
+                List<Categories> allCategories = categoryRepository.findByUserIdOrUserIdIsNull(resolvedUserId);
+                for (Categories cat : allCategories) {
+                    if (cat.getName().toLowerCase().contains("khác") && cat.getType().equals(txnType)) {
+                        categoryId = cat.getId();
+                        break;
+                    }
+                }
+                if (categoryId == null && !allCategories.isEmpty()) {
+                    categoryId = allCategories.get(0).getId();
+                }
+            }
 
             // Lưu giao dịch
-            Transaction saved = createTransaction(request, resolvedUserId);
-            savedTransactions.add(saved);
+            TransactionRequest request = new TransactionRequest();
+            request.setAmount(amount);
+            request.setNote(note != null ? note : categoryName);
+            request.setTransactionDate(txnDate);
+            request.setType(txnType);
+            request.setCategoryId(categoryId);
+            request.setWalletId(selectedWallet.getId());
+
+            try {
+                Transaction saved = createTransaction(request, resolvedUserId);
+                savedTransactions.add(saved);
+
+                Wallet updatedWallet = walletRepository.findById(selectedWallet.getId()).orElse(selectedWallet);
+
+                String catDisplayName = "Chưa phân loại";
+                if (categoryId != null) {
+                    Categories cat = categoryRepository.findById(categoryId).orElse(null);
+                    if (cat != null) {
+                        catDisplayName = cat.getName();
+                    }
+                }
+
+                String typeSymbol = "EXPENSE".equals(txnType) ? "💸 Chi tiêu" : "💰 Thu nhập";
+                resultMessage.append(String.format("- %s: %,.0f VNĐ - '%s' (%s) ghi vào ví '%s' (Số dư mới: %,.0f VNĐ)\n",
+                        typeSymbol, amount, request.getNote(), catDisplayName, updatedWallet.getName(), 
+                        updatedWallet.getBalance()));
+            } catch (Exception e) {
+                resultMessage.append(String.format("- ⚠️ Lỗi khi ghi nhận '%s': %s\n", note != null ? note : categoryName, e.getMessage()));
+            }
         }
 
-        return savedTransactions;
+        if (savedTransactions.isEmpty()) {
+            return "Không thể lưu giao dịch từ câu chat. Lý do: Số dư trong tất cả các ví đều không đủ hoặc thông tin giao dịch không hợp lệ.";
+        }
+
+        return resultMessage.toString();
     }
-}
+
+    @Deprecated
+    public List<Transaction> createTransactionsFromChat(String userInput, Long userId, Long walletId, String username) {
+        return new ArrayList<>();
+    }
+}
