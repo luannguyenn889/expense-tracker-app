@@ -252,7 +252,7 @@ public class TransactionService {
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Lỗi gọi AI: " + e.getMessage());
-            return "[]"; // Trả về mảng rỗng để không bị lỗi parse JSON
+            return "ERROR: " + e.getMessage();
         }
     }
    //  hàm phụ trợ làm sạch JSON cho AI
@@ -406,6 +406,9 @@ public class TransactionService {
 
         // 4. Gọi Gemini
         String aiResponse = callGeminiApi(prompt);
+        if (aiResponse == null || aiResponse.trim().isEmpty() || aiResponse.startsWith("ERROR:") || "[]".equals(aiResponse)) {
+            return "Không thể kết nối đến Google Gemini API hoặc API Key không hợp lệ. Vui lòng kiểm tra lại kết nối mạng của máy chủ và cài đặt 'gemini.api.key' trong file 'application.properties'.";
+        }
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> responseMap;
         try {
