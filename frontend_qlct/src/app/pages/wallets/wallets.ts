@@ -31,7 +31,7 @@ export class Wallets implements OnInit {
       this.loadWallets();
     }
   }
-
+  // Load danh sách tất cả các ví của user
   loadWallets() {
     this.isLoading = true;
     this.cdr.detectChanges();
