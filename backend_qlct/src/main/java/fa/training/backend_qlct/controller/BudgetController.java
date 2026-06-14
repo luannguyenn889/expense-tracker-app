@@ -18,14 +18,13 @@ public class BudgetController {
     @PostMapping("/add")
     public ResponseEntity<?> addBudget(@RequestBody BudgetRequest request, @RequestParam Long userId) {
         try {
-            // Trong thuc te, userId nen duoc lay tu Token (Security Context) thay vi @RequestParam
             Budgets savedBudget = budgetService.createBudget(request, userId);
             return ResponseEntity.ok(savedBudget);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
-    // Thêm hàm này vào BudgetController.java
+
     @GetMapping("/progress")
     public ResponseEntity<?> getProgress(
             @RequestParam Long userId,
@@ -35,6 +34,33 @@ public class BudgetController {
             return ResponseEntity.ok(budgetService.getBudgetProgress(userId, month, year));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // API Cập nhật
+    @PutMapping("/update/{budgetId}")
+    public ResponseEntity<?> updateBudget(
+            @PathVariable Long budgetId,
+            @RequestBody BudgetRequest request,
+            @RequestParam Long userId) {
+        try {
+            Budgets updatedBudget = budgetService.updateBudget(budgetId, request, userId);
+            return ResponseEntity.ok(updatedBudget);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    // API Xóa
+    @DeleteMapping("/delete/{budgetId}")
+    public ResponseEntity<?> deleteBudget(
+            @PathVariable Long budgetId,
+            @RequestParam Long userId) {
+        try {
+            budgetService.deleteBudget(budgetId, userId);
+            return ResponseEntity.ok().body("Xóa hạn mức thành công!");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 }
