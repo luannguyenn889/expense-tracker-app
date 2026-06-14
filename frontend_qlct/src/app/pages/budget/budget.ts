@@ -14,7 +14,7 @@ import { Auth } from '../../services/auth';
     <div class="transactions-container">
       <div class="header-actions">
         <div>
-          <h2>Thiết lập hạn mức</h2>
+          <h2>{{ editingBudgetId ? 'Cập nhật hạn mức' : 'Thiết lập hạn mức' }}</h2>
           <p class="page-subtitle">Quản lý và giới hạn chi tiêu hàng tháng của bạn.</p>
         </div>
       </div>
@@ -27,7 +27,7 @@ import { Auth } from '../../services/auth';
           <div class="filter-row">
             <div class="filter-group">
               <label for="category">Danh mục chi tiêu</label>
-              <select id="category" name="category" [(ngModel)]="selectedCategoryId" required>
+              <select id="category" name="category" [(ngModel)]="selectedCategoryId" required [disabled]="editingBudgetId !== null">
                 <option value="" disabled selected>-- Chọn danh mục --</option>
                 <option *ngFor="let cat of expenseCategories" [value]="cat.id">
                   {{ cat.name }}
@@ -39,7 +39,7 @@ import { Auth } from '../../services/auth';
               <label for="monthYear">Tháng áp dụng</label>
               <input type="month" id="monthYear" name="monthYear"
                      [(ngModel)]="selectedMonthYear"
-                     (ngModelChange)="onMonthChange()" required />
+                     (ngModelChange)="onMonthChange()" required [disabled]="editingBudgetId !== null" />
             </div>
 
             <div class="filter-group">
@@ -49,9 +49,12 @@ import { Auth } from '../../services/auth';
           </div>
 
           <div class="filter-actions justify-end mt-4">
+            <button type="button" *ngIf="editingBudgetId" (click)="cancelEdit()" class="btn-cancel">
+              Hủy
+            </button>
             <button type="submit" [disabled]="!budgetForm.valid || isLoading" class="btn-search">
-              <span class="material-symbols-outlined" *ngIf="!isLoading">add</span>
-              <span *ngIf="!isLoading">Lưu Hạn Mức</span>
+              <span class="material-symbols-outlined" *ngIf="!isLoading">{{ editingBudgetId ? 'save' : 'add' }}</span>
+              <span *ngIf="!isLoading">{{ editingBudgetId ? 'Cập Nhật' : 'Lưu Hạn Mức' }}</span>
               <span *ngIf="isLoading">Đang xử lý...</span>
             </button>
           </div>
@@ -68,8 +71,14 @@ import { Auth } from '../../services/auth';
 
           <div class="progress-card" *ngFor="let p of budgetProgresses">
             <div class="progress-header">
-              <span class="cat-name">{{ p.categoryName }}</span>
-              <span class="cat-amount">{{ p.actualSpend | number }} / {{ p.budgetAmount | number }} đ</span>
+              <div>
+                <span class="cat-name">{{ p.categoryName }}</span>
+                <span class="cat-amount ml-2">{{ p.actualSpend | number }} / {{ p.budgetAmount | number }} đ</span>
+              </div>
+              <div class="action-buttons">
+                <span class="material-symbols-outlined icon-btn edit" title="Sửa hạn mức" (click)="editBudget(p)">edit</span>
+                <span class="material-symbols-outlined icon-btn delete" title="Xóa hạn mức" (click)="deleteBudget(p.budgetId)">delete</span>
+              </div>
             </div>
             <div class="progress-bar-bg">
               <div class="progress-bar-fill"
@@ -105,6 +114,8 @@ import { Auth } from '../../services/auth';
     .filter-group label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #64748b; }
     .filter-group input, .filter-group select { width: 100%; padding: 0.6rem 1rem; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 14px; background: white; box-sizing: border-box; }
     .filter-group input:focus, .filter-group select:focus { outline: none; border-color: #006493; }
+    .filter-group input:disabled, .filter-group select:disabled { background: #f1f5f9; cursor: not-allowed; }
+
     .filter-actions { display: flex; gap: 8px; align-items: flex-end; }
     .justify-end { justify-content: flex-end; }
     .mt-4 { margin-top: 1.5rem; }
@@ -114,24 +125,33 @@ import { Auth } from '../../services/auth';
     .btn-search:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0, 100, 147, 0.3); }
     .btn-search:disabled { background: #94a3b8; cursor: not-allowed; }
 
+    .btn-cancel { background: transparent; color: #64748b; border: 1px solid #cbd5e1; border-radius: 12px; padding: 0.6rem 1.5rem; cursor: pointer; font-weight: 600; height: 42px; transition: all 0.2s ease; }
+    .btn-cancel:hover { background: #f1f5f9; color: #334155; }
+
     .alert { padding: 12px 16px; border-radius: 12px; margin-bottom: 20px; font-size: 14px; box-sizing: border-box; }
     .alert-error { background-color: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
     .alert-success { background-color: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
 
-    /* CSS CHO PHẦN TIẾN ĐỘ */
     .section-title { font-size: 18px; font-weight: 600; color: #1a1c1c; margin-bottom: 16px; margin-top: 32px; padding-left: 8px; border-left: 4px solid #006493;}
     .progress-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
     .progress-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-    .progress-header { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; }
+
+    .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 14px; }
     .cat-name { font-weight: 600; color: #334155; }
     .cat-amount { color: #64748b; }
+    .ml-2 { margin-left: 8px; }
+
+    .action-buttons { display: flex; gap: 8px; }
+    .icon-btn { font-size: 18px; cursor: pointer; color: #cbd5e1; transition: color 0.2s ease; }
+    .icon-btn.edit:hover { color: #006493; }
+    .icon-btn.delete:hover { color: #ef4444; }
 
     .progress-bar-bg { width: 100%; height: 8px; background-color: #f1f5f9; border-radius: 99px; overflow: hidden; margin-bottom: 8px; }
     .progress-bar-fill { height: 100%; border-radius: 99px; transition: width 0.4s ease; }
 
-    .bg-success { background-color: #10b981; } /* Xanh */
-    .bg-warning { background-color: #f59e0b; } /* Vàng */
-    .bg-danger { background-color: #ef4444; }  /* Đỏ */
+    .bg-success { background-color: #10b981; }
+    .bg-warning { background-color: #f59e0b; }
+    .bg-danger { background-color: #ef4444; }
 
     .progress-footer { display: flex; justify-content: space-between; font-size: 12px; color: #64748b; }
     .text-danger { color: #ef4444 !important; }
@@ -142,7 +162,7 @@ import { Auth } from '../../services/auth';
       .transactions-container { padding: 16px; }
       .filters.form-wrapper { padding: 1rem; }
       .filter-group { min-width: 100%; }
-      .btn-search { width: 100%; justify-content: center; }
+      .btn-search, .btn-cancel { width: 100%; justify-content: center; }
       .progress-list { grid-template-columns: 1fr; }
     }
   `]
@@ -155,6 +175,8 @@ export class Budget implements OnInit {
   amount: number | null = null;
   selectedMonthYear: string = '';
 
+  editingBudgetId: number | null = null; // Cờ theo dõi trạng thái Sửa
+
   isLoading: boolean = false;
   errorMessage: string = '';
   successMessage: string = '';
@@ -164,7 +186,7 @@ export class Budget implements OnInit {
   constructor(
     private categoryService: CategoryService,
     private budgetService: BudgetService,
-    private cdr: ChangeDetectorRef, // Inject thêm dịch vụ này để ép UI làm mới ngay
+    private cdr: ChangeDetectorRef,
     private auth: Auth
   ) {}
 
@@ -180,14 +202,14 @@ export class Budget implements OnInit {
             const userInfo = JSON.parse(userInfoStr);
             this.userId = userInfo && userInfo.id ? userInfo.id : 7;
           } else {
-            this.userId = 7; // default fallback if not found
+            this.userId = 7;
           }
         }
         this.fetchCategories();
         this.fetchBudgetProgress();
       },
       error: (err) => {
-        console.error('Error fetching user info in Budget:', err);
+        console.error('Error fetching user info:', err);
         this.userId = 7;
         this.fetchCategories();
         this.fetchBudgetProgress();
@@ -204,6 +226,7 @@ export class Budget implements OnInit {
 
   onMonthChange(): void {
     if (this.selectedMonthYear) {
+      this.cancelEdit(); // Hủy trạng thái sửa nếu đổi tháng
       this.fetchBudgetProgress();
     }
   }
@@ -211,34 +234,21 @@ export class Budget implements OnInit {
   fetchCategories(): void {
     this.categoryService.getAllCategories(this.userId).subscribe({
       next: (data) => {
-        // Lọc lấy danh mục CHI TIÊU và ưu tiên Danh mục CÁ NHÂN (userId != null)
         this.expenseCategories = data.filter(cat => {
-          // Bắt buộc là khoản Chi
           if (cat.type !== 'EXPENSE') return false;
-
-          // NẾU hệ thống của bạn phân biệt danh mục cá nhân bằng thuộc tính userId
-          // (Tức là danh mục mặc định thì userId = null hoặc 0)
-          // THÌ chỉ lấy các danh mục có userId trùng với userId hiện tại.
-          // Bỏ comment dòng dưới nếu DB của bạn thiết kế như vậy:
-          // return cat.userId === this.userId;
-
-          return true; // Tạm thời giữ nguyên nếu backend chưa trả về userId trong object Category
+          return true;
         });
 
-        // MẸO XỬ LÝ NHANH TRƯỜNG HỢP TRÙNG TÊN:
-        // Nếu vẫn bị trùng, ta dùng cách loại bỏ các danh mục trùng tên,
-        // giữ lại cái cuối cùng (thường là danh mục cá nhân ghi đè lên)
         const uniqueCategories = [];
         const seenNames = new Set();
         for (let i = this.expenseCategories.length - 1; i >= 0; i--) {
           const currentCat = this.expenseCategories[i];
           if (!seenNames.has(currentCat.name)) {
             seenNames.add(currentCat.name);
-            uniqueCategories.unshift(currentCat); // Thêm vào đầu mảng để giữ đúng thứ tự
+            uniqueCategories.unshift(currentCat);
           }
         }
         this.expenseCategories = uniqueCategories;
-
       },
       error: (err) => console.error('Fetch Categories Error:', err)
     });
@@ -252,12 +262,50 @@ export class Budget implements OnInit {
       .subscribe({
         next: (data) => {
           this.budgetProgresses = data;
-          this.cdr.detectChanges(); // Ép Angular vẽ lại mảng tiến độ
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('Fetch Progress Error:', err);
         }
       });
+  }
+
+  // Khởi động chế độ Sửa
+  editBudget(p: BudgetProgress): void {
+    this.editingBudgetId = p.budgetId;
+    this.selectedCategoryId = p.categoryId;
+    this.amount = p.budgetAmount;
+
+    // Cuộn mượt mà lên trên form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.errorMessage = '';
+    this.successMessage = '';
+  }
+
+  // Hủy chế độ Sửa
+  cancelEdit(): void {
+    this.editingBudgetId = null;
+    this.selectedCategoryId = '';
+    this.amount = null;
+    this.errorMessage = '';
+    this.successMessage = '';
+  }
+
+  // Hàm xóa hạn mức
+  deleteBudget(budgetId: number): void {
+    if (confirm('Bạn có chắc chắn muốn xóa hạn mức này không? Dữ liệu chi tiêu sẽ không bị ảnh hưởng.')) {
+      this.budgetService.deleteBudget(budgetId, this.userId).subscribe({
+        next: () => {
+          this.successMessage = 'Đã xóa hạn mức!';
+          this.fetchBudgetProgress();
+          if (this.editingBudgetId === budgetId) this.cancelEdit();
+        },
+        error: (err) => {
+          this.errorMessage = err.error || 'Xóa thất bại!';
+          this.cdr.detectChanges();
+        }
+      });
+    }
   }
 
   onSubmit(): void {
@@ -278,23 +326,37 @@ export class Budget implements OnInit {
     };
 
     this.isLoading = true;
-    this.budgetService.addBudget(request, this.userId).subscribe({
-      next: (res) => {
-        this.isLoading = false;
-        this.successMessage = 'Thiết lập hạn mức thành công!';
 
-        // Chỉ reset Danh mục và Số tiền, GIỮ NGUYÊN Tháng
-        this.selectedCategoryId = '';
-        this.amount = null;
-
-        // Tải lại tiến độ ngay tức thì
-        this.fetchBudgetProgress();
-      },
-      error: (err) => {
-        this.isLoading = false;
-        this.errorMessage = err.error || 'Đã xảy ra lỗi khi lưu hạn mức.';
-        this.cdr.detectChanges(); // Ép Angular hiển thị lỗi
-      }
-    });
+    // PHÂN NHÁNH: CẬP NHẬT HOẶC THÊM MỚI
+    if (this.editingBudgetId) {
+      this.budgetService.updateBudget(this.editingBudgetId, request, this.userId).subscribe({
+        next: (res) => {
+          this.isLoading = false;
+          this.successMessage = 'Cập nhật hạn mức thành công!';
+          this.cancelEdit();
+          this.fetchBudgetProgress();
+        },
+        error: (err) => {
+          this.isLoading = false;
+          this.errorMessage = err.error || 'Đã xảy ra lỗi khi cập nhật.';
+          this.cdr.detectChanges();
+        }
+      });
+    } else {
+      this.budgetService.addBudget(request, this.userId).subscribe({
+        next: (res) => {
+          this.isLoading = false;
+          this.successMessage = 'Thiết lập hạn mức thành công!';
+          this.selectedCategoryId = '';
+          this.amount = null;
+          this.fetchBudgetProgress();
+        },
+        error: (err) => {
+          this.isLoading = false;
+          this.errorMessage = err.error || 'Đã xảy ra lỗi khi lưu hạn mức.';
+          this.cdr.detectChanges();
+        }
+      });
+    }
   }
 }
