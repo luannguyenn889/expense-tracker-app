@@ -61,6 +61,7 @@ public class BudgetService {
 
         for (Budgets b : budgets) {
             BudgetProgressResponse dto = new BudgetProgressResponse();
+            dto.setBudgetId(b.getId());
             dto.setCategoryId(b.getCategory().getId());
             dto.setCategoryName(b.getCategory().getName());
             dto.setBudgetAmount(b.getAmount());
@@ -85,5 +86,45 @@ public class BudgetService {
             progressList.add(dto);
         }
         return progressList;
+    }
+
+    // 3. Chỉnh sửa
+    public Budgets updateBudget(Long budgetId, BudgetRequest request, Long userId) throws Exception {
+        Budgets budget = budgetRepository.findById(budgetId)
+                .orElseThrow(() -> new Exception("Không tìm thấy hạn mức này!"));
+
+        if (!budget.getUserId().equals(userId)) {
+            throw new Exception("Bạn không có quyền chỉnh sửa hạn mức này!");
+        }
+
+        // Kiểm tra trùng lặp nếu người dùng đổi sang danh mục khác
+        if (!budget.getCategory().getId().equals(request.getCategoryId())) {
+            boolean exists = budgetRepository.existsByCategoryIdAndUserIdAndMonthAndYear(
+                    request.getCategoryId(), userId, request.getMonth(), request.getYear()
+            );
+            if (exists) throw new Exception("Danh mục này đã có hạn mức trong tháng!");
+        }
+
+        Categories category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new Exception("Không tìm thấy danh mục!"));
+
+        budget.setCategory(category);
+        budget.setAmount(request.getAmount());
+        budget.setMonth(request.getMonth());
+        budget.setYear(request.getYear());
+
+        return budgetRepository.save(budget);
+    }
+
+    // 4. Xóa
+    public void deleteBudget(Long budgetId, Long userId) throws Exception {
+        Budgets budget = budgetRepository.findById(budgetId)
+                .orElseThrow(() -> new Exception("Không tìm thấy hạn mức này!"));
+
+        if (!budget.getUserId().equals(userId)) {
+            throw new Exception("Bạn không có quyền xóa hạn mức này!");
+        }
+        // Xóa budget, không ảnh hưởng đến transaction
+        budgetRepository.delete(budget);
     }
 }
