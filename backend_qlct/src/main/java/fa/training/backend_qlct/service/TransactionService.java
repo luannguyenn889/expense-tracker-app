@@ -10,6 +10,8 @@ import fa.training.backend_qlct.repository.WalletRepository;
 import fa.training.backend_qlct.dto.response.TransactionResponse;
 import fa.training.backend_qlct.repository.BudgetRepository;
 import fa.training.backend_qlct.entities.Budgets;
+import fa.training.backend_qlct.repository.SavingGoalRepository;
+import fa.training.backend_qlct.entities.SavingGoals;
 import fa.training.backend_qlct.respository.UserRepository;
 import fa.training.backend_qlct.entities.Users;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,6 +52,9 @@ public class TransactionService {
     
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private SavingGoalRepository savingGoalRepository;
 
     @Value("${gemini.api.key}")
     private String apiKey;
@@ -403,6 +408,46 @@ public class TransactionService {
             }
         }
 
+        // 2.2. Lấy dữ liệu Hạn mức chi tiêu (Budgets)
+        List<Budgets> activeBudgets = budgetRepository.findByUserIdAndMonthAndYear(resolvedUserId, startDate.getMonthValue(), startDate.getYear());
+        StringBuilder budgetsInfo = new StringBuilder();
+        if (activeBudgets.isEmpty()) {
+            budgetsInfo.append("- Chưa thiết lập hạn mức chi tiêu nào cho tháng này.\n");
+        } else {
+            for (Budgets b : activeBudgets) {
+                BigDecimal actualSpend = transactionRepository.sumExpenseByCategoryIdAndDate(
+                        resolvedUserId, b.getCategory().getId(), startDate, endDate);
+                BigDecimal budgetAmount = BigDecimal.valueOf(b.getAmount());
+                BigDecimal actual = actualSpend != null ? actualSpend : BigDecimal.ZERO;
+                BigDecimal remaining = budgetAmount.subtract(actual);
+                double percent = b.getAmount() > 0 ? (actual.doubleValue() / b.getAmount()) * 100 : 0.0;
+                budgetsInfo.append(String.format("- Danh mục '%s': Hạn mức %,.0f VNĐ | Đã chi: %,.0f VNĐ (%.1f%%) | %s: %,.0f VNĐ\n",
+                        b.getCategory().getName(),
+                        b.getAmount(),
+                        actual,
+                        percent,
+                        remaining.compareTo(BigDecimal.ZERO) >= 0 ? "Còn lại" : "Vượt hạn mức",
+                        remaining.abs()));
+            }
+        }
+
+        // 2.3. Lấy dữ liệu Mục tiêu tiết kiệm (Saving Goals)
+        List<SavingGoals> savingGoals = savingGoalRepository.findByUserId(resolvedUserId);
+        StringBuilder goalsInfo = new StringBuilder();
+        if (savingGoals.isEmpty()) {
+            goalsInfo.append("- Chưa thiết lập mục tiêu tiết kiệm nào.\n");
+        } else {
+            for (SavingGoals goal : savingGoals) {
+                double percent = goal.getTargetAmount() > 0 ? (goal.getCurrentAmount() / goal.getTargetAmount()) * 100 : 0.0;
+                goalsInfo.append(String.format("- Mục tiêu '%s': Đã tích lũy %,.0f / %,.0f VNĐ (%.1f%%) | Hạn chót: %s\n",
+                        goal.getName(),
+                        goal.getCurrentAmount(),
+                        goal.getTargetAmount(),
+                        percent,
+                        goal.getTargetDate()));
+            }
+        }
+
         // 3. Xây dựng prompt thông minh gửi đến Gemini
         String prompt = String.format(
             "Bạn là một trợ lý tài chính cá nhân người Việt thông minh, tận tâm và thân thiện.\n" +
@@ -413,16 +458,18 @@ public class TransactionService {
             "- Tổng thu nhập: %,.0f VNĐ\n" +
             "- Tổng chi tiêu: %,.0f VNĐ\n" +
             "- Thặng dư/thâm hụt: %,.0f VNĐ\n\n" +
+            "🎯 Hạn mức chi tiêu tháng này (Budgets):\n%s\n" +
+            "🏆 Các mục tiêu tiết kiệm hiện có (Saving Goals):\n%s\n" +
             "📜 Lịch sử 10 giao dịch gần nhất nhất:\n%s\n" +
             "Người dùng gửi lời nhắn sau: '%s'\n\n" +
             "Nhiệm vụ của bạn:\n" +
             "Hãy phân loại tin nhắn của người dùng thuộc một trong hai loại sau:\n" +
-            "1. 'CHAT': Nếu người dùng đang chào hỏi, hỏi về tình hình tài chính của họ (ví dụ: 'tháng này mình tiêu thế nào', 'tổng số dư là bao nhiêu', 'ví Momo còn bao nhiêu tiền'), muốn xin lời khuyên tiết kiệm hoặc trò chuyện thông thường.\n" +
+            "1. 'CHAT': Nếu người dùng đang chào hỏi, hỏi về tình hình tài chính của họ (ví dụ: 'tháng này mình tiêu thế nào', 'tổng số dư là bao nhiêu', 'ăn uống còn bao nhiêu hạn mức', 'quỹ mua xe của mình thế nào'), muốn xin lời khuyên tiết kiệm hoặc trò chuyện thông thường.\n" +
             "2. 'TRANSACTION': Nếu người dùng muốn ghi chép/lưu lại một hoặc nhiều giao dịch mới vừa xảy ra (ví dụ: 'mua cafe 30k', 'ăn sáng 35.000', 'nhận lương 15tr', 'đổ xăng 50k ngày hôm qua').\n\n" +
             "Hãy trả về MỘT chuỗi JSON duy nhất, định dạng chính xác như sau, không có bất kỳ văn bản giải thích nào trước hoặc sau nó:\n" +
             "{\n" +
             "  \"type\": \"CHAT\" hoặc \"TRANSACTION\",\n" +
-            "  \"reply\": \"Câu trả lời của bạn gửi cho người dùng (nếu type là CHAT. Hãy trả lời ngắn gọn, thân thiện, mang tính cá nhân hóa cao dựa trên dữ liệu tài chính ở trên, sử dụng emoji và xuống dòng hợp lý. Không dùng ký tự tiêu đề markdown #)\",\n" +
+            "  \"reply\": \"Câu trả lời của bạn gửi cho người dùng (nếu type là CHAT. Hãy trả lời ngắn gọn, thân thiện, mang tính cá nhân hóa cao dựa trên dữ liệu tài chính ở trên, bao gồm cả tình hình hạn mức chi tiêu hay mục tiêu tiết kiệm nếu họ hỏi đến, sử dụng emoji và xuống dòng hợp lý. Không dùng ký tự tiêu đề markdown #)\",\n" +
             "  \"transactions\": [\n" +
             "    {\n" +
             "      \"note\": \"Mô tả ngắn gọn về giao dịch (ví dụ: 'Ăn phở', 'Mua cafe', 'Nhận lương')\",\n" +
@@ -443,6 +490,8 @@ public class TransactionService {
             totalIncome,
             totalExpense,
             totalIncome.subtract(totalExpense),
+            budgetsInfo.toString(),
+            goalsInfo.toString(),
             recentSummary.toString(),
             userInput
         );
