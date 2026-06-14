@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SavingGoalService, SavingGoalRequest } from '../../services/saving-goal-service';
 import { HttpClient } from '@angular/common/http';
+import { Auth } from '../../services/auth';
 
 @Component({
   selector: 'app-saving-goals',
@@ -44,16 +45,37 @@ export class SavingGoals implements OnInit {
   constructor(
     private savingGoalService: SavingGoalService,
     private http: HttpClient, // Inject thêm HttpClient
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private auth: Auth
   ) {}
 
   ngOnInit(): void {
-    const storedUserId = sessionStorage.getItem('userId') || localStorage.getItem('userId');
-    this.userId = storedUserId ? Number(storedUserId) : 7; // Dùng ID 7 như bạn đang test
-
     this.setDefaultDate();
-    this.loadWallets();
-    this.loadGoals();
+    this.auth.currentUser$.subscribe({
+      next: (user) => {
+        if (user && user.id) {
+          this.userId = user.id;
+        } else {
+          const userInfoStr = localStorage.getItem('user_info');
+          if (userInfoStr) {
+            const userInfo = JSON.parse(userInfoStr);
+            this.userId = userInfo && userInfo.id ? userInfo.id : 7;
+          } else {
+            this.userId = 7;
+          }
+        }
+        this.loadWallets();
+        this.loadGoals();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error fetching user info in SavingGoals:', err);
+        this.userId = 7;
+        this.loadWallets();
+        this.loadGoals();
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   setDefaultDate(): void {
@@ -101,7 +123,7 @@ export class SavingGoals implements OnInit {
 
   // Lấy danh sách ví theo userId
   loadWallets(): void {
-    this.http.get<any[]>(`http://localhost:8080/api/wallets/all?userId=${this.userId}`).subscribe({
+    this.http.get<any[]>(`http://localhost:8080/api/wallets?userId=${this.userId}`).subscribe({
       next: (data) => this.wallets = data,
       error: (err) => console.error('Lỗi tải ví', err)
     });

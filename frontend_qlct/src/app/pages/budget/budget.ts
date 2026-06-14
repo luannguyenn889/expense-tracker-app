@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CategoryService } from '../../services/category-service';
 import { BudgetService, BudgetRequest, BudgetProgress } from '../../services/budget-service';
 import { Category } from '../../model/category';
+import { Auth } from '../../services/auth';
 
 @Component({
   selector: 'app-budget',
@@ -163,17 +164,35 @@ export class Budget implements OnInit {
   constructor(
     private categoryService: CategoryService,
     private budgetService: BudgetService,
-    private cdr: ChangeDetectorRef // Inject thêm dịch vụ này để ép UI làm mới ngay
+    private cdr: ChangeDetectorRef, // Inject thêm dịch vụ này để ép UI làm mới ngay
+    private auth: Auth
   ) {}
 
   ngOnInit(): void {
-    const storedUserId = sessionStorage.getItem('userId') || localStorage.getItem('userId');
-    // Tạm thời gán cứng ID của bạn để test luồng ngân sách
-    this.userId = storedUserId ? Number(storedUserId) : 7; // Tạm để 7 nếu không tìm thấy để test
-
     this.setDefaultMonth();
-    this.fetchCategories();
-    this.fetchBudgetProgress();
+    this.auth.currentUser$.subscribe({
+      next: (user) => {
+        if (user && user.id) {
+          this.userId = user.id;
+        } else {
+          const userInfoStr = localStorage.getItem('user_info');
+          if (userInfoStr) {
+            const userInfo = JSON.parse(userInfoStr);
+            this.userId = userInfo && userInfo.id ? userInfo.id : 7;
+          } else {
+            this.userId = 7; // default fallback if not found
+          }
+        }
+        this.fetchCategories();
+        this.fetchBudgetProgress();
+      },
+      error: (err) => {
+        console.error('Error fetching user info in Budget:', err);
+        this.userId = 7;
+        this.fetchCategories();
+        this.fetchBudgetProgress();
+      }
+    });
   }
 
   setDefaultMonth(): void {

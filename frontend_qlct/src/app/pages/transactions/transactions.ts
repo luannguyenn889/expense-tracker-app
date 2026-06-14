@@ -218,7 +218,7 @@ export class Transactions implements OnInit {
     }
 
     // ĐOẠN NÀY CHỈ CHẠY KHI LÀ KHOẢN CHI (EXPENSE)
-    const currentUserId = Number(sessionStorage.getItem('userId')) || 7;
+    const currentUserId = this.transactionService.getCurrentUserId() || 7;
     const today = new Date();
     const currentMonth = today.getMonth() + 1;
     const currentYear = today.getFullYear();

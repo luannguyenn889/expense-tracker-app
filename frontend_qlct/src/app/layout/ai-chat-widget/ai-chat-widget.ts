@@ -30,7 +30,8 @@ export class AiChatWidget implements OnInit {
     'Ăn phở 45k',
     'Nhận lương 15tr',
     'Tháng này mình tiêu thế nào?',
-    'Tổng tiền của mình là bao nhiêu?'
+    'Tổng tiền của mình là bao nhiêu?',
+    
   ];
 
   constructor(
@@ -40,7 +41,11 @@ export class AiChatWidget implements OnInit {
     private cdr: ChangeDetectorRef
   ) {}
 
+
+
   ngOnInit() {
+
+    // Theo dõi thay đổi thông tin người dùng
     this.auth.currentUser$.subscribe({
       next: (user) => {
         if (user && user.id) {
@@ -57,7 +62,7 @@ export class AiChatWidget implements OnInit {
       time: new Date()
     });
   }
-
+// ham mo dong khung chat
   toggleChat() {
     this.isOpen = !this.isOpen;
     if (this.isOpen) {

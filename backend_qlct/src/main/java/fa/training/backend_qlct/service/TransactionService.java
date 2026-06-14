@@ -47,6 +47,8 @@ public class TransactionService {
 
     @Autowired
     private BudgetRepository budgetRepository;
+    
+    @Autowired
     private UserRepository userRepository;
 
     @Value("${gemini.api.key}")
