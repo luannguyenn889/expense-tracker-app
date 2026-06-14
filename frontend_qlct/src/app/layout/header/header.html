@@ -15,7 +15,71 @@
       <input
         class="topbar__search"
         type="text"
-        placeholder="Search transactions, categories..." />
+        placeholder="Tìm kiếm giao dịch, danh mục..."
+        [(ngModel)]="searchQuery"
+        (input)="onSearchInput()"
+        (focus)="onSearchFocus()"
+        (blur)="onSearchBlur()" />
+
+      <!-- Dropdown Kết quả Tìm kiếm -->
+      <div class="search-results-dropdown" *ngIf="showSearchResults">
+        <!-- Đang tải -->
+        <div class="search-loading" *ngIf="isSearching">
+          <div class="spinner-ring"></div>
+          <span>Đang tìm kiếm...</span>
+        </div>
+
+        <!-- Không có kết quả -->
+        <div class="search-no-results" *ngIf="!isSearching && searchResultsCategories.length === 0 && searchResultsTransactions.length === 0">
+          Không tìm thấy kết quả cho "{{ searchQuery }}"
+        </div>
+
+        <!-- Phần Danh mục -->
+        <div class="search-section" *ngIf="!isSearching && searchResultsCategories.length > 0">
+          <div class="search-section-title">Danh mục</div>
+          <div class="search-item" *ngFor="let cat of searchResultsCategories" (mousedown)="goToCategory(cat)">
+            <div class="search-item-icon-wrap" [style.background-color]="(cat.color || '#5c6bc0') + '15'">
+              <span class="material-symbols-outlined search-item-icon" [style.color]="cat.color || 'var(--color-primary)'">
+                {{ cat.icon || 'category' }}
+              </span>
+            </div>
+            <div class="search-item-info">
+              <div class="search-item-name">{{ cat.name }}</div>
+              <div class="search-item-desc" *ngIf="cat.description">{{ cat.description }}</div>
+            </div>
+            <span class="search-item-badge" 
+                  [class.search-item-badge--expense]="cat.type === 'EXPENSE'" 
+                  [class.search-item-badge--income]="cat.type === 'INCOME'">
+              {{ cat.type === 'INCOME' ? 'Thu nhập' : 'Chi tiêu' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Phần Giao dịch -->
+        <div class="search-section" *ngIf="!isSearching && searchResultsTransactions.length > 0">
+          <div class="search-section-title">Giao dịch</div>
+          <div class="search-item" *ngFor="let tx of searchResultsTransactions" (mousedown)="goToTransaction(tx)">
+            <div class="search-item-icon-wrap" 
+                 [class.search-item-icon-wrap--income]="tx.type === 'INCOME'" 
+                 [class.search-item-icon-wrap--expense]="tx.type === 'EXPENSE'">
+              <span class="material-symbols-outlined search-item-icon">
+                {{ tx.type === 'INCOME' ? 'trending_up' : (tx.type === 'EXPENSE' ? 'trending_down' : 'swap_horiz') }}
+              </span>
+            </div>
+            <div class="search-item-info">
+              <div class="search-item-name">{{ tx.note || (tx.type === 'INCOME' ? 'Thu nhập' : (tx.type === 'EXPENSE' ? 'Chi tiêu' : 'Chuyển tiền')) }}</div>
+              <div class="search-item-desc">
+                {{ tx.transactionDate | date:'dd/MM/yyyy' }} • {{ getWalletName(tx.walletId) }}
+              </div>
+            </div>
+            <div class="search-item-amount" 
+                 [class.search-item-amount--income]="tx.type === 'INCOME'" 
+                 [class.search-item-amount--expense]="tx.type === 'EXPENSE'">
+              {{ tx.type === 'INCOME' ? '+' : (tx.type === 'EXPENSE' ? '-' : '') }}{{ tx.amount | number:'1.0-0' }} ₫
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -66,6 +130,12 @@
             <div style="font-size: 12px; color: var(--color-on-surface-variant); margin-top: 2px;">{{ user?.username || 'User' }}</div>
           </div>
           <ul class="dropdown-list">
+            <li>
+              <a [routerLink]="['/user/edit', user?.id]" class="dropdown-item" (click)="toggleMenu()">
+                <span class="material-symbols-outlined">manage_accounts</span>
+                Cập nhật tài khoản
+              </a>
+            </li>
             <li>
               <a routerLink="/settings" class="dropdown-item" (click)="toggleMenu()">
                 <span class="material-symbols-outlined">settings</span>

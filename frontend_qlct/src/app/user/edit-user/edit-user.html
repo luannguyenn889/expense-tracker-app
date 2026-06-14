@@ -1,0 +1,83 @@
+<div class="profile-card">
+  <div class="profile-card-header">
+    <div class="profile-title-group">
+      <span class="material-symbols-outlined profile-header-icon">manage_accounts</span>
+      <div>
+        <h2 class="profile-card-title">Cập nhật tài khoản</h2>
+        <p class="profile-card-subtitle">Chỉnh sửa thông tin cá nhân của bạn</p>
+      </div>
+    </div>
+    <button class="profile-btn-secondary" routerLink="/">
+      <span class="material-symbols-outlined">arrow_back</span>
+      Trang chủ
+    </button>
+  </div>
+
+  @if (isLoading) {
+    <div class="profile-loading">
+      <div class="spinner"></div>
+      <p>Đang tải thông tin tài khoản...</p>
+    </div>
+  } @else {
+    <form class="profile-form" (ngSubmit)="onSubmit()">
+      
+      <!-- Readonly Username -->
+      <div class="profile-form-group">
+        <label class="profile-label" for="username">Tên đăng nhập (Email)</label>
+        <div class="profile-input-wrapper readonly">
+          <span class="material-symbols-outlined input-icon">alternate_email</span>
+          <input type="text" id="username" class="profile-input" name="username" [value]="user.username" readonly>
+        </div>
+        <small class="profile-help-text">Tên đăng nhập không thể thay đổi.</small>
+      </div>
+
+      <div class="profile-form-row">
+        <!-- First Name -->
+        <div class="profile-form-group">
+          <label class="profile-label" for="firstname">Họ và tên đệm <span class="profile-required">*</span></label>
+          <div class="profile-input-wrapper">
+            <span class="material-symbols-outlined input-icon">badge</span>
+            <input type="text" id="firstname" class="profile-input" name="firstname" [(ngModel)]="user.firstname" placeholder="Ví dụ: Nguyễn Văn" required>
+          </div>
+        </div>
+
+        <!-- Last Name -->
+        <div class="profile-form-group">
+          <label class="profile-label" for="lastname">Tên <span class="profile-required">*</span></label>
+          <div class="profile-input-wrapper">
+            <span class="material-symbols-outlined input-icon">person</span>
+            <input type="text" id="lastname" class="profile-input" name="lastname" [(ngModel)]="user.lastname" placeholder="Ví dụ: An" required>
+          </div>
+        </div>
+      </div>
+
+      <!-- Date of Birth -->
+      <div class="profile-form-group">
+        <label class="profile-label" for="dob">Ngày sinh</label>
+        <div class="profile-input-wrapper">
+          <span class="material-symbols-outlined input-icon">calendar_month</span>
+          <input type="date" id="dob" class="profile-input" name="dob" [(ngModel)]="user.dob">
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="profile-form-group">
+        <label class="profile-label" for="password">Mật khẩu mới</label>
+        <div class="profile-input-wrapper">
+          <span class="material-symbols-outlined input-icon">lock</span>
+          <input type="password" id="password" class="profile-input" name="password" [(ngModel)]="user.password" placeholder="Nhập mật khẩu mới nếu muốn thay đổi">
+        </div>
+        <small class="profile-help-text">Để trống nếu bạn không muốn thay đổi mật khẩu hiện tại.</small>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="profile-form-actions">
+        <button type="button" class="profile-btn-outline" routerLink="/">Hủy bỏ</button>
+        <button type="submit" class="profile-btn">
+          <span class="material-symbols-outlined">save</span>
+          Lưu thay đổi
+        </button>
+      </div>
+    </form>
+  }
+</div>

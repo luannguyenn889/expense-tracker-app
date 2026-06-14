@@ -11,6 +11,8 @@ import { Settings } from './pages/settings/settings';
 import { ListCategory } from './categories/list-category/list-category';
 import { AddCategory } from './categories/add-category/add-category';
 import { EditCategory } from './categories/edit-category/edit-category';
+import { EditUser } from './user/edit-user/edit-user';
+import {SavingGoals} from './pages/saving-goals/saving-goals';
 
 export const routes: Routes = [
   { path: 'login', component: Login },
@@ -25,6 +27,8 @@ export const routes: Routes = [
   { path: 'list-category', component: ListCategory },
   { path: 'categories/add', component: AddCategory },
   { path: 'categories/edit/:id', component: EditCategory },
+  { path: 'user/edit/:id', component: EditUser },
+  { path: 'saving-goals', component: SavingGoals },
   { path: '**', redirectTo: '' }
 ];
 

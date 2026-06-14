@@ -1,0 +1,205 @@
+<div class="transactions-container">
+  <div class="header-actions">
+    <div>
+      <h2>Tạo Mục Tiêu Tiết Kiệm</h2>
+      <p class="page-subtitle">Lên kế hoạch tài chính cho tương lai của bạn.</p>
+    </div>
+  </div>
+
+  <div class="filters form-wrapper">
+    <div *ngIf="errorMessage" class="alert alert-error w-100">{{ errorMessage }}</div>
+    <div *ngIf="successMessage" class="alert alert-success w-100">{{ successMessage }}</div>
+
+    <form (ngSubmit)="onSubmit()" #goalForm="ngForm" class="w-100">
+      <div class="filter-row">
+        <div class="filter-group">
+          <label for="goalName">Tên mục tiêu</label>
+          <input type="text" id="goalName" name="goalName" [(ngModel)]="goalName" required placeholder="Ví dụ: Mua iPhone" />
+        </div>
+
+        <div class="filter-group">
+          <label for="targetAmount">Số tiền mục tiêu (VNĐ)</label>
+          <input type="number" id="targetAmount" name="targetAmount" [(ngModel)]="targetAmount" required min="1000" placeholder="Ví dụ: 30000000" />
+        </div>
+
+        <div class="filter-group">
+          <label for="targetDate">Ngày dự kiến hoàn thành</label>
+          <input type="date" id="targetDate" name="targetDate" [(ngModel)]="targetDate" required />
+        </div>
+      </div>
+
+      <div class="filter-actions justify-end mt-4">
+        <button type="submit" [disabled]="!goalForm.valid || isLoading" class="btn-search">
+          <span class="material-symbols-outlined" *ngIf="!isLoading">flag</span>
+          <span *ngIf="!isLoading">Tạo Mục Tiêu</span>
+          <span *ngIf="isLoading">Đang xử lý...</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="progress-section mt-4">
+    <h3 class="section-title" style="margin-bottom: 16px; font-size: 1.25rem; color: #1a1c1c;">Danh sách mục tiêu của bạn</h3>
+
+    <div class="progress-list">
+      <div *ngIf="savingGoalsList.length === 0" class="empty-state" style="padding: 20px; text-align: center; color: #64748b; background: #f8fafc; border-radius: 12px;">
+        Bạn chưa có mục tiêu tiết kiệm nào. Hãy tạo một mục tiêu mới!
+      </div>
+
+      <div class="progress-card" *ngFor="let goal of savingGoalsList" style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 1.5rem; margin-bottom: 1rem; position: relative;">
+
+        <div class="progress-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="cat-name" style="font-weight: 600; font-size: 16px;">{{ goal.name }}</span>
+
+              <span class="status-badge" [ngClass]="getGoalStatus(goal).class">
+                 {{ getGoalStatus(goal).text }}
+              </span>
+
+              <div class="action-icons">
+                <span class="material-symbols-outlined icon-btn edit-icon" (click)="openEditModal(goal)" title="Sửa">edit</span>
+                <span class="material-symbols-outlined icon-btn delete-icon" (click)="openDeleteModal(goal)" title="Xóa">delete</span>
+              </div>
+            </div>
+
+            <span class="cat-amount" style="color: #64748b; font-size: 14px; display: block; margin-top: 4px;">
+               Tích lũy: {{ goal.currentAmount | number }} / {{ goal.targetAmount | number }} đ
+            </span>
+          </div>
+
+          <button class="btn-search" style="height: 32px; padding: 0 12px; font-size: 13px;"
+                  (click)="openModal(goal)" *ngIf="getGoalStatus(goal).text === 'Đang thực hiện'">
+            Nạp tiền
+          </button>
+        </div>
+
+        <div class="progress-bar-bg" style="width: 100%; height: 8px; background-color: #e2e8f0; border-radius: 4px; overflow: hidden; margin-bottom: 8px;">
+          <div class="progress-bar-fill"
+               style="height: 100%; transition: width 0.3s ease;"
+               [style.background-color]="getGoalStatus(goal).text === 'Quá hạn' ? '#ef4444' : (getGoalStatus(goal).text === 'Đã hoàn thành' ? '#22c55e' : '#0ea5e9')"
+               [style.width.%]="(goal.currentAmount / goal.targetAmount) * 100 > 100 ? 100 : (goal.currentAmount / goal.targetAmount) * 100">
+          </div>
+        </div>
+
+        <div class="progress-footer" style="display: flex; justify-content: space-between; font-size: 13px; color: #64748b;">
+          <span>Tiến độ: {{ ((goal.currentAmount / goal.targetAmount) * 100) | number:'1.0-1' }}%</span>
+
+          <span *ngIf="goal.targetAmount - goal.currentAmount > 0" style="font-weight: 500; color: #b91c1c;">
+            Còn thiếu: {{ (goal.targetAmount - goal.currentAmount) | number }} đ
+          </span>
+          <span *ngIf="goal.targetAmount - goal.currentAmount <= 0" style="font-weight: 500; color: #16803d;">
+            Xuất sắc!
+          </span>
+
+          <span class="fw-bold">Hạn: {{ goal.targetDate | date:'dd/MM/yyyy' }}</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Nạp tiền: {{ selectedGoal?.name }}</h3>
+      <button class="close-btn" (click)="closeModal()"><span class="material-symbols-outlined">close</span></button>
+    </div>
+
+    <div class="modal-body form-wrapper" style="padding: 1.5rem 0;">
+      <div *ngIf="modalError" class="alert alert-error">{{ modalError }}</div>
+
+      <div class="filter-group mb-3">
+        <label>Chọn Ví Nguồn</label>
+        <select [(ngModel)]="selectedWalletId" name="selectedWalletId">
+          <option [ngValue]="null" disabled>-- Chọn ví --</option>
+          <option *ngFor="let w of wallets" [value]="w.id">
+            {{ w.name }} (Dư: {{ w.balance | number }} đ)
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group mb-4">
+        <label>Số tiền nạp (VNĐ)</label>
+        <input type="number" [(ngModel)]="contributeAmount" name="contributeAmount" min="1000" placeholder="Nhập số tiền..." />
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button class="btn-cancel" (click)="closeModal()">Hủy</button>
+        <button class="btn-search" (click)="onContributeSubmit()" [disabled]="isContributing">
+          {{ isContributing ? 'Đang nạp...' : 'Xác nhận nạp' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showEditModal" (click)="closeEditModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Sửa mục tiêu</h3>
+      <button class="close-btn" (click)="closeEditModal()"><span class="material-symbols-outlined">close</span></button>
+    </div>
+
+    <div class="modal-body form-wrapper" style="padding: 1.5rem 0;">
+      <div *ngIf="modalError" class="alert alert-error">{{ modalError }}</div>
+
+      <div class="filter-group mb-3">
+        <label>Tên mục tiêu</label>
+        <input type="text" [(ngModel)]="editGoalData.name" name="editName" required />
+      </div>
+      <div class="filter-group mb-3">
+        <label>Số tiền mục tiêu (VNĐ)</label>
+        <input type="number" [(ngModel)]="editGoalData.targetAmount" name="editAmount" required />
+      </div>
+      <div class="filter-group mb-4">
+        <label>Ngày hoàn thành</label>
+        <input type="date" [(ngModel)]="editGoalData.targetDate" name="editDate" required />
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button class="btn-cancel" (click)="closeEditModal()">Hủy</button>
+        <button class="btn-search" (click)="onEditSubmit()" [disabled]="isEditing">
+          {{ isEditing ? 'Đang lưu...' : 'Lưu thay đổi' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 style="color: #b91c1c;">Cảnh báo xóa mục tiêu</h3>
+      <button class="close-btn" (click)="closeDeleteModal()"><span class="material-symbols-outlined">close</span></button>
+    </div>
+
+    <div class="modal-body form-wrapper" style="padding: 1.5rem 0;">
+      <div *ngIf="modalError" class="alert alert-error">{{ modalError }}</div>
+
+      <p style="margin-bottom: 1rem; color: #475569; line-height: 1.5;">
+        Bạn có chắc chắn muốn xóa quỹ <strong>{{ goalToDelete?.name }}</strong> không? Thao tác này không thể hoàn tác.
+      </p>
+
+      <div class="filter-group mb-4" *ngIf="goalToDelete?.currentAmount > 0" style="background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+        <label style="color: #0369a1; font-weight: 600; display: block; margin-bottom: 8px;">
+          Quỹ này đang có {{ goalToDelete?.currentAmount | number }} đ. Bạn muốn hoàn tiền về ví nào?
+        </label>
+        <select [(ngModel)]="refundWalletId" name="refundWallet">
+          <option [ngValue]="null">Không hoàn tiền (Xóa trắng dữ liệu)</option>
+          <option *ngFor="let w of wallets" [value]="w.id">
+            Hoàn vào: {{ w.name }} (Dư: {{ w.balance | number }} đ)
+          </option>
+        </select>
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button class="btn-cancel" (click)="closeDeleteModal()">Hủy</button>
+        <button class="btn-search" style="background: #ef4444;" (click)="onDeleteSubmit()" [disabled]="isDeleting">
+          {{ isDeleting ? 'Đang xóa...' : 'Xác nhận xóa' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -7,9 +7,10 @@ import {GoogleSigninButtonDirective, SocialAuthService} from '@abacritt/angularx
 import {Auth} from '../../services/auth';
 
 import {User} from '../../model/user';
+import { ReactiveFormsModule } from '@angular/forms';
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, FormsModule, GoogleSigninButtonDirective],
+  imports: [CommonModule, FormsModule, GoogleSigninButtonDirective, ReactiveFormsModule, FormsModule,CommonModule],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
@@ -20,7 +21,7 @@ export class Login implements OnInit{
   @Input() public user!: User;
 
 
-  // Login fields
+  // Dữ llieu đăng nhập thường
   email = '';
   password = '';
   rememberMe = false;
@@ -29,7 +30,7 @@ export class Login implements OnInit{
 
   }
 
-// tao login data
+// Tạo một object để chứa dữ liệu đăng nhập thường, sẽ được Angular tự động bind với form
   logindata = {
     username: '',
     password: ''
