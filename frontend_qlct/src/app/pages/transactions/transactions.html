@@ -50,7 +50,7 @@
     </div>
   </div>
 
-  <app-list-transaction 
+  <app-list-transaction
     [transactions]="transactions"
     [wallets]="allWallets"
     [currentPage]="currentPage"
@@ -62,16 +62,16 @@
 </div>
 
 <!-- POPUP THÊM GIAO DỊCH -->
-<app-add-transaction 
+<app-add-transaction
   *ngIf="showAddModal"
   [wallets]="wallets"
   [categories]="categories"
   (close)="closeAddModal()"
-  (added)="onTransactionAdded()">
+  (added)="onTransactionAdded($event)">
 </app-add-transaction>
 
 <!-- POPUP SỬA GIAO DỊCH -->
-<app-edit-transaction 
+<app-edit-transaction
   *ngIf="showEditModal"
   [transaction]="selectedTransaction"
   [wallets]="wallets"
@@ -81,9 +81,26 @@
 </app-edit-transaction>
 
 <!-- POPUP CHUYỂN TIỀN -->
-<app-transfer 
+<app-transfer
   *ngIf="showTransferModal"
   [wallets]="wallets"
   (close)="closeTransferModal()"
   (completed)="onTransferCompleted()">
 </app-transfer>
+
+<div class="custom-toast-container" *ngIf="toastMessage">
+  <div class="custom-toast" [ngClass]="{
+      'toast-warning': toastType === 'WARNING',
+      'toast-danger': toastType === 'DANGER',
+      'toast-success': toastType === 'SUCCESS'
+    }">
+    <span class="material-symbols-outlined toast-icon">
+      {{ toastType === 'SUCCESS' ? 'check_circle' : (toastType === 'DANGER' ? 'error' : 'warning') }}
+    </span>
+    <div class="toast-content">
+      <strong>{{ toastType === 'SUCCESS' ? 'Thành công' : 'Cảnh báo Ngân sách' }}</strong>
+      <p>{{ toastMessage }}</p>
+    </div>
+    <button class="toast-close" (click)="toastMessage = ''">&times;</button>
+  </div>
+</div>

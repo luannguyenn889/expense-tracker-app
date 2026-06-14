@@ -7,6 +7,9 @@ import fa.training.backend_qlct.entities.Categories;
 import fa.training.backend_qlct.respository.TransactionRepository;
 import fa.training.backend_qlct.respository.CategoryRepository;
 import fa.training.backend_qlct.repository.WalletRepository;
+import fa.training.backend_qlct.dto.response.TransactionResponse;
+import fa.training.backend_qlct.repository.BudgetRepository;
+import fa.training.backend_qlct.entities.Budgets;
 import fa.training.backend_qlct.respository.UserRepository;
 import fa.training.backend_qlct.entities.Users;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,6 +46,7 @@ public class TransactionService {
     private CategoryRepository categoryRepository;
 
     @Autowired
+    private BudgetRepository budgetRepository;
     private UserRepository userRepository;
 
     @Value("${gemini.api.key}")
@@ -52,7 +56,7 @@ public class TransactionService {
     private String apiUrl;
 
     @Transactional
-    public Transaction createTransaction(TransactionRequest request, Long userId) {
+    public TransactionResponse createTransaction(TransactionRequest request, Long userId) {
         Wallet wallet = walletRepository.findById(request.getWalletId())
                 .orElseThrow(() -> new RuntimeException("Ví không tồn tại"));
 
@@ -95,7 +99,44 @@ public class TransactionService {
         }
         transaction.setUserId(userId);
 
-        return transactionRepository.save(transaction);
+        Transaction savedTransaction = transactionRepository.save(transaction);
+
+        // 3. TẠO RESPONSE ĐỂ CHUẨN BỊ TRẢ VỀ CHO FRONTEND
+        TransactionResponse response = new TransactionResponse();
+        response.setTransaction(savedTransaction);
+
+        // 4. KIỂM TRA CẢNH BÁO [UC20] (Logic mới thêm vào)
+        if ("EXPENSE".equals(request.getType()) && request.getCategoryId() != null) {
+            LocalDate date = savedTransaction.getTransactionDate();
+            int month = date.getMonthValue();
+            int year = date.getYear();
+
+            List<Budgets> budgets = budgetRepository.findByUserIdAndMonthAndYear(userId, month, year);
+            Budgets budget = budgets.stream()
+                    .filter(b -> b.getCategory().getId().equals(request.getCategoryId()))
+                    .findFirst().orElse(null);
+
+            if (budget != null) {
+                LocalDate startDate = LocalDate.of(year, month, 1);
+                LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+
+                // Lấy tổng chi tiêu của danh mục này trong tháng
+                BigDecimal totalSpend = transactionRepository.sumExpenseByCategoryIdAndDate(
+                        userId, request.getCategoryId(), startDate, endDate);
+
+                double spend = totalSpend != null ? totalSpend.doubleValue() : 0.0;
+                double percent = (spend / budget.getAmount()) * 100;
+
+                if (percent > 100) {
+                    response.setAlertMessage("Bạn đã vượt hạn mức chi tiêu!");
+                    response.setAlertType("DANGER");
+                } else if (percent >= 80) {
+                    response.setAlertMessage("Bạn đã tiêu gần hết hạn mức!");
+                    response.setAlertType("WARNING");
+                }
+            }
+        }
+        return response;
     }
 
     @Transactional
@@ -441,7 +482,7 @@ public class TransactionService {
 
         for (Map<String, Object> trx : trxList) {
             String note = (String) trx.get("note");
-            
+
             Object amountObj = trx.get("amount");
             BigDecimal amount = BigDecimal.ZERO;
             if (amountObj instanceof Number) {
@@ -463,7 +504,7 @@ public class TransactionService {
             if (txnType == null || (!"INCOME".equals(txnType) && !"EXPENSE".equals(txnType))) {
                 txnType = "EXPENSE";
             }
-            
+
             String dateStr = (String) trx.get("date");
             LocalDate txnDate = LocalDate.now();
             if (dateStr != null && !dateStr.trim().isEmpty()) {
@@ -477,12 +518,12 @@ public class TransactionService {
             // Giải quyết ví thông minh
             Wallet selectedWallet = null;
             List<Wallet> activeWallets = walletRepository.findActiveByUserId(resolvedUserId);
-            
+
             // 1. Tìm ví khớp với tên do AI nhận diện
             if (walletNameFromAi != null && !walletNameFromAi.trim().isEmpty()) {
                 String normalizedAiName = walletNameFromAi.toLowerCase().trim();
                 for (Wallet w : activeWallets) {
-                    if (w.getName().toLowerCase().contains(normalizedAiName) || 
+                    if (w.getName().toLowerCase().contains(normalizedAiName) ||
                         normalizedAiName.contains(w.getName().toLowerCase())) {
                         selectedWallet = w;
                         break;
@@ -505,7 +546,7 @@ public class TransactionService {
                         .filter(w -> w.getBalance().compareTo(finalAmount) >= 0)
                         .sorted((w1, w2) -> w2.getBalance().compareTo(w1.getBalance()))
                         .collect(Collectors.toList());
-                
+
                 if (!walletsWithSufficientBalance.isEmpty()) {
                     selectedWallet = walletsWithSufficientBalance.get(0);
                 }
@@ -569,7 +610,7 @@ public class TransactionService {
             request.setWalletId(selectedWallet.getId());
 
             try {
-                Transaction saved = createTransaction(request, resolvedUserId);
+                Transaction saved = createTransaction(request, resolvedUserId).getTransaction();
                 savedTransactions.add(saved);
 
                 Wallet updatedWallet = walletRepository.findById(selectedWallet.getId()).orElse(selectedWallet);
@@ -584,7 +625,7 @@ public class TransactionService {
 
                 String typeSymbol = "EXPENSE".equals(txnType) ? "💸 Chi tiêu" : "💰 Thu nhập";
                 resultMessage.append(String.format("- %s: %,.0f VNĐ - '%s' (%s) ghi vào ví '%s' (Số dư mới: %,.0f VNĐ)\n",
-                        typeSymbol, amount, request.getNote(), catDisplayName, updatedWallet.getName(), 
+                        typeSymbol, amount, request.getNote(), catDisplayName, updatedWallet.getName(),
                         updatedWallet.getBalance()));
             } catch (Exception e) {
                 resultMessage.append(String.format("- ⚠️ Lỗi khi ghi nhận '%s': %s\n", note != null ? note : categoryName, e.getMessage()));
@@ -602,4 +643,5 @@ public class TransactionService {
     public List<Transaction> createTransactionsFromChat(String userInput, Long userId, Long walletId, String username) {
         return new ArrayList<>();
     }
-}
+}
+

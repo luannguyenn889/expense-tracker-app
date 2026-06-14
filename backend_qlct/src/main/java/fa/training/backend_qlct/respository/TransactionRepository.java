@@ -1,5 +1,6 @@
 package fa.training.backend_qlct.respository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -39,4 +40,24 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Transaction> findByUserIdAndTransactionDateBetween(Long userId, LocalDate startDate, LocalDate endDate);
 
     List<Transaction> findTop10ByUserIdOrderByTransactionDateDescIdDesc(Long userId);
+
+    @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t " +
+            "WHERE t.userId = :userId " +
+            "AND t.categoryId = :categoryId " +
+            "AND t.type = 'EXPENSE' " +
+            "AND t.transactionDate >= :startDate " +
+            "AND t.transactionDate <= :endDate")
+    java.math.BigDecimal sumExpenseByCategoryIdAndDate(
+            @Param("userId") Long userId,
+            @Param("categoryId") String categoryId,
+            @Param("startDate") java.time.LocalDate startDate,
+            @Param("endDate") java.time.LocalDate endDate);
+
+    @Query("SELECT SUM(CASE WHEN t.type = 'EXPENSE' THEN t.amount WHEN t.type = 'INCOME' THEN -t.amount ELSE 0 END) " +
+            "FROM Transaction t WHERE t.userId = :userId AND t.categoryId = :categoryId " +
+            "AND t.transactionDate >= :startDate AND t.transactionDate <= :endDate")
+    BigDecimal calculateNetSpendingByCategoryIdAndDate(@Param("userId") Long userId,
+                                                       @Param("categoryId") String categoryId,
+                                                       @Param("startDate") LocalDate startDate,
+                                                       @Param("endDate") LocalDate endDate);
 }

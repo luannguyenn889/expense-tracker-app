@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*") 
 public class AuthController {
 
     @Autowired
@@ -34,6 +33,7 @@ public class AuthController {
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Google login failed: " + e.getMessage());
         }
     }

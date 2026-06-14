@@ -24,7 +24,7 @@ public class AuthService {
     // private JwtService jwtService;
 
     // Thay thế chuỗi này bằng Client ID thật của bạn từ Google Cloud Console
-    public static final String GOOGLE_CLIENT_ID = "569426721711-6fcai7tp032jl9lirj5ov96g7oati346.apps.googleusercontent.com";
+    public static final String GOOGLE_CLIENT_ID = "569426721711-6ub3hgomi74b201otif6cpe3oq53s5fj.apps.googleusercontent.com";
 
     public AuthResponse processGoogleLogin(String tokenFromAngular) throws Exception {
         

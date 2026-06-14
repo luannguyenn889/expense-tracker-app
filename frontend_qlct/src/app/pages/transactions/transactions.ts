@@ -8,6 +8,7 @@ import { Transfer } from '../../transactions/transfer/transfer';
 import { TransactionService } from '../../services/transaction-service';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
+import {BudgetService} from '../../services/budget-service';
 
 @Component({
   selector: 'app-transactions',
@@ -20,8 +21,8 @@ export class Transactions implements OnInit {
 
   transactions: any[] = [];
   wallets: any[] = [];
-  allWallets: any[] = [];   
-  activeWallets: any[] = [];  
+  allWallets: any[] = [];
+  activeWallets: any[] = [];
   categories: any[] = [];
   filter = { startDate: '', endDate: '', type: '', walletId: null as number | null };
   currentPage = 0;
@@ -33,8 +34,12 @@ export class Transactions implements OnInit {
   showTransferModal = false;
   selectedTransaction: any = null;
 
+  toastMessage: string = '';
+  toastType: string = '';
+
   constructor(
     private transactionService: TransactionService,
+    private budgetService: BudgetService,
     private cdr: ChangeDetectorRef,
     private http: HttpClient,
     private route: ActivatedRoute,
@@ -44,10 +49,6 @@ export class Transactions implements OnInit {
   ngOnInit() {
     this.loadData();
 
-    this.transactionService.transactionChanges$.subscribe(() => {
-      this.loadData();
-    });
-    
     if (sessionStorage.getItem('openAddTransaction') === 'true') {
       sessionStorage.removeItem('openAddTransaction');
       setTimeout(() => {
@@ -66,7 +67,7 @@ export class Transactions implements OnInit {
           queryParams: { editTxId: null },
           queryParamsHandling: 'merge'
         });
-        
+
         this.transactionService.getTransactionById(txId).subscribe({
           next: (tx) => {
             setTimeout(() => {
@@ -77,6 +78,8 @@ export class Transactions implements OnInit {
         });
       }
     });
+
+
   }
 
   loadData() {
@@ -95,17 +98,17 @@ export class Transactions implements OnInit {
   loadWallets() {
     this.transactionService.getWallets().subscribe({
       next: (data: any) => {
-        this.allWallets = data;        
-        this.wallets = data;          
+        this.allWallets = data;
+        this.wallets = data;
         this.cdr.detectChanges();
       },
       error: (err) => console.error('Lỗi tải ví:', err)
     });
-    
+
     this.http.get(`http://localhost:8080/api/wallets/all?userId=${this.transactionService.getCurrentUserId()}`)
       .subscribe({
         next: (data: any) => {
-          this.allWallets = data; 
+          this.allWallets = data;
         },
         error: (err) => console.error('Lỗi tải all ví:', err)
       });
@@ -126,14 +129,14 @@ export class Transactions implements OnInit {
       });
   }
 
-  search() { 
-    this.currentPage = 0; 
-    this.loadTransactions(); 
+  search() {
+    this.currentPage = 0;
+    this.loadTransactions();
   }
-  
-  changePage(page: number) { 
-    this.currentPage = page; 
-    this.loadTransactions(); 
+
+  changePage(page: number) {
+    this.currentPage = page;
+    this.loadTransactions();
   }
 
   clearFilter() {
@@ -147,29 +150,29 @@ export class Transactions implements OnInit {
     this.loadTransactions();
   }
 
-  openAddTransaction() { 
-    this.showAddModal = true; 
+  openAddTransaction() {
+    this.showAddModal = true;
   }
-  
-  closeAddModal() { 
-    this.showAddModal = false; 
+
+  closeAddModal() {
+    this.showAddModal = false;
   }
 
   openEditModal(transaction: any) {
     this.selectedTransaction = transaction;
     this.showEditModal = true;
   }
-  
-  closeEditModal() { 
-    this.showEditModal = false; 
+
+  closeEditModal() {
+    this.showEditModal = false;
   }
 
-  openTransferModal() { 
-    this.showTransferModal = true; 
+  openTransferModal() {
+    this.showTransferModal = true;
   }
-  
-  closeTransferModal() { 
-    this.showTransferModal = false; 
+
+  closeTransferModal() {
+    this.showTransferModal = false;
   }
 
   deleteTransaction(id: number) {
@@ -199,9 +202,60 @@ export class Transactions implements OnInit {
     }
   }
 
-  onTransactionAdded() {
+  onTransactionAdded(response?: any) {
     this.closeAddModal();
     this.loadData();
+
+    if (response && response.alertMessage) {
+      this.showToast(response.alertMessage, response.alertType);
+      return;
+    }
+
+    // LUẬT MỚI 1: NẾU LÀ KHOẢN THU (INCOME) -> LUÔN XANH LÁ, BỎ QUA NGÂN SÁCH
+    if (response && response.type === 'INCOME') {
+      this.showToast('Thêm giao dịch thành công!', 'SUCCESS');
+      return;
+    }
+
+    // ĐOẠN NÀY CHỈ CHẠY KHI LÀ KHOẢN CHI (EXPENSE)
+    const currentUserId = Number(sessionStorage.getItem('userId')) || 7;
+    const today = new Date();
+    const currentMonth = today.getMonth() + 1;
+    const currentYear = today.getFullYear();
+
+    this.budgetService.getBudgetProgress(currentUserId, currentMonth, currentYear).subscribe({
+      next: (progressList) => {
+
+        // LUẬT MỚI 2: Lấy chính xác CategoryId của giao dịch vừa thêm để check
+        const categoryId = response ? response.categoryId : null;
+
+        // CHỈ tìm ngân sách của đúng danh mục vừa chi
+        const currentBudget = progressList.find(p => p.categoryId === categoryId);
+
+        if (currentBudget) {
+          if (currentBudget.percentage > 100) {
+            this.showToast(`Cảnh báo Ngân sách: Bạn đã vượt hạn mức "${currentBudget.categoryName}"`, 'DANGER');
+          } else if (currentBudget.percentage >= 80) {
+            this.showToast(`Cảnh báo Ngân sách: Bạn đã tiêu gần hết "${currentBudget.categoryName}"`, 'WARNING');
+          } else {
+            this.showToast('Thêm giao dịch thành công!', 'SUCCESS');
+          }
+        } else {
+          // Danh mục này chưa cài ngân sách
+          this.showToast('Thêm giao dịch thành công!', 'SUCCESS');
+        }
+      },
+      error: () => this.showToast('Thêm giao dịch thành công!', 'SUCCESS')
+    });
+  }
+
+  showToast(message: string, type: string) {
+    this.toastMessage = message;
+    this.toastType = type;
+    setTimeout(() => {
+      this.toastMessage = '';
+      this.cdr.detectChanges(); // ép UI cập nhật ẩn đi
+    }, 5000);
   }
 
   onTransactionUpdated() {

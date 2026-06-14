@@ -14,7 +14,7 @@ export class AddTransaction {
   @Input() wallets: any[] = [];
   @Input() categories: any[] = [];
   @Output() close = new EventEmitter<void>();
-  @Output() added = new EventEmitter<void>();
+  @Output() added = new EventEmitter<any>();
 
   transactionData = {
     type: 'EXPENSE',
@@ -43,8 +43,7 @@ export class AddTransaction {
 
     this.transactionService.addTransaction(this.transactionData).subscribe({
       next: () => {
-        alert('Thêm giao dịch thành công!');
-        this.added.emit();
+        this.added.emit(this.transactionData);
         this.close.emit();
       },
       error: (err) => {

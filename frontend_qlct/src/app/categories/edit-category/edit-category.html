@@ -22,6 +22,15 @@
 
       <!-- Icon -->
       <div class="basic-form-group">
+        <label class="basic-label" for="categoryName">Tên Danh Mục <span class="basic-required">*</span></label>
+        <input type="text" id="categoryName" class="basic-input" name="name" [(ngModel)]="category.name" placeholder="Ví dụ: Ăn uống, Mua sắm..." #categorynameInput="ngModel" required>
+        @if (categorynameInput.invalid && (categorynameInput.dirty || categorynameInput.touched)) {
+          <div class="error-msg">
+            <!-- <span class="material-symbols-outlined error-icon">error</span> -->
+            <span *ngIf="categorynameInput.errors?.['required']" style="color: red;">Tên danh mục là bắt buộc.</span>
+            <span *ngIf="categorynameInput.errors?.['minlength']" style="color: red;">Tên danh mục phải có ít nhất 3 ký tự.</span>
+          </div>
+        }
         <label class="basic-label" for="categoryIcon">Icon Danh Mục <span class="basic-required">*</span></label>
         <div class="basic-icon-select-row">
           <select id="categoryIcon" class="basic-input basic-icon-select" name="icon" [(ngModel)]="category.icon" required>

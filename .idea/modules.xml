@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/expense-tracker-app.iml" filepath="$PROJECT_DIR$/.idea/expense-tracker-app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/backend_qlct/backend_qlct.iml" filepath="$PROJECT_DIR$/backend_qlct/backend_qlct.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/expense-tracker-app-dev.iml" filepath="$PROJECT_DIR$/.idea/expense-tracker-app-dev.iml" />
     </modules>
   </component>
 </project>

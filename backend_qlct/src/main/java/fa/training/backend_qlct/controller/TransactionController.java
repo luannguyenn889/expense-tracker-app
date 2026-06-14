@@ -2,6 +2,7 @@ package fa.training.backend_qlct.controller;
 
 import fa.training.backend_qlct.dto.request.TransactionRequest;
 import fa.training.backend_qlct.dto.request.TransferRequest;
+import fa.training.backend_qlct.dto.response.TransactionResponse;
 import fa.training.backend_qlct.entities.Transaction;
 import fa.training.backend_qlct.service.TransactionService;
 import fa.training.backend_qlct.service.TransferService;
@@ -60,10 +61,11 @@ public class TransactionController {
 
     @PostMapping
     public ResponseEntity<?> createTransaction(@RequestBody TransactionRequest request,
-                                                @RequestParam Long userId) {
+                                               @RequestParam Long userId) {
         try {
-            Object result = transactionService.createTransaction(request, userId);
-            return ResponseEntity.ok(result);
+            // Đổi từ Object result thành TransactionResponse
+            TransactionResponse response = transactionService.createTransaction(request, userId);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

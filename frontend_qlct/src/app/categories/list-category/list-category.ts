@@ -16,7 +16,7 @@ export class ListCategory implements OnInit {
   categories: Category[] = [];
   paginatedCategories: Category[] = [];
   userId: number | null = null; // Lưu trữ ID người dùng đang đăng nhập
-  
+
   // Pagination properties
   currentPage: number = 1; // trang hiện tại
   pageSize: number = 3; // kích thước trang
@@ -73,11 +73,11 @@ export class ListCategory implements OnInit {
     } else if (this.currentPage < 1) {
       this.currentPage = 1;
     }
-    
+
     const startIndex = (this.currentPage - 1) * this.pageSize;
     const endIndex = startIndex + this.pageSize;
     this.paginatedCategories = this.categories.slice(startIndex, endIndex);
-    
+
     // Tạo mảng các số trang
     this.pagesArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
   }
