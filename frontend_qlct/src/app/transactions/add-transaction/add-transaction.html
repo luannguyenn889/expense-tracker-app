@@ -24,9 +24,11 @@
       <label>Danh mục</label>
       <select [(ngModel)]="transactionData.categoryId">
         <option [value]="null">-- Chọn danh mục --</option>
-        <option *ngFor="let cat of categories" [value]="cat.id">
-          {{ cat.name }} ({{ cat.type }})
-        </option>
+        <ng-container *ngFor="let cat of categories">
+          <option *ngIf="cat.type === transactionData.type" [value]="cat.id">
+            {{ cat.name }}
+          </option>
+        </ng-container>
       </select>
     </div>
 

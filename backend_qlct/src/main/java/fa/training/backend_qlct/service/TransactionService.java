@@ -646,8 +646,14 @@ public class TransactionService {
                         break;
                     }
                 }
-                if (categoryId == null && !allCategories.isEmpty()) {
-                    categoryId = allCategories.get(0).getId();
+                // Nếu vẫn chưa tìm thấy, lấy danh mục đầu tiên có cùng loại giao dịch (INCOME/EXPENSE)
+                if (categoryId == null) {
+                    for (Categories cat : allCategories) {
+                        if (cat.getType().equals(txnType)) {
+                            categoryId = cat.getId();
+                            break;
+                        }
+                    }
                 }
             }
 
