@@ -25,15 +25,26 @@ export class BudgetService {
   getBudgetProgress(userId: number, month: number, year: number): Observable<BudgetProgress[]> {
     return this.http.get<BudgetProgress[]>(`${this.apiUrl}/progress?userId=${userId}&month=${month}&year=${year}`);
   }
+
+  // Thêm hàm Sửa
+  updateBudget(budgetId: number, budget: BudgetRequest, userId: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/update/${budgetId}?userId=${userId}`, budget);
+  }
+
+  // Thêm hàm Xóa (responseType: 'text' vì Backend trả về chuỗi thông báo)
+  deleteBudget(budgetId: number, userId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/delete/${budgetId}?userId=${userId}`, { responseType: 'text' });
+  }
 }
 
-// Thêm interface này vào file budget-service.ts
+
 export interface BudgetProgress {
   categoryId: string;
   categoryName: string;
   budgetAmount: number;
   actualSpend: number;
   percentage: number;
+  budgetId: number;
 }
 
 
