@@ -17,7 +17,7 @@ export const appConfig: ApplicationConfig = {
           {
             id: GoogleLoginProvider.PROVIDER_ID,
             provider: new GoogleLoginProvider(
-              '569426721711-6fcai7tp032jl9lirj5ov96g7oati346.apps.googleusercontent.com' // Hãy thay bằng Client ID thật của bạn
+              '569426721711-6ub3hgomi74b201otif6cpe3oq53s5fj.apps.googleusercontent.com' // Hãy thay bằng Client ID thật của bạn
             )
           }
         ],
@@ -34,7 +34,7 @@ export const appConfig: ApplicationConfig = {
           {
             id: GoogleLoginProvider.PROVIDER_ID,
             provider: new GoogleLoginProvider(
-              '569426721711-6fcai7tp032jl9lirj5ov96g7oati346.apps.googleusercontent.com'
+              '569426721711-6ub3hgomi74b201otif6cpe3oq53s5fj.apps.googleusercontent.com'
             )
           }
         ],
