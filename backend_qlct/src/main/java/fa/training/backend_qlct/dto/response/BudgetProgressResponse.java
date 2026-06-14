@@ -6,6 +6,7 @@ public class BudgetProgressResponse {
     private Double budgetAmount;
     private Double actualSpend;
     private Double percentage;
+    private Long budgetId;
 
     // Getters & Setters
     public String getCategoryId() { return categoryId; }
@@ -22,4 +23,7 @@ public class BudgetProgressResponse {
 
     public Double getPercentage() { return percentage; }
     public void setPercentage(Double percentage) { this.percentage = percentage; }
+
+    public Long getBudgetId() { return budgetId; }
+    public void setBudgetId(Long budgetId) { this.budgetId = budgetId; }
 }
