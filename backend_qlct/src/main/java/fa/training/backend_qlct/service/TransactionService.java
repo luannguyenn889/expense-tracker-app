@@ -287,7 +287,6 @@ public class TransactionService {
         BigDecimal total = transactionRepository.sumExpenseByMonth(userId, month, year);
         return total != null ? total : BigDecimal.ZERO;
     }
-
 public Page<TransactionResponse> searchTransactions(
     Long userId, String keyword, LocalDate startDate, LocalDate endDate,
     String type, Long walletId, Double minAmount, Double maxAmount,
@@ -310,37 +309,12 @@ public Page<TransactionResponse> searchTransactions(
         return transactionRepository.findAll(spec);
     }
 
-private Specification<Transaction> buildSpecification(Long userId, String keyword,
-        LocalDate startDate, LocalDate endDate, String type, Long walletId,
-        Double minAmount, Double maxAmount) {
-    return (root, query, cb) -> {
-        List<Predicate> predicates = new ArrayList<>();
-        predicates.add(cb.equal(root.get("userId"), userId));  // Bỏ cast (Predicate)
-
-        if (keyword != null && !keyword.trim().isEmpty())
-            predicates.add(cb.like(cb.lower(root.get("note")), "%" + keyword.toLowerCase() + "%"));
-        if (startDate != null)
-            predicates.add(cb.greaterThanOrEqualTo(root.get("transactionDate"), startDate));
-        if (endDate != null)
-            predicates.add(cb.lessThanOrEqualTo(root.get("transactionDate"), endDate));
-        if (type != null && !type.trim().isEmpty())
-            predicates.add(cb.equal(root.get("type"), type));
-        if (walletId != null)
-            predicates.add(cb.equal(root.get("walletId"), walletId));
-        if (minAmount != null)
-            predicates.add(cb.greaterThanOrEqualTo(root.get("amount"), BigDecimal.valueOf(minAmount)));
-        if (maxAmount != null)
-            predicates.add(cb.lessThanOrEqualTo(root.get("amount"), BigDecimal.valueOf(maxAmount)));
-
-        return cb.and(predicates.toArray(new Predicate[0]));
-    };
-}
 
  private TransactionResponse convert(Transaction tx) {
 
     TransactionResponse dto = new TransactionResponse();
 
-    dto.setId(tx.getId());
+dto.setId(tx.getId());
     dto.setAmount(tx.getAmount());
     dto.setNote(tx.getNote());
     dto.setTransactionDate(tx.getTransactionDate());
@@ -459,7 +433,6 @@ public List<Notification> getNotifications(Long userId) {
     return notificationRepository.findByUserIdAndIsReadFalseOrderByCreatedAtDesc(userId);
 }
 
-
         @Transactional
         public void markAsRead(Long notificationId) {
 
@@ -497,7 +470,32 @@ public List<Notification> getNotifications(Long userId) {
         }
         return transaction;
     }
+    // MỚI - thay vào
+    private Specification<Transaction> buildSpecification(Long userId, String keyword,
+            LocalDate startDate, LocalDate endDate, String type, Long walletId,
+            Double minAmount, Double maxAmount) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get("userId"), userId));
 
+            if (keyword != null && !keyword.trim().isEmpty())
+                predicates.add(cb.like(cb.lower(root.get("note")), "%" + keyword.toLowerCase() + "%"));
+            if (startDate != null)
+                predicates.add(cb.greaterThanOrEqualTo(root.get("transactionDate"), startDate));
+            if (endDate != null)
+                predicates.add(cb.lessThanOrEqualTo(root.get("transactionDate"), endDate));
+            if (type != null && !type.trim().isEmpty())
+                predicates.add(cb.equal(root.get("type"), type));
+            if (walletId != null)
+                predicates.add(cb.equal(root.get("walletId"), walletId));
+            if (minAmount != null)
+                predicates.add(cb.greaterThanOrEqualTo(root.get("amount"), BigDecimal.valueOf(minAmount)));
+            if (maxAmount != null)
+                predicates.add(cb.lessThanOrEqualTo(root.get("amount"), BigDecimal.valueOf(maxAmount)));
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
     // phuong thuc boc tach Transactions thanh JSON
     public String extractTransactionJson(String userInput) {
         String prompt = "Bạn là một trợ lý tài chính. Hãy trích xuất thông tin giao dịch từ câu sau: '" + userInput + "'. "
@@ -942,5 +940,5 @@ public List<Notification> getNotifications(Long userId) {
     public List<Transaction> createTransactionsFromChat(String userInput, Long userId, Long walletId, String username) {
         return new ArrayList<>();
     }
-
+    
 }

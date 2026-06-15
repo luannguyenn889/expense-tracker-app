@@ -175,10 +175,12 @@ export class Dashboard implements OnInit {
       next: (res: any) => {
         this.aiAdvice = res.message;
         this.isAiThinking = false;
+        this.cdr.detectChanges(); // Hiển thị kết quả lời khuyên ngay lập tức
       },
       error: () => {
         this.aiAdvice = 'Xin lỗi, trợ lý AI hiện đang đi vắng.';
         this.isAiThinking = false;
+        this.cdr.detectChanges(); // Hiển thị thông báo lỗi ngay lập tức
       }
     });
   }

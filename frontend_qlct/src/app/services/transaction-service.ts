@@ -136,3 +136,4 @@ export class TransactionService {
     return this.http.put(`${this.apiUrl}/notifications/${id}/read`, {});
   }
 }
+

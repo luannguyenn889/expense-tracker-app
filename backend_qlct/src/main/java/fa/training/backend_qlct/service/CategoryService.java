@@ -65,7 +65,8 @@ public class CategoryService {
         categories.setColor(request.getColor());
         categories.setDescription(request.getDescription());
         categories.setMonthlyBudget(request.getMonthlyBudget());
-
         return categoryRepository.save(categories);
     }
 }
+
+

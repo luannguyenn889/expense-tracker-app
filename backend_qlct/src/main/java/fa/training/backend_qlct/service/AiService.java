@@ -33,11 +33,8 @@ public class AiService {
     @Value("${gemini.api.key}")
     private String apiKey;
 
-    @Value("${gemini.api.url}")
     private String apiUrl;
 
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private TransactionRepository transactionRepository;
@@ -47,6 +44,8 @@ public class AiService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     public String getFinancialAdvice(String username) {
         // Tìm kiếm user từ username, nếu không tìm thấy (hoặc là guest) thì lấy user đầu tiên trong DB để phục vụ chạy thử/test
@@ -249,6 +248,5 @@ public class AiService {
         }
         return sb.toString();
     }
-
 }
 
