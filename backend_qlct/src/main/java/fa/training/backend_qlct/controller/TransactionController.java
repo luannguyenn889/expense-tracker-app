@@ -1,25 +1,31 @@
 package fa.training.backend_qlct.controller;
 
-import java.io.ByteArrayInputStream;
-import java.math.BigDecimal;
+import java.security.Principal;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.io.ByteArrayInputStream;
+import java.math.BigDecimal;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import fa.training.backend_qlct.dto.request.ChatRequest;
 import fa.training.backend_qlct.dto.request.TransactionRequest;
+import fa.training.backend_qlct.dto.request.TransactionResponse;
 import fa.training.backend_qlct.dto.request.TransferRequest;
 import fa.training.backend_qlct.entities.Transaction;
 import fa.training.backend_qlct.service.TransactionService;
 import fa.training.backend_qlct.service.TransferService;
+import fa.training.backend_qlct.respository.TransactionRepository;
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -28,17 +34,8 @@ public class TransactionController {
 
     @Autowired
     private TransactionService transactionService;
-
     @Autowired
     private TransferService transferService;
-
-    // ==========================================
-    // TRUY VẤN & TÌM KIẾM NÂNG CAO 
-    // ==========================================
-
-    /**
-     * API Tìm kiếm nâng cao kết hợp phân trang (Khớp với getAdvancedSearch của Angular)
-     */
 // @GetMapping
 // public ResponseEntity<?> getAdvancedSearch(
 //         @RequestParam(required = false) Long userId,
@@ -46,6 +43,7 @@ public class TransactionController {
 //         @RequestParam(required = false)
 //         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
 //         LocalDate startDate,
+
 
 //         @RequestParam(required = false)
 //         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
@@ -125,69 +123,63 @@ public class TransactionController {
 public ResponseEntity<?> getAdvancedSearch(
         @RequestParam(required = false) Long userId,
         @RequestParam(required = false) String keyword,
-
-        @RequestParam(required = false)
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-        LocalDate startDate,
-
-        @RequestParam(required = false)
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-        LocalDate endDate,
-
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
         @RequestParam(required = false) String type,
         @RequestParam(required = false) Long walletId,
         @RequestParam(required = false) Double minAmount,
         @RequestParam(required = false) Double maxAmount,
-
         @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "10") int size
-) {
-
+        @RequestParam(defaultValue = "10") int size) {
     try {
-
-        Page<Transaction> result =
-                transactionService.searchTransactions(
-                        userId,
-                        keyword,
-                        startDate,
-                        endDate,
-                        type,
-                        walletId,
-                        minAmount,
-                        maxAmount,
-                        page,
-                        size
-                );
+        // ĐỔI: Page<Transaction> → Page<TransactionResponse>
+        Page<TransactionResponse> result = transactionService.searchTransactions(
+                userId, keyword, startDate, endDate, type, walletId, minAmount, maxAmount, page, size);
 
         System.out.println("SO GIAO DICH = " + result.getContent().size());
-
         return ResponseEntity.ok(result);
-
     } catch (Exception e) {
-
         e.printStackTrace();
-
         return ResponseEntity.internalServerError().body(
-                Map.of(
-                        "success", false,
-                        "message", e.getMessage()
-                )
-        );
+                Map.of("success", false, "message", e.getMessage()));
     }
 }
-    // ==========================================
-    // THAO TÁC CRUD GIAO DỊCH VÀ CHUYỂN KHOẢN
-    // ==========================================
 
-    /**
-     * API Thêm mới giao dịch (Thuộc nhánh Trang)
-     */
+    // @GetMapping
+    // public ResponseEntity<Page<Transaction>> getTransactions(
+    //         @RequestParam Long userId,
+    //         @RequestParam(required = false) LocalDate startDate,
+    //         @RequestParam(required = false) LocalDate endDate,
+    //         @RequestParam(required = false) String type,
+    //         @RequestParam(required = false) Long walletId,
+    //         @RequestParam(required = false) String query,
+    //         @RequestParam(defaultValue = "0") int page,
+    //         @RequestParam(defaultValue = "10") int size) {
+        
+    //     Page<Transaction> transactions = transactionService.getTransactions(
+    //         userId, startDate, endDate, type, walletId, query, PageRequest.of(page, size));
+    //     return ResponseEntity.ok(transactions);
+    // }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Transaction> getTransaction(
+            @PathVariable Long id,
+            @RequestParam Long userId) {
+        try {
+            Transaction transaction = transactionService.getTransactionById(id, userId);
+            return ResponseEntity.ok(transaction);
+        } catch (Exception e) {
+            return ResponseEntity.status(404).body(null);
+        }
+    }
+
     @PostMapping
     public ResponseEntity<?> createTransaction(@RequestBody TransactionRequest request,
                                                @RequestParam Long userId) {
         try {
-            Object result = transactionService.createTransaction(request, userId);
-            return ResponseEntity.ok(result);
+            // Đổi từ Object result thành TransactionResponse
+            TransactionResponse response = transactionService.createTransaction(request, userId);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -343,5 +335,25 @@ public ResponseEntity<?> getNotifications(@RequestParam Long userId) {
                             "message", e.getMessage()
                     ));
         }
+    }
+    @PostMapping("/chat")
+    public ResponseEntity<?> addTransactionByChat(@RequestBody ChatRequest request, Principal principal) {
+        try {
+            String username = (principal != null) ? principal.getName() : null;
+            String result = transactionService.processChat(
+                    request.getMessage(),
+                    request.getUserId(),
+                    request.getWalletId(),
+                    username
+            );
+            return ResponseEntity.ok(Collections.singletonMap("message", result));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Không thể xử lý tin nhắn từ câu chat. Lỗi: " + e.getMessage());
+        }
+    }
+
+    public TransactionService getTransactionService() {
+        return transactionService;
     }
 }

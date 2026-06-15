@@ -7,11 +7,20 @@
     </button>
   </div>
 
-  @if (isLoading) {
-    <div class="basic-loading">Đang tải dữ liệu danh mục...</div>
-  } @else {
-    <form class="basic-form" (ngSubmit)="onSubmit()">
+  <div *ngIf="isLoading" class="basic-loading">Đang tải dữ liệu danh mục...</div>
+  <form *ngIf="!isLoading" class="basic-form" (ngSubmit)="onSubmit()">
       <!-- Tên danh mục -->
+      <div class="basic-form-group">
+        <label class="basic-label" for="categoryName">Tên Danh Mục <span class="basic-required">*</span></label>
+        <input type="text" id="categoryName" class="basic-input" name="name" [(ngModel)]="category.name" placeholder="Ví dụ: Ăn uống, Mua sắm..." #categorynameInput="ngModel" required>
+        <div *ngIf="categorynameInput.invalid && (categorynameInput.dirty || categorynameInput.touched)" class="error-msg">
+          <!-- <span class="material-symbols-outlined error-icon">error</span> -->
+          <span *ngIf="categorynameInput.errors?.['required']" style="color: red;">Tên danh mục là bắt buộc.</span>
+          <span *ngIf="categorynameInput.errors?.['minlength']" style="color: red;">Tên danh mục phải có ít nhất 3 ký tự.</span>
+        </div>
+      </div>
+
+      <!-- Icon -->
       <div class="basic-form-group">
         <label class="basic-label" for="categoryName">Tên Danh Mục <span class="basic-required">*</span></label>
         <input type="text" id="categoryName" class="basic-input" name="name" [(ngModel)]="category.name" placeholder="Ví dụ: Ăn uống, Mua sắm..." #categorynameInput="ngModel" required>
@@ -22,10 +31,6 @@
             <span *ngIf="categorynameInput.errors?.['minlength']" style="color: red;">Tên danh mục phải có ít nhất 3 ký tự.</span>
           </div>
         }
-      </div>
-
-      <!-- Icon -->
-      <div class="basic-form-group">
         <label class="basic-label" for="categoryIcon">Icon Danh Mục <span class="basic-required">*</span></label>
         <div class="basic-icon-select-row">
           <select id="categoryIcon" class="basic-input basic-icon-select" name="icon" [(ngModel)]="category.icon" required>
@@ -71,9 +76,7 @@
               <option value="more_horiz">... Khác (more_horiz)</option>
             </optgroup>
           </select>
-          @if (category.icon) {
-            <span class="basic-icon-dot material-symbols-outlined">{{ category.icon }}</span>
-          }
+          <span *ngIf="category.icon" class="basic-icon-dot material-symbols-outlined">{{ category.icon }}</span>
         </div>
       </div>
 
@@ -84,12 +87,10 @@
           <option value="EXPENSE">Khoản chi (Expense)</option>
           <option value="INCOME">Khoản thu (Income)</option>
         </select>
-        @if (categoryTypeInput.invalid && (categoryTypeInput.dirty || categoryTypeInput.touched)) {
-          <div class="error-msg">
-            <!-- <span class="material-symbols-outlined error-icon">error</span> -->
-            <span *ngIf="categoryTypeInput.errors?.['required']">Loại danh mục là bắt buộc.</span>
-          </div>
-        }
+        <div *ngIf="categoryTypeInput.invalid && (categoryTypeInput.dirty || categoryTypeInput.touched)" class="error-msg">
+          <!-- <span class="material-symbols-outlined error-icon">error</span> -->
+          <span *ngIf="categoryTypeInput.errors?.['required']">Loại danh mục là bắt buộc.</span>
+        </div>
       </div>
 
       <!-- Màu sắc -->
@@ -113,9 +114,7 @@
             <option value="#8D6E63">🟤 Nâu</option>
             <option value="#78909C">⚫ Xám xanh</option>
           </select>
-          @if (category.color) {
-            <span class="basic-color-dot" [style.background-color]="category.color"></span>
-          }
+          <span *ngIf="category.color" class="basic-color-dot" [style.background-color]="category.color"></span>
         </div>
       </div>
 
@@ -136,5 +135,4 @@
         <button type="submit" class="basic-btn">Cập Nhật Danh Mục</button>
       </div>
     </form>
-  }
 </div>

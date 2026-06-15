@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { TransactionService } from '../../services/transactionService';
+import { TransactionService } from '../../services/transaction-service';
 
 
 @Component({
@@ -16,7 +16,7 @@ export class AddTransaction {
   @Input() wallets: any[] = [];
   @Input() categories: any[] = [];
   @Output() close = new EventEmitter<void>();
-  @Output() added = new EventEmitter<void>();
+  @Output() added = new EventEmitter<any>();
 
   transactionData = {
     type: 'EXPENSE',
@@ -45,8 +45,7 @@ export class AddTransaction {
 
     this.transactionService.addTransaction(this.transactionData).subscribe({
       next: () => {
-        alert('Thêm giao dịch thành công!');
-        this.added.emit();
+        this.added.emit(this.transactionData);
         this.close.emit();
       },
       error: (err) => {

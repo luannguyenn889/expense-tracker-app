@@ -5,7 +5,11 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "transactions")
+@Table(name = "transactions", indexes = {
+    @Index(name = "idx_transaction_user_id", columnList = "user_id"),
+    @Index(name = "idx_transaction_category_id", columnList = "category_id"),
+    @Index(name = "idx_transaction_date", columnList = "transaction_date")
+})
 public class Transaction {
 
     @Id
@@ -25,7 +29,7 @@ public class Transaction {
 
     // FIX #1 liên quan: đổi String → Long để khớp với categories.id kiểu bigint
     @Column(name = "category_id")
-    private Long categoryId;
+    private String categoryId;
 
     @Column(name = "wallet_id", nullable = false)
     private Long walletId;
@@ -36,13 +40,13 @@ public class Transaction {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @JoinColumn(name = "wallet_id", insertable = false, updatable = false)
-    // private Wallet wallet;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "wallet_id", insertable = false, updatable = false)
+    private Wallet wallet;
 
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @JoinColumn(name = "to_wallet_id", insertable = false, updatable = false)
-    // private Wallet toWallet;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "to_wallet_id", insertable = false, updatable = false)
+    private Wallet toWallet;
 
     public Transaction() {}
 
@@ -61,8 +65,8 @@ public class Transaction {
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
 
-    public Long getCategoryId() { return categoryId; }
-    public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
+    public String getCategoryId() { return categoryId; }
+    public void setCategoryId(String categoryId) { this.categoryId = categoryId; }
 
     public Long getWalletId() { return walletId; }
     public void setWalletId(Long walletId) { this.walletId = walletId; }
@@ -73,9 +77,9 @@ public class Transaction {
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
 
-    // public Wallet getWallet() { return wallet; }
-    // public void setWallet(Wallet wallet) { this.wallet = wallet; }
+    public Wallet getWallet() { return wallet; }
+    public void setWallet(Wallet wallet) { this.wallet = wallet; }
 
-    // public Wallet getToWallet() { return toWallet; }
-    // public void setToWallet(Wallet toWallet) { this.toWallet = toWallet; }
+    public Wallet getToWallet() { return toWallet; }
+    public void setToWallet(Wallet toWallet) { this.toWallet = toWallet; }
 }

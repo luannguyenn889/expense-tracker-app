@@ -5,7 +5,9 @@ import { Observable } from 'rxjs';
 export interface CashFlowItem { label: string; income: number; expense: number; }
 export interface Wallet { name: string; balance: number; }
 export interface TransactionItem { title: string; amount: number; }
-export interface CategoryExpense { name: string; amount: number; percentage: number; color?: string; }
+export interface CategoryExpense {
+  categoryName: any; name: string; amount: number; percentage: number; color?: string; 
+}
 export interface SpendingAlert { message: string; }
 
 export interface DashboardData {

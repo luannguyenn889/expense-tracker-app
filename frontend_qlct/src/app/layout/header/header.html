@@ -5,8 +5,8 @@
         alt="WealthWise Logo"
         class="topbar__logo topbar__logo--mobile"
         src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAABGlJREFUaIHtmVtsFUUYx3/fOW1pS1sMVWm1xlRFjcYLBm+JiRoTE2N8UOODxgcfNEZjjPHBxBgvL0aj8RL1QWO8BKNGo/GCxoAoihdUvKFi1IoWraC0tIWW9pzx+83u2T1nz9ntnlMu/pPN7OzMt/P9d+ab2VmwWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovlvwzlLdDc3KxjY2NpNxuBPcCezs7O7rwdV1dX6+DgYNo9CQwEaZTOqNQp0CWiZ4WNa0ZHR2/0LFuKXLzGOBb5K/Ja3r17Q0cXoZPzBHFPkpJ6x4gXc7l9N/IKvAF4A3gIOA0T90V6OjZT/qBjUArcDJwInC0P10MXAbcCjQBBTflFNA+I/hL4GPXR3pxvGfideCVoWuXAHcBT7rXy3H+Xv5+RFdnS0t82GzS6p0AjvJeePyYn4QvzFH0DeAnYIZU9EnVdTkdZFZ3cF6Xs9x2K9CH83e4P+haBj4HhqLGVvjIR8PuNi3KfcLFa+YeVcAJ6MsFnrGM7TaQUe7AMu0Ux90DWq6gzk7eB/4EW3y21Js9x70kF/AhqBV4DfcfYc26qcXw9gA+BQ5J+05NE3EjlBsC6I2gy8EpP2APCD+JoRCUhXyVp8FxxZ3k/iH5T0Lm9RJPC2KfJLY+ojeH8XvIF1MfclQfpT5WJx13NfHgP2xOnx7yCDQB/oO8mYqYiM4u3Ax0OXm5tGYl/sDcJ+HWmjMNO3T5DkD9XJ2CKagYeA94H/cFasd6AUUXOqtBe4FHgdeInyL3MTAb2eZx5cJqoIcivM7MUB74PabPpv0N2AxcDpzjKXcA8BDQBXwKDOSQqVKsAt4DPo6J3w7UEzzHp4F3gC7P/MfAbuAAb8cJpuhTiQ9L04+cBdwC/BOTfx/OJnYbQTLsj8D/FLgbuBj4i2BHMR34nKCevUOXWAicDPwZKjcIrMT5J/EH0Il8oqNJqzqcN7cW+AMn4gXAE8A9wO+uTG7LajIIjOJ8z+sU9ZZiGwIyIl/J/AbuAp4l+C50+2mv8uNN9p3Q4/APTjP1Y4z7c5mIH8F+sDpWV8GLvfkfQz81XPdD/RGlBkGPsNZ2UaBdqCbhM+IOw3F7xXYIHYCi4muL4E+oF3gL+AT4ETPGm7Xe1kNPVZ4G3gPJx/ZwCYAbwNfAW8TzCMjuN4/3r8YXSEBMNNKGRGXKVzinuAvJuImerSLwBeJBi6nuc0ypnnfkr4DPdcchZwEfBcKH8jwTPMxvVhvS5xHGfe3IfzdepzZ5bgXWAHzhdJgJ+x++JZl1oSFO/3LNcTvD+AvgQ6PKUuJBhaXgceAbly1YnzrD6kCefd+g8Fvl3knxb2Eywj7iLCr3RcqPSi4BXgP2A/XC+hL0D/BR1U0aZCIr3A0cBL1HDj5AnUPrfaQHOAA4DTiDYML+C87VpDfAPpf+xZrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWP5L/AuERWlBAVrrogAAAABJRU5ErkJggg==" />
-
-      <h2 class="topbar__title">WealthWise</h2>
+      <h2 class="topbar__title topbar__title--mobile">WealthWise</h2>
+      <h2 class="topbar__title topbar__title--desktop">WealthWise</h2>
     </div>
 
     <!-- Search -->
@@ -18,7 +18,71 @@
       <input
         class="topbar__search"
         type="text"
-        placeholder="Search transactions, categories..." />
+        placeholder="Tìm kiếm giao dịch, danh mục..."
+        [(ngModel)]="searchQuery"
+        (input)="onSearchInput()"
+        (focus)="onSearchFocus()"
+        (blur)="onSearchBlur()" />
+
+      <!-- Dropdown Kết quả Tìm kiếm -->
+      <div class="search-results-dropdown" *ngIf="showSearchResults">
+        <!-- Đang tải -->
+        <div class="search-loading" *ngIf="isSearching">
+          <div class="spinner-ring"></div>
+          <span>Đang tìm kiếm...</span>
+        </div>
+
+        <!-- Không có kết quả -->
+        <div class="search-no-results" *ngIf="!isSearching && searchResultsCategories.length === 0 && searchResultsTransactions.length === 0">
+          Không tìm thấy kết quả cho "{{ searchQuery }}"
+        </div>
+
+        <!-- Phần Danh mục -->
+        <div class="search-section" *ngIf="!isSearching && searchResultsCategories.length > 0">
+          <div class="search-section-title">Danh mục</div>
+          <div class="search-item" *ngFor="let cat of searchResultsCategories" (mousedown)="goToCategory(cat)">
+            <div class="search-item-icon-wrap" [style.background-color]="(cat.color || '#5c6bc0') + '15'">
+              <span class="material-symbols-outlined search-item-icon" [style.color]="cat.color || 'var(--color-primary)'">
+                {{ cat.icon || 'category' }}
+              </span>
+            </div>
+            <div class="search-item-info">
+              <div class="search-item-name">{{ cat.name }}</div>
+              <div class="search-item-desc" *ngIf="cat.description">{{ cat.description }}</div>
+            </div>
+            <span class="search-item-badge" 
+                  [class.search-item-badge--expense]="cat.type === 'EXPENSE'" 
+                  [class.search-item-badge--income]="cat.type === 'INCOME'">
+              {{ cat.type === 'INCOME' ? 'Thu nhập' : 'Chi tiêu' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Phần Giao dịch -->
+        <div class="search-section" *ngIf="!isSearching && searchResultsTransactions.length > 0">
+          <div class="search-section-title">Giao dịch</div>
+          <div class="search-item" *ngFor="let tx of searchResultsTransactions" (mousedown)="goToTransaction(tx)">
+            <div class="search-item-icon-wrap" 
+                 [class.search-item-icon-wrap--income]="tx.type === 'INCOME'" 
+                 [class.search-item-icon-wrap--expense]="tx.type === 'EXPENSE'">
+              <span class="material-symbols-outlined search-item-icon">
+                {{ tx.type === 'INCOME' ? 'trending_up' : (tx.type === 'EXPENSE' ? 'trending_down' : 'swap_horiz') }}
+              </span>
+            </div>
+            <div class="search-item-info">
+              <div class="search-item-name">{{ tx.note || (tx.type === 'INCOME' ? 'Thu nhập' : (tx.type === 'EXPENSE' ? 'Chi tiêu' : 'Chuyển tiền')) }}</div>
+              <div class="search-item-desc">
+                {{ tx.transactionDate | date:'dd/MM/yyyy' }} • {{ getWalletName(tx.walletId) }}
+              </div>
+            </div>
+            <div class="search-item-amount" 
+                 [class.search-item-amount--income]="tx.type === 'INCOME'" 
+                 [class.search-item-amount--expense]="tx.type === 'EXPENSE'">
+              {{ tx.type === 'INCOME' ? '+' : (tx.type === 'EXPENSE' ? '-' : '') }}{{ tx.amount | number:'1.0-0' }} ₫
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

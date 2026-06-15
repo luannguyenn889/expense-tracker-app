@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { TransactionService } from '../../services/transactionService';
+import { TransactionService } from '../../services/transaction-service';
 
 
 @Component({

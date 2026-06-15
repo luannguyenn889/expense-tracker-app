@@ -4,7 +4,22 @@ import { Auth } from '../../services/auth';
 import { DashboardSer, CashFlowItem, Wallet, TransactionItem, CategoryExpense, SpendingAlert } from '../../services/dashboardSer';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HttpClient } from '@angular/common/http'; // Đã thêm HttpClient
+import { CategoryService } from '../../services/category-service';
+import { Category } from '../../model/category';
+import { TransactionService } from '../../services/transaction-service';
+import { WalletService } from '../../services/wallet-service';
+import {
+  Chart,
+  ArcElement,
+  Tooltip,
+  Legend,
+  DoughnutController,
+  Title,
+} from 'chart.js';
+import { Wallet as WalletModel } from '../../model/wallet';
+
+Chart.register(ArcElement, Tooltip, Legend, DoughnutController, Title);
 
 @Component({
   selector: 'app-dashboard',
@@ -15,9 +30,7 @@ import { HttpClientModule } from '@angular/common/http';
 })
 export class Dashboard implements OnInit {
 
-  selectedPeriod: number = 6; // Bộ lọc chung cho Dashboard
-
-  // Các biến lọc độc lập cho khu vực Biểu đồ tròn
+  selectedPeriod: number = 6;
   selectedMonth: number = new Date().getMonth() + 1; 
   selectedYear: number = new Date().getFullYear();    
 
@@ -35,17 +48,24 @@ export class Dashboard implements OnInit {
   wallets: Wallet[] = [];
   totalAssets: number = 0;
   recentTransactions: TransactionItem[] = [];
-  
-  // Dữ liệu hiển thị biểu đồ tròn và cột % bên cạnh
   categoryExpenses: CategoryExpense[] = [];
-
+  
   userId!: number;
+  username: string = ''; // Thêm biến username
+  pieChart: Chart | null = null;
+  isAiThinking: boolean = false; // Thêm biến AI
+  aiAdvice: string = ''; 
+  isLoading: boolean = true; // Thêm biến Loading
 
   constructor(
     private dashboardSer: DashboardSer,
     private auth: Auth,
     private router: Router,
-    private cdr: ChangeDetectorRef 
+    private cdr: ChangeDetectorRef,
+    private walletService: WalletService,
+    private categoryService: CategoryService,
+    private transactionService: TransactionService,
+    private http: HttpClient // Thêm HttpClient
   ) {
     const currentYear = new Date().getFullYear();
     for (let y = currentYear - 3; y <= currentYear + 1; y++) {
@@ -65,8 +85,10 @@ export class Dashboard implements OnInit {
       const userObj = this.auth.getCurrentUser();
       if (userObj && userObj.id) {
         this.userId = Number(userObj.id);
-        this.loadGeneralData();  // Tải dữ liệu tổng quan
-        this.loadPieChartData(); // Tải riêng dữ liệu biểu đồ tròn
+        this.username = userObj.username || '';
+        this.loadGeneralData();
+        this.loadPieChartData();
+        this.loadWallets(); // Load ví ngay khi khởi tạo
       } else {
         attempts++;
         if (attempts < maxAttempts) {
@@ -79,7 +101,6 @@ export class Dashboard implements OnInit {
     setTimeout(checkUserAndLoad, 50);
   }
 
-  // Hàm chạy khi thay đổi bộ lọc chu kỳ tổng (Tháng này, 3 tháng, 6 tháng...)
   loadGeneralData(): void {
     if (!this.userId) return;
 
@@ -96,28 +117,90 @@ export class Dashboard implements OnInit {
           this.wallets = data.wallets || [];
           this.totalAssets = data.totalAssets || 0;
           this.recentTransactions = data.recentTransactions || [];
-
           this.cdr.detectChanges(); 
         }
-      },
-      error: (err) => console.error('Lỗi tải dữ liệu tổng quan:', err)
+      }
+    });
+
+    this.transactionService.transactionChanges$.subscribe(() => {
+      if (this.userId) {
+        this.loadWallets();
+      }
     });
   }
 
-  // Hàm chạy RIÊNG khi thay đổi tháng hoặc năm ở biểu đồ tròn
   loadPieChartData(): void {
     if (!this.userId) return;
 
     this.dashboardSer.getCategoryExpenses(this.userId, this.selectedMonth, this.selectedYear).subscribe({
       next: (data) => {
         this.categoryExpenses = data || [];
+        this.renderPieChart(); // Gọi hàm render biểu đồ từ dev
         this.cdr.detectChanges();
-      },
-      error: (err) => console.error('Lỗi tải dữ liệu biểu đồ tròn:', err)
+      }
     });
   }
 
-  getBarHeight(amount: number): number {
+  // --- MỚI: Hàm render biểu đồ từ dev ---
+  renderPieChart(): void {
+    const canvas = document.getElementById('pieChart') as HTMLCanvasElement;
+    if (!canvas) return;
+
+    if (this.pieChart) {
+      this.pieChart.destroy();
+      this.pieChart = null;
+    }
+
+    const defaultPalette = ['#EF5350', '#EC407A', '#AB47BC', '#5C6BC0', '#42A5F5', '#26C6DA', '#66BB6A', '#FFCA28'];
+    
+    this.pieChart = new Chart(canvas, {
+      type: 'doughnut',
+      data: {
+        labels: this.categoryExpenses.map(c => c.categoryName),
+        datasets: [{
+          data: this.categoryExpenses.map(c => Math.abs(c.amount)),
+          backgroundColor: defaultPalette,
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+
+  // --- MỚI: Hàm AI Advice từ dev ---
+  askAiForAdvice() {
+    this.isAiThinking = true;
+    this.aiAdvice = '';
+    const url = `http://localhost:8080/api/ai/advice?username=${this.username}`;
+    this.http.get(url).subscribe({
+      next: (res: any) => {
+        this.aiAdvice = res.message;
+        this.isAiThinking = false;
+      },
+      error: () => {
+        this.aiAdvice = 'Xin lỗi, trợ lý AI hiện đang đi vắng.';
+        this.isAiThinking = false;
+      }
+    });
+  }
+
+  // --- MỚI: Hàm Load ví từ dev ---
+  loadWallets() {
+    this.isLoading = true;
+    this.walletService.getWallets().subscribe({
+      next: (data) => {
+        this.wallets = data || [];
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  getTotalBalance(): number {
+    return this.wallets.reduce((sum, w) => sum + (w.balance || 0), 0);
+  }
+
+  // Giữ nguyên các hàm cũ của bạn:
+ getBarHeight(amount: number): number {
     if (amount <= 0 || !this.cashFlows || this.cashFlows.length === 0) return 0;
     const maxHeight = 140; 
     const maxInList = Math.max(...this.cashFlows.map(item => Math.max(item.income, item.expense)));
