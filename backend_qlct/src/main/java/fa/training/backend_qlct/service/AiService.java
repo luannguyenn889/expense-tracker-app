@@ -33,6 +33,7 @@ public class AiService {
     @Value("${gemini.api.key}")
     private String apiKey;
 
+    @Value("${gemini.api.url}")
     private String apiUrl;
 
 
