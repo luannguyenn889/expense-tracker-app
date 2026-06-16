@@ -109,8 +109,13 @@ public class TransactionService {
         this.transactionRepository = transactionRepository;
         this.walletRepository = walletRepository;
     }
+
     @Transactional
     public TransactionResponse createTransaction(TransactionRequest request, Long userId) {
+        if (!"INCOME".equals(request.getType()) && !"EXPENSE".equals(request.getType()) && !"TRANSFER".equals(request.getType())) {
+            throw new RuntimeException("Loại giao dịch không hợp lệ. Chỉ chấp nhận INCOME, EXPENSE hoặc TRANSFER");
+        }
+
         Wallet wallet = walletRepository.findById(request.getWalletId())
                 .orElseThrow(() -> new RuntimeException("Ví không tồn tại"));
 
@@ -118,8 +123,16 @@ public class TransactionService {
             throw new RuntimeException("Ví không thuộc về bạn");
         }
 
-        if (request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+        if (request.getAmount() == null || request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new RuntimeException("Số tiền phải lớn hơn 0");
+        }
+
+        if (request.getCategoryId() != null && !request.getCategoryId().trim().isEmpty()) {
+            Categories category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Danh mục không tồn tại"));
+            if (category.getUserId() != null && !category.getUserId().equals(userId)) {
+                throw new RuntimeException("Danh mục không thuộc về bạn");
+            }
         }
 
         BigDecimal balanceChange;
@@ -135,6 +148,18 @@ public class TransactionService {
             if (wallet.getBalance().compareTo(request.getAmount()) < 0) {
                 throw new RuntimeException("Số dư không đủ để chuyển");
             }
+            if (request.getToWalletId() == null) {
+                throw new RuntimeException("Ví nhận không được để trống");
+            }
+            if (request.getWalletId().equals(request.getToWalletId())) {
+                throw new RuntimeException("Ví gửi và ví nhận không được trùng nhau");
+            }
+            Wallet toWallet = walletRepository.findById(request.getToWalletId())
+                    .orElseThrow(() -> new RuntimeException("Ví nhận không tồn tại"));
+            if (!toWallet.getUserId().equals(userId)) {
+                throw new RuntimeException("Ví nhận không thuộc về bạn");
+            }
+            walletRepository.updateBalance(request.getToWalletId(), request.getAmount());
         } else {
             balanceChange = BigDecimal.ZERO;
         }
@@ -206,6 +231,28 @@ public class TransactionService {
         if ("TRANSFER".equals(transaction.getType())) {
             throw new RuntimeException("Không thể sửa giao dịch chuyển tiền. Vui lòng xóa và tạo mới.");
         }
+
+        if ("TRANSFER".equals(request.getType())) {
+            throw new RuntimeException("Không thể sửa loại giao dịch thành chuyển tiền. Vui lòng xóa và tạo mới.");
+        }
+
+        if (request.getAmount() == null || request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("Số tiền phải lớn hơn 0");
+        }
+
+        Wallet wallet = walletRepository.findById(request.getWalletId())
+                .orElseThrow(() -> new RuntimeException("Ví không tồn tại"));
+        if (!wallet.getUserId().equals(userId)) {
+            throw new RuntimeException("Ví không thuộc về bạn");
+        }
+
+        if (request.getCategoryId() != null && !request.getCategoryId().trim().isEmpty()) {
+            Categories category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Danh mục không tồn tại"));
+            if (category.getUserId() != null && !category.getUserId().equals(userId)) {
+                throw new RuntimeException("Danh mục không thuộc về bạn");
+            }
+        }
         
         // Hoàn tác số dư cũ trước khi áp dụng số tiền mới
         if ("INCOME".equals(transaction.getType())) {
@@ -219,8 +266,7 @@ public class TransactionService {
         transaction.setTransactionDate(request.getTransactionDate());
         transaction.setType(request.getType());
         
-        // SỬA LẠI THÀNH
-        if (request.getCategoryId() != null) {
+        if (request.getCategoryId() != null && !request.getCategoryId().trim().isEmpty()) {
             transaction.setCategoryId(request.getCategoryId());
         } else {
             transaction.setCategoryId(null);
@@ -234,8 +280,10 @@ public class TransactionService {
             newBalanceChange = request.getAmount();
         } else {
             newBalanceChange = request.getAmount().negate();
-            Wallet wallet = walletRepository.findById(request.getWalletId()).orElseThrow();
-            if (wallet.getBalance().compareTo(request.getAmount()) < 0) {
+            // Fetch the updated wallet balance from DB (safely reloaded since updateBalance flushes/clears JPA cache)
+            Wallet updatedWallet = walletRepository.findById(request.getWalletId())
+                    .orElseThrow(() -> new RuntimeException("Ví không tồn tại"));
+            if (updatedWallet.getBalance().compareTo(request.getAmount()) < 0) {
                 throw new RuntimeException("Số dư không đủ");
             }
         }
@@ -269,6 +317,7 @@ public class TransactionService {
         }
         
         transactionRepository.deleteById(id);
+        transactionRepository.flush();
         
         // KIỂM TRA VÀ KHÔI PHỤC TRẠNG THÁI VÍ NẾU CẦN
         boolean stillHasTransactions = transactionRepository.existsByWalletIdOrToWalletId(walletId, userId);
