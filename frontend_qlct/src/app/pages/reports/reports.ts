@@ -163,7 +163,7 @@ export class Reports implements OnInit {
     this.pieChart = new Chart(canvas, {
       type: 'doughnut',
       data: {
-        labels: this.categoryExpenses.map(c => c.categoryName),
+        labels: this.categoryExpenses.map(c => c.name || 'Chưa đặt tên'),
         datasets: [{
           data: this.categoryExpenses.map(c => Math.abs(c.amount)),
           backgroundColor: defaultPalette,
