@@ -13,7 +13,7 @@ public interface WalletRepository extends JpaRepository<Wallet, Long> {
 
     List<Wallet> findByUserId(Long userId);
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Transactional
     @Query("UPDATE Wallet w SET w.balance = w.balance + :amount WHERE w.id = :walletId")
     void updateBalance(@Param("walletId") Long walletId, @Param("amount") BigDecimal amount);

@@ -21,6 +21,9 @@ public class TransferService {
     // Phuong thuc chuyen tien
     @Transactional
     public String transfer(TransferRequest request, Long userId) {
+        if (request.getAmount() == null || request.getAmount().compareTo(java.math.BigDecimal.ZERO) <= 0) {
+            return "Số tiền chuyển phải lớn hơn 0";
+        }
         Wallet fromWallet = walletRepository.findById(request.getFromWalletId()).orElse(null);
         if (fromWallet == null) return "Ví gửi không tồn tại";
 
