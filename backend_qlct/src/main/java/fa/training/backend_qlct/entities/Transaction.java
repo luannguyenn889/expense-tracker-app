@@ -3,6 +3,7 @@ package fa.training.backend_qlct.entities;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "transactions", indexes = {
@@ -40,10 +41,12 @@ public class Transaction {
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wallet_id", insertable = false, updatable = false)
     private Wallet wallet;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "to_wallet_id", insertable = false, updatable = false)
     private Wallet toWallet;
