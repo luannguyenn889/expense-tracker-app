@@ -39,20 +39,28 @@ public class AuthController {
     }
 
     // --- NORMAL LOGIN ---
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        try {
-            Users user = userService.findByUsername(request.getUsername());
-            if (user != null && user.getPassword().equals(request.getPassword())) {
-                return ResponseEntity.ok(user);
-            } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
-            }
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+// Trong AuthController.java
+@PostMapping("/login")
+public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    try {
+        Users user = userService.findByUsername(request.getUsername());
+        if (user != null && user.getPassword().equals(request.getPassword())) {
+            // 1. Tạo Token (Ví dụ: đặt là "my-secret-token" hoặc gọi hàm tạo JWT của bạn)
+            String token = "my-secret-token"; 
+            
+            // 2. Tạo đối tượng AuthResponse
+            AuthResponse response = new AuthResponse();
+            response.setAccessToken(token);
+            response.setUser(user);
+            
+            return ResponseEntity.ok(response); // Trả về DTO thay vì Users
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         }
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
     }
-
+}
     // --- NORMAL REGISTER ---
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody UserCreationRequest request) {

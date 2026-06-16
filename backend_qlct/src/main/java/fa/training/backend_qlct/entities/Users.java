@@ -12,8 +12,8 @@ import jakarta.persistence.Id;
 public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "`id`", nullable = false) // Thêm dấu bao ` ` để giữ nguyên chữ hoa/thường
-    private Long id;
+    @Column(name = "userId", nullable = false) 
+    private Long userId;
 
     private String username;
     private  String password;
@@ -21,12 +21,12 @@ public class Users {
     private String lastname;
     private LocalDate dob;
 
-    public Long getId() {
-        return id;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public String getUsername() {

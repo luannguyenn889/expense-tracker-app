@@ -602,7 +602,7 @@ public List<Notification> getNotifications(Long userId) {
         if (user == null) {
             return "Không tìm thấy thông tin người dùng trong hệ thống. Vui lòng đăng nhập lại!";
         }
-        Long resolvedUserId = user.getId();
+        Long resolvedUserId = user.getUserId();
 
         // 2. Lấy dữ liệu ngữ cảnh tài chính của user
         List<Wallet> wallets = walletRepository.findActiveByUserId(resolvedUserId);

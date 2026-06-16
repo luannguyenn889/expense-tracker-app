@@ -57,7 +57,7 @@ public class AiService {
             return "Chào bạn! Hiện tại hệ thống chưa có thông tin người dùng và giao dịch nào. Hãy đăng ký tài khoản và tạo giao dịch để nhận lời khuyên tài chính cá nhân hóa từ AI nhé!";
         }
 
-        Long userId = user.getId();
+        Long userId = user.getUserId();
         String displayName = (user.getFirstname() != null ? user.getFirstname() : "") + " " + (user.getLastname() != null ? user.getLastname() : "");
         displayName = displayName.trim().isEmpty() ? user.getUsername() : displayName.trim();
 

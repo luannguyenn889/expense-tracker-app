@@ -5,7 +5,8 @@ import fa.training.backend_qlct.entities.Users;
 public class AuthResponse {
     private String accessToken;
     private Users user;
-
+    public AuthResponse() {}
+    
     public String getAccessToken() {
         return accessToken;
     }
