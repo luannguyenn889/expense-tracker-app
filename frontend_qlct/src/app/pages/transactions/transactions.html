@@ -1,5 +1,4 @@
 <div class="transactions-container">
-  
   <div class="header-actions">
     <h2>Giao dịch</h2>
     <div class="btn-group">
@@ -14,105 +13,40 @@
     </div>
   </div>
 
-  <!-- <div class="dashboard-widgets" style="display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
-    <div class="comparison-card" *ngIf="comparisonData" style="flex: 1; min-width: 250px; background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 16px;">
-      <h3 style="margin-top: 0;">📊 Biến động chi tiêu</h3>
-      <div class="comparison-content" style="display: flex; justify-content: space-between;">
-        <div class="comparison-item">
-          <span class="label" style="color: #6b7280; display: block; font-size: 14px;">Tháng này</span>
-          <span class="value" style="font-size: 18px; font-weight: 700;">
-            {{comparisonData?.currentMonthTotal | number:'1.0-0'}} ₫
-          </span>
-        </div>
-        <div class="comparison-item" style="text-align: right;">
-          <span class="label" style="color: #6b7280; display: block; font-size: 14px;">So với tháng trước</span>
-          <span class="value" [ngClass]="{'increase': comparisonData?.percentageChange > 0, 'decrease': comparisonData?.percentageChange < 0}" style="font-size: 18px; font-weight: 700;">
-            {{comparisonData?.percentageChange}}%
-          </span>
-        </div>
-      </div>
-    </div> 
-
-     <div class="notification-list" style="flex: 1; min-width: 250px; background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 16px;">
-      <h3 style="margin-top: 0;">🔔 Thông báo</h3>
-      <div class="notification-item" *ngFor="let n of notifications" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px;">
-        <div class="notification-message">{{ n.message }}</div>
-        <button class="read-btn" (click)="markAsRead(n.id)" style="padding: 4px 8px; font-size: 12px; cursor: pointer;">Đã đọc</button>
-      </div>
-      <div class="empty-notification" *ngIf="notifications && notifications.length === 0" style="color: #9ca3af; font-size: 14px;">
-        Chưa có thông báo nào
-      </div>
-    </div> 
-   </div> -->
-
-  <div class="filters" style="display: flex; flex-direction: column; gap: 16px; align-items: stretch; background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 20px; margin-bottom: 24px;">
-    
-    <div class="filter-group" style="max-width: 400px; width: 100%;">
-      <input type="text" 
-             [(ngModel)]="filter.keyword" 
-             (ngModelChange)="onFilterChange()" 
-             placeholder="Tìm kiếm theo từ khóa nội dung..." 
-             style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;" />
+  <div class="filters">
+    <div class="filter-group">
+      <label>Từ</label>
+      <input type="date" [(ngModel)]="filter.startDate" />
     </div>
-
-    <div style="display: flex; flex-wrap: wrap; gap: 12px; width: 100%;">
-      <div class="filter-group">
-        <label style="display: block; font-size: 13px; margin-bottom: 4px; color: #4b5563;">Từ ngày</label>
-        <input type="date" [(ngModel)]="filter.startDate" (ngModelChange)="onFilterChange()" />
-      </div>
-      
-      <div class="filter-group">
-        <label style="display: block; font-size: 13px; margin-bottom: 4px; color: #4b5563;">Đến ngày</label>
-        <input type="date" [(ngModel)]="filter.endDate" (ngModelChange)="onFilterChange()" />
-      </div>
-      
-      <div class="filter-group">
-        <label style="display: block; font-size: 13px; margin-bottom: 4px; color: #4b5563;">Loại</label>
-        <select [(ngModel)]="filter.type" (ngModelChange)="onFilterChange()">
-          <option value="">Tất cả</option>
-          <option value="INCOME">Thu</option>
-          <option value="EXPENSE">Chi</option>
-          <option value="TRANSFER">Chuyển tiền</option>
-        </select>
-      </div>
-      
-      <div class="filter-group">
-        <label style="display: block; font-size: 13px; margin-bottom: 4px; color: #4b5563;">Ví tài sản</label>
-        <select [(ngModel)]="filter.walletId" (ngModelChange)="onFilterChange()" class="filter-select">
-          <option [ngValue]="null">Tất cả ví</option>
-          <option *ngFor="let wallet of allWallets" [ngValue]="wallet.id">{{ wallet.name }}</option>
-        </select>
-      </div>
-      
-      <div class="filter-group">
-        <label style="display: block; font-size: 13px; margin-bottom: 4px; color: #4b5563;">Số tiền từ (₫)</label>
-        <input type="number" [(ngModel)]="filter.minAmount" (ngModelChange)="onFilterChange()" placeholder="Ví dụ: 100000" />
-      </div>
-      
-      <div class="filter-group">
-        <label style="display: block; font-size: 13px; margin-bottom: 4px; color: #4b5563;">Đến (₫)</label>
-        <input type="number" [(ngModel)]="filter.maxAmount" (ngModelChange)="onFilterChange()" placeholder="Ví dụ: 500000" />
-      </div>
+    <div class="filter-group">
+      <label>Đến</label>
+      <input type="date" [(ngModel)]="filter.endDate" />
     </div>
-
-    <div class="filter-actions-container" style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f3f4f6; padding-top: 12px; margin-top: 4px;">
-      <button (click)="clearFilter()" class="btn-clear" style="display: flex; align-items: center; gap: 4px; background: none; border: 1px solid #d1d5db; padding: 8px 12px; border-radius: 6px; cursor: pointer;">
-        <span class="material-symbols-outlined" style="font-size: 18px;">clear</span>
-        Xóa bộ lọc
+    <div class="filter-group">
+      <label>Loại</label>
+      <select [(ngModel)]="filter.type">
+        <option value="">Tất cả</option>
+        <option value="INCOME">Thu</option>
+        <option value="EXPENSE">Chi</option>
+        <option value="TRANSFER">Chuyển tiền</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Ví</label>
+      <select [(ngModel)]="filter.walletId">
+        <option [value]="null">Tất cả ví</option>
+        <option *ngFor="let wallet of allWallets" [value]="wallet.id">{{ wallet.name }}</option>
+      </select>
+    </div>
+    <div class="filter-actions">
+      <button (click)="search()" class="btn-search">
+        <span class="material-symbols-outlined">search</span>
+        Tìm kiếm
       </button>
-
-      <div class="export-actions" style="display: flex; gap: 12px;">
-        <button (click)="exportReport('excel')" 
-                [disabled]="transactions.length === 0" 
-                style="background-color: #15803d; color: white; padding: 9px 16px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
-          📊 Xuất Excel
-        </button>
-        <button (click)="exportReport('pdf')" 
-                [disabled]="transactions.length === 0" 
-                style="background-color: #b91c1c; color: white; padding: 9px 16px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
-          📕 Xuất PDF
-        </button>
-      </div>
+      <button (click)="clearFilter()" class="btn-clear">
+        <span class="material-symbols-outlined">clear</span>
+        Xóa lọc
+      </button>
     </div>
   </div>
 
@@ -125,13 +59,12 @@
     (edit)="openEditModal($event)"
     (delete)="deleteTransaction($event)">
   </app-list-transaction>
-
 </div>
 
 <!-- POPUP THÊM GIAO DỊCH -->
 <app-add-transaction
   *ngIf="showAddModal"
-  [wallets]="allWallets"
+  [wallets]="wallets"
   [categories]="categories"
   (close)="closeAddModal()"
   (added)="onTransactionAdded($event)">
@@ -141,7 +74,7 @@
 <app-edit-transaction
   *ngIf="showEditModal"
   [transaction]="selectedTransaction"
-  [wallets]="allWallets"
+  [wallets]="wallets"
   [categories]="categories"
   (close)="closeEditModal()"
   (updated)="onTransactionUpdated()">
@@ -150,7 +83,7 @@
 <!-- POPUP CHUYỂN TIỀN -->
 <app-transfer
   *ngIf="showTransferModal"
-  [wallets]="allWallets"
+  [wallets]="wallets"
   (close)="closeTransferModal()"
   (completed)="onTransferCompleted()">
 </app-transfer>

@@ -1,191 +1,257 @@
-<div class="dashboard-page">
-  <div class="page-header">
-    <h1>Phân tích luồng tiền</h1>
-    <div class="filter-actions">
-      <select [(ngModel)]="selectedPeriod" (change)="loadGeneralData()">
-        <option [value]="1">Tháng này</option>
-        <option [value]="3">3 tháng gần đây</option>
-        <option [value]="6">6 tháng gần đây</option>
-        <option [value]="12">12 tháng gần đây</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="summary-cards">
-    <div class="summary-card income">
-      <div class="icon">⬆</div>
-      <div class="card-content">
-        <h3>Tổng thu nhập</h3>
-        <p>{{ totalIncome | number:'1.0-0' }} đ</p>
-        <!-- <span class="compare-tag positive">▲ +{{ incomeChange }}%</span> -->
+<div class="dashboard">
+  <!-- Row 1: Summary Cards -->
+  <div class="cards-grid">
+    <!-- Current Balance -->
+    <div class="card">
+      <div class="card__header">
+        <div class="card__icon card__icon--primary">
+          <span class="material-symbols-outlined">account_balance_wallet</span>
+        </div>
+        <h3 class="card__title">Số dư hiện tại</h3>
+      </div>
+      <div class="card__body">
+        <p class="card__amount card__amount--primary">{{ getTotalBalance() | number:'1.0-0' }} ₫</p>
+        <p class="card__meta">Updated just now</p>
       </div>
     </div>
-
-    <div class="summary-card expense">
-      <div class="icon">⬇</div>
-      <div class="card-content">
-        <h3>Tổng chi tiêu</h3>
-        <p>{{ totalExpense | number:'1.0-0' }} đ</p>
-        <!-- <span class="compare-tag negative">▲ +{{ expenseChange }}%</span> -->
+ 
+    <!-- Monthly Income -->
+    <div class="card">
+      <div class="card__header">
+        <div class="card__icon card__icon--income">
+          <span class="material-symbols-outlined">trending_up</span>
+        </div>
+        <h3 class="card__title">Tổng Thu tháng này</h3>
+      </div>
+      <div class="card__body">
+        <p class="card__amount card__amount--income">{{ totalIncome | number:'1.0-0' }} ₫</p>
+        <div class="card__trend">
+          <span class="material-symbols-outlined card__trend-icon"
+                [class.card__trend-icon--up]="getSavingRate() >= 0"
+                [class.card__trend-icon--down]="getSavingRate() < 0">
+            {{ getSavingRate() >= 0 ? 'arrow_upward' : 'arrow_downward' }}
+          </span>
+          <span class="card__trend-value"
+                [class.card__trend-value--up]="getSavingRate() >= 0"
+                [class.card__trend-value--down]="getSavingRate() < 0">
+            {{ getSavingRate() | number:'1.1-1' }}%
+          </span>
+          <span class="card__trend-label">tỷ lệ tiết kiệm</span>
+        </div>
       </div>
     </div>
-
-    <div class="summary-card saving" [ngClass]="netCashFlow >= 0 ? 'positive-card' : 'negative-card'">
-      <div class="icon">💰</div>
-      <div class="card-content">
-        <h3>Dòng tiền ròng</h3>
-        <p [ngClass]="netCashFlow >= 0 ? 'positive' : 'negative'">{{ netCashFlow | number:'1.0-0' }} đ</p>
+ 
+    <!-- Monthly Expenses -->
+    <div class="card">
+      <div class="card__header">
+        <div class="card__icon card__icon--expense">
+          <span class="material-symbols-outlined">trending_down</span>
+        </div>
+        <h3 class="card__title">Tổng Chi tháng này</h3>
       </div>
-    </div>
-
-    <div class="summary-card saving-rate">
-      <div class="icon">📈</div>
-      <div class="card-content">
-        <h3>Tỷ lệ tiết kiệm</h3>
-        <p>{{ getSavingRate() | number:'1.1-1' }}%</p>
-        <div class="progress-bar-container">
-          <div class="progress-bar" [style.width.%]="getSavingRate() > 100 ? 100 : (getSavingRate() < 0 ? 0 : getSavingRate())"></div>
+      <div class="card__body">
+        <p class="card__amount card__amount--expense">{{ totalExpense | number:'1.0-0' }} ₫</p>
+        <div class="card__trend">
+          <span class="material-symbols-outlined card__trend-icon"
+                [class.card__trend-icon--up]="netCashFlow >= 0"
+                [class.card__trend-icon--down]="netCashFlow < 0">
+            {{ netCashFlow >= 0 ? 'arrow_upward' : 'arrow_downward' }}
+          </span>
+          <span class="card__trend-value"
+                [class.card__trend-value--up]="netCashFlow >= 0"
+                [class.card__trend-value--down]="netCashFlow < 0">
+            {{ netCashFlow | number:'1.0-0' }} ₫
+          </span>
+          <span class="card__trend-label">dòng tiền ròng</span>
         </div>
       </div>
     </div>
   </div>
-
-  <div class="dashboard-grid">
-    
-    <div class="main-chart-col">
-      
-      <div class="chart-card">
-        <div class="card-header">
-          <h2>Biểu đồ thu chi theo tháng</h2>
+ 
+  <!-- Row 1.5: AI Assistant Card -->
+  <div class="ai-assistant-card">
+    <div class="header">
+      <h3>🤖 Trợ lý Tài chính AI</h3>
+      <button (click)="askAiForAdvice()" [disabled]="isAiThinking">
+        {{ isAiThinking ? 'Đang phân tích dữ liệu...' : 'Xin lời khuyên tháng này' }}
+      </button>
+    </div>
+ 
+    <div class="advice-content" *ngIf="aiAdvice || isAiThinking">
+      <div class="loading-spinner" *ngIf="isAiThinking">
+        <div class="spinner-ring"></div>
+        <p>AI đang xem xét các khoản chi của bạn...</p>
+      </div>
+ 
+      <div class="result" *ngIf="aiAdvice && !isAiThinking">
+        <p style="white-space: pre-wrap;">{{ aiAdvice }}</p>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- Row 2: Charts -->
+  <div class="charts-grid">
+ 
+    <!-- Biểu đồ thu chi theo tháng -->
+    <div class="chart-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div class="chart-card__header">
+          <h3 class="chart-card__title">Thu nhập &amp; Chi tiêu theo tháng</h3>
+          
+          <!-- <select class="chart-card__select" [(ngModel)]="selectedPeriod" (change)="loadGeneralData()">
+            <option [value]="1">Tháng này</option>
+            <option [value]="3">3 tháng gần đây</option>
+            <option [value]="6">6 tháng gần đây</option>
+            <option [value]="12">12 tháng gần đây</option>
+          </select> -->
         </div>
-
-        <div class="chart-area" style="display: flex; align-items: flex-end; margin-bottom: 20px; padding-top: 20px;">
-          <div class="y-axis" style="display: flex; flex-direction: column; justify-content: space-between; height: 140px; padding-right: 12px; color: #888; font-size: 11px; text-align: right; width: 45px;">
-            <span>MAX</span><span>75%</span><span>50%</span><span>25%</span><span>0</span>
-          </div>
-
-          <div class="chart-content" style="flex: 1; height: 140px; position: relative; border-left: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0;">
-            <div class="bars" style="display: flex; align-items: flex-end; justify-content: space-around; height: 100%; padding: 0 10px;">
-              <div class="month-group" *ngFor="let item of cashFlows" style="display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%;">
-                <div class="bar-group"
-                     [title]="item.label + '\nThu nhập: ' + (item.income | number) + ' đ\nChi tiêu: ' + (item.expense | number) + ' đ'"
-                     style="display: flex; align-items: flex-end; gap: 6px; margin-bottom: 6px;">
-                  <div class="bar income-bar" [style.height.px]="getBarHeight(item.income)"
-                       style="width: 16px; background-color: #2ecc71; border-radius: 4px 4px 0 0; transition: height 0.5s ease-in-out;">
-                  </div>
-                  <div class="bar expense-bar" [style.height.px]="getBarHeight(item.expense)"
-                       style="width: 16px; background-color: #e74c3c; border-radius: 4px 4px 0 0; transition: height 0.5s ease-in-out;">
-                  </div>
-                </div>
-                <span style="font-size: 12px; color: #666; font-weight: 500; margin-top: 4px;">{{ item.label }}</span>
-              </div>
+        <div class="chart-card__header">
+          <a routerLink="/reports" class="view-report-btn">Xem chi tiết</a>
+        </div>
+      </div>
+ 
+      <ng-container *ngIf="cashFlows && cashFlows.length > 0; else noCashFlow">
+        <div class="chart-bars">
+          <div class="chart-bars__group" *ngFor="let item of cashFlows">
+            <div class="chart-bars__pair"
+                 [title]="item.label + '\nThu nhập: ' + (item.income | number) + ' đ\nChi tiêu: ' + (item.expense | number) + ' đ'">
+              <div class="chart-bars__bar chart-bars__bar--income" [style.height.px]="getBarHeight(item.income)"></div>
+              <div class="chart-bars__bar chart-bars__bar--expense" [style.height.px]="getBarHeight(item.expense)"></div>
             </div>
+            <span class="chart-bars__label">{{ item.label }}</span>
           </div>
         </div>
-
-        <div class="legend" style="display: flex; gap: 20px; justify-content: center; margin-top: 15px;">
-          <div class="legend-item" style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #555;"><span class="dot green" style="width: 12px; height: 12px; background: #2ecc71; display: inline-block; border-radius: 3px;"></span> Thu nhập</div>
-          <div class="legend-item" style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: #555;"><span class="dot red" style="width: 12px; height: 12px; background: #e74c3c; display: inline-block; border-radius: 3px;"></span> Chi tiêu</div>
+ 
+        <div class="chart-card__legend">
+          <div class="chart-card__legend-item">
+            <span class="chart-card__legend-dot chart-card__legend-dot--income"></span> Thu nhập
+          </div>
+          <div class="chart-card__legend-item">
+            <span class="chart-card__legend-dot chart-card__legend-dot--expense"></span> Chi tiêu
+          </div>
         </div>
+      </ng-container>
+ 
+      <ng-template #noCashFlow>
+        <div class="chart-card__placeholder">
+          <span class="material-symbols-outlined chart-card__icon">bar_chart</span>
+          <p>Chưa có dữ liệu thu chi trong khoảng thời gian này.</p>
+        </div>
+      </ng-template>
+    </div>
+ 
+    <!-- Pie chart thực — Chi tiêu theo danh mục -->
+    <div class="chart-card">
+      <div class="chart-card__header">
+        <h3 class="chart-card__title">Chi tiêu theo danh mục</h3>
+        <!-- <div class="chart-card__filters">
+          <select class="chart-card__select" [(ngModel)]="selectedMonth" (change)="loadPieChartData()">
+            <option *ngFor="let m of monthsList" [value]="m">Tháng {{ m }}</option>
+          </select>
+          <select class="chart-card__select" [(ngModel)]="selectedYear" (change)="loadPieChartData()">
+            <option *ngFor="let y of yearsList" [value]="y">Năm {{ y }}</option>
+          </select>
+        </div> -->
+        <span class="chart-card__badge">{{ userId ? 'Dữ liệu của bạn' : '' }}</span>
       </div>
-
-      <div class="chart-card category-chart-card">
-        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-          <h2>Chi tiêu theo danh mục</h2>
-          
-          <div class="pie-date-filters" style="display: flex; gap: 8px;">
-            <select [(ngModel)]="selectedMonth" (change)="loadPieChartData()" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd; font-size: 12.5px; cursor: pointer;">
-              <option *ngFor="let m of monthsList" [value]="m">Tháng {{ m }}</option>
-            </select>
-            <select [(ngModel)]="selectedYear" (change)="loadPieChartData()" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #ddd; font-size: 12.5px; cursor: pointer;">
-              <option *ngFor="let y of yearsList" [value]="y">Năm {{ y }}</option>
-            </select>
-          </div>
-        </div>
-        
-        <div class="category-chart-container" *ngIf="categoryExpenses && categoryExpenses.length > 0; else noCategoryTemplate" style="display: flex; align-items: center; gap: 30px; padding: 10px 0;">
-          
-          <div class="pie-chart-wrapper" style="position: relative; width: 150px; height: 150px; flex-shrink: 0;">
-            <svg viewBox="0 0 32 32" style="width: 100%; height: 100%; transform: rotate(-90deg); border-radius: 50%;">
-              <circle *ngFor="let cat of categoryExpenses; let i = index"
-                      [title]="cat.name + ': ' + (cat.amount | number) + ' đ'"
-                      r="16" cx="16" cy="16" fill="transparent"
-                      [style.stroke]="cat.color || '#3498db'"
-                      stroke-width="32"
-                      style="transition: stroke-dasharray 0.5s ease;"
-                      [style.stroke-dasharray]="getPieStrokeArray(i)"
-                      [style.stroke-dashoffset]="getPieStrokeOffset(i)">
-              </circle>
-            </svg>
-            <div class="donut-hole" style="position: absolute; width: 50%; height: 50%; background: #ffffff; border-radius: 50%; top: 25%; left: 25%;"></div>
-          </div>
-
-          <div class="category-list" style="flex: 1;">
-            <div class="category-item" *ngFor="let cat of categoryExpenses">
-              <div class="cat-info" style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 13px;">
-                <span style="font-weight: 500; color: #333; display: flex; align-items: center; gap: 8px;">
-                  <span [style.background-color]="cat.color" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%;"></span>
-                  {{ cat.name }}
+ 
+      <!-- Loading -->
+      <div *ngIf="isCategoryLoading" class="chart-card__placeholder">
+        <div class="chart-loading-spinner"></div>
+        <p>Đang tải dữ liệu...</p>
+      </div>
+ 
+      <!-- Empty — chưa có danh mục Chi tiêu -->
+      <div *ngIf="!isCategoryLoading && !hasExpenseCategories" class="chart-card__placeholder">
+        <span class="material-symbols-outlined chart-card__icon">pie_chart</span>
+        <p>Chưa có danh mục chi tiêu nào.</p>
+        <a class="chart-card__link" routerLink="/add-category">+ Tạo danh mục</a>
+      </div>
+ 
+      <!-- Canvas biểu đồ tròn -->
+      <div *ngIf="!isCategoryLoading && hasExpenseCategories" class="chart-card__canvas-wrap">
+        <canvas id="categoryPieCanvas"></canvas>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- Row 3: Hoạt động gần đây — danh mục của user -->
+  <div class="table-card">
+    <div class="table-card__header">
+      <h3 class="table-card__title">Hoạt động gần đây</h3>
+      <a class="table-card__view-all" routerLink="/list-category">Xem tất cả</a>
+    </div>
+ 
+    <div class="table-card__body">
+ 
+      <!-- Loading -->
+      <div *ngIf="isCategoryLoading" class="cat-loading">
+        <div class="cat-loading__spinner"></div>
+        <span>Đang tải danh mục...</span>
+      </div>
+ 
+      <!-- Empty state -->
+      <div *ngIf="!isCategoryLoading && recentCategories.length === 0" class="cat-empty">
+        <span class="material-symbols-outlined cat-empty__icon">inbox</span>
+        <p>Bạn chưa tạo danh mục nào.</p>
+        <a class="cat-empty__btn" routerLink="/add-category">+ Tạo danh mục mới</a>
+      </div>
+ 
+      <!-- Table -->
+      <table *ngIf="!isCategoryLoading && recentCategories.length > 0" class="txn-table">
+        <thead>
+          <tr>
+            <th>Danh mục</th>
+            <th>Mô tả</th>
+            <th>Loại</th>
+            <th class="txn-table__right">Ngân sách / tháng</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cat of recentCategories">
+            <!-- Danh mục: icon + tên + chấm màu -->
+            <td>
+              <div class="txn-table__category">
+                <span class="txn-table__cat-badge"
+                      [style.background-color]="getCategoryBgColor(cat)">
+                  <span class="material-symbols-outlined txn-table__cat-icon"
+                        [style.color]="getCategoryIconColor(cat)">
+                    {{ cat.icon || 'category' }}
+                  </span>
                 </span>
-                <span style="color: #777; font-weight: 500;">{{ cat.percentage | number:'1.0-1' }}% ({{ cat.amount | number:'1.0-0' }} đ)</span>
+                <span class="txn-table__cat-name">{{ cat.name }}</span>
+                <span *ngIf="cat.color" class="txn-table__cat-dot" [style.background-color]="cat.color"></span>
               </div>
-              <div class="cat-progress-bar" style="width: 100%; height: 6px; background: #f0f0f0; border-radius: 4px; overflow: hidden; margin-bottom: 12px;">
-                <div class="cat-progress" [style.width.%]="cat.percentage" [style.background-color]="cat.color || '#3498db'" style="height: 100%; border-radius: 4px; transition: width 0.5s ease-in-out;"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <ng-template #noCategoryTemplate>
-          <div class="empty-chart-notice" style="text-align: center; padding: 40px 20px; border: 2px dashed #eaeaea; border-radius: 8px; margin-top: 15px; background: #fafafa;">
-            <div style="font-size: 32px; margin-bottom: 10px;">📊</div>
-            <p style="color: #666; font-size: 14px; font-weight: 500; margin: 0;">
-              Không tìm thấy dữ liệu chi tiêu trong <strong style="color: #e74c3c;">Tháng {{ selectedMonth }}/{{ selectedYear }}</strong>.
-            </p>
-            <span style="color: #999; font-size: 12px; display: block; margin-top: 4px;">Vui lòng thêm giao dịch mới hoặc chọn một mốc thời gian khác.</span>
-          </div>
-        </ng-template>
-
-      </div>
-    </div>
-
-    <div class="side-col">
-      
-      <div class="side-card wallet-card">
-        <h3>Số dư ví hiện tại</h3>
-        <div class="wallet-list" *ngIf="wallets && wallets.length > 0; else noWallets">
-          <div class="wallet-item" *ngFor="let wallet of wallets" style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #eee;">
-            <span style="color: #555;">{{ wallet.name }}</span>
-            <span class="wallet-balance" style="font-weight: 600; color: #333;">{{ wallet.balance | number:'1.0-0' }} đ</span>
-          </div>
-        </div>
-        <ng-template #noWallets>
-          <p class="empty-text" style="color: #aaa; font-size: 13px; padding: 15px 0; text-align: center;">Chưa khởi tạo ví lưu trữ.</p>
-        </ng-template>
-        <div class="total-assets" style="display: flex; justify-content: space-between; margin-top: 15px; padding-top: 10px; border-top: 1px solid #ddd;">
-          <strong>Tổng tài sản:</strong>
-          <strong class="positive" style="color: #27ae60; font-size: 16px;">{{ totalAssets | number:'1.0-0' }} đ</strong>
-        </div>
-      </div>
-
-      <div class="side-card recent-transactions">
-        <h3>Giao dịch gần đây</h3>
-        <div class="transaction-list" *ngIf="recentTransactions && recentTransactions.length > 0; else noTransactions">
-          <div class="transaction-item" *ngFor="let tx of recentTransactions" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f9f9f9;">
-            <div class="tx-left" style="display: flex; align-items: center; gap: 8px;">
-              <span class="status-icon" [style.color]="tx.amount >= 0 ? '#2ecc71' : '#e74c3c'" style="font-weight: bold;">●</span>
-              <span class="tx-title" style="font-size: 13.5px; color: #444;">{{ tx.title }}</span>
-            </div>
-            <span class="tx-amount" [style.color]="tx.amount >= 0 ? '#2ecc71' : '#e74c3c'" style="font-weight: 600; font-size: 13.5px;">
-              {{ tx.amount >= 0 ? '+' : '' }}{{ tx.amount | number:'1.0-0' }} đ
-            </span>
-          </div>
-        </div>
-        <ng-template #noTransactions>
-          <p class="empty-text" style="color: #aaa; font-size: 13px; padding: 15px 0; text-align: center;">Chưa ghi nhận giao dịch gần đây.</p>
-        </ng-template>
-      </div>
-
+            </td>
+ 
+            <!-- Mô tả -->
+            <td class="txn-table__desc">
+              {{ cat.description || '—' }}
+            </td>
+ 
+            <!-- Loại -->
+            <td>
+              <span class="txn-table__type-badge"
+                    [class.txn-table__type-badge--income]="cat.type === 'INCOME'"
+                    [class.txn-table__type-badge--expense]="cat.type === 'EXPENSE'">
+                {{ cat.type === 'INCOME' ? '↑ Thu nhập' : '↓ Chi tiêu' }}
+              </span>
+            </td>
+ 
+            <!-- Ngân sách tháng -->
+            <td class="txn-table__right txn-table__amount"
+                [class.txn-table__amount--income]="cat.type === 'INCOME'">
+              <span *ngIf="cat.monthlyBudget; else noBudget">
+                {{ cat.monthlyBudget | number:'1.0-0' }} ₫
+              </span>
+              <ng-template #noBudget>
+                <span style="color: var(--color-outline)">Không giới hạn</span>
+              </ng-template>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+ 
     </div>
   </div>
 </div>
