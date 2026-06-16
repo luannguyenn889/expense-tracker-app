@@ -204,7 +204,7 @@ export class Dashboard implements OnInit, OnDestroy {
   ];
 
   // 3. Map dữ liệu an toàn (Dùng "||" để tránh undefined)
-  const labels = this.categoryExpenses.map(c => c.categoryName || 'Chưa đặt tên');
+  const labels = this.categoryExpenses.map(c => c.name || 'Chưa đặt tên');
   const values = this.categoryExpenses.map(c => Math.abs(c.amount || 0));
   const bgColors = this.categoryExpenses.map((_, i) => defaultPalette[i % defaultPalette.length]);
 
@@ -239,7 +239,7 @@ export class Dashboard implements OnInit, OnDestroy {
           callbacks: {
             label: (ctx) => {
               const cat = this.categoryExpenses[ctx.dataIndex];
-              const name = cat.categoryName || 'Chưa đặt tên';
+              const name = cat.name || 'Chưa đặt tên';
               const amount = (cat.amount || 0).toLocaleString('vi-VN');
               const percent = cat.percentage != null ? ` (${cat.percentage.toFixed(1)}%)` : '';
               return ` ${name}: ${amount} ₫${percent}`;
