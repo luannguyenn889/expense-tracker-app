@@ -24,7 +24,6 @@ notifications: any[] = [];
 isLoggedIn = false;
 user: any = null;
 userId = 0;
-
 // Thuộc tính Tìm kiếm
 searchQuery = '';
 searchResultsCategories: any[] = [];
@@ -46,23 +45,6 @@ constructor(
   private router: Router,
   private cdr: ChangeDetectorRef
   ) {}
-
-  ngOnInit(): void {
-    this.auth.isLoggedIn$.subscribe(status => {
-      this.isLoggedIn = status;
-      if (status) {
-        this.userId = this.auth.getCurrentUserId() ?? 0;
-        if (this.userId > 0) this.loadNotifications();
-      } else {
-        this.notifications = [];
-      }
-    });
-
-    this.auth.currentUser$.subscribe(userData => this.user = userData);
-  }
-
-
-
   loadNotifications(): void {
     if (!this.userId) return;
     this.notificationService.getNotifications(this.userId).subscribe({
@@ -109,6 +91,21 @@ constructor(
     }
   }
 
+  ngOnInit() {
+    this.auth.isLoggedIn$.subscribe(status => {
+      this.isLoggedIn = status;
+      if (status) {
+        this.loadCategoriesAndWallets();
+      } else {
+        this.allCategories = [];
+        this.allWallets = [];
+      }
+    });
+
+    this.auth.currentUser$.subscribe(userData => {
+      this.user = userData;
+    });
+  }
 
   loadCategoriesAndWallets() {
     // Load danh mục để tìm kiếm offline cực nhanh

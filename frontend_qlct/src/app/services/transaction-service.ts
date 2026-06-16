@@ -6,8 +6,11 @@ import { Auth } from './auth';
 
 @Injectable({ providedIn: 'root' })
 export class TransactionService {
-  // Cơ chế Subject để các component lắng nghe thay đổi dữ liệu
   public transactionChanges$ = new Subject<void>();
+
+  notifyTransactionChange() {
+    this.transactionChanges$.next();
+  }
 
   private apiUrl = 'http://localhost:8080/api/transactions';
   private walletUrl = 'http://localhost:8080/api/wallets';
@@ -21,9 +24,7 @@ export class TransactionService {
   // ==========================================
   // TIỆN ÍCH
   // ==========================================
-  notifyTransactionChange() {
-    this.transactionChanges$.next();
-  }
+
 
   private getUserId(): number | null {
     const userInfo = this.auth['currentUser']?.value;

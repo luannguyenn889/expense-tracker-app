@@ -44,9 +44,10 @@ public class AiService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
     @Autowired
     private UserRepository userRepository;
-
+    
     public String getFinancialAdvice(String username) {
         // Tìm kiếm user từ username, nếu không tìm thấy (hoặc là guest) thì lấy user đầu tiên trong DB để phục vụ chạy thử/test
         Users user = userRepository.findByUsername(username)
@@ -207,10 +208,8 @@ public class AiService {
             return "Hiện tại hệ thống AI đang quá tải hoặc gặp sự cố kết nối, vui lòng thử lại sau nhé!";
         }
     }
-    
 
     private String escapeJson(String input) {
-        
         if (input == null) return "";
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < input.length(); i++) {

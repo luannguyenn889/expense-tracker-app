@@ -56,17 +56,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import fa.training.backend_qlct.dto.request.TransactionResponse;
 import fa.training.backend_qlct.entities.Budgets;
 import fa.training.backend_qlct.entities.Categories;
-import fa.training.backend_qlct.entities.Users;
 import fa.training.backend_qlct.entities.SavingGoals;
+import fa.training.backend_qlct.entities.Users;
 import fa.training.backend_qlct.repository.BudgetRepository;
-import fa.training.backend_qlct.respository.CategoryRepository;
 import fa.training.backend_qlct.repository.SavingGoalRepository;
+import fa.training.backend_qlct.respository.CategoryRepository;
 import fa.training.backend_qlct.respository.UserRepository;
 
 @Service
@@ -906,6 +908,7 @@ public List<Notification> getNotifications(Long userId) {
             request.setCategoryId(categoryId);
             request.setWalletId(selectedWallet.getId());
             
+
             try {
                 Transaction saved = createTransaction(request, resolvedUserId).getTransaction();
                 savedTransactions.add(saved);

@@ -18,7 +18,9 @@ import {
   DoughnutController,
   Title,
 } from 'chart.js';
- 
+
+import { Wallets } from '../wallets/wallets'; 
+
 // Đăng ký các thành phần Chart.js cần dùng
 Chart.register(ArcElement, Tooltip, Legend, DoughnutController, Title);
  
@@ -264,15 +266,11 @@ export class Dashboard implements OnInit, OnDestroy {
   }
  
   getCategoryBgColor(category: Category): string {
-    return (category.color && category.color.trim() !== '')
-      ? category.color + '22'
-      : 'var(--color-primary-container)';
+    return (category.color && category.color.trim() !== '') ? category.color + '22' : 'var(--color-primary-container)';
   }
  
   getCategoryIconColor(category: Category): string {
-    return (category.color && category.color.trim() !== '')
-      ? category.color
-      : 'var(--color-primary)';
+    return (category.color && category.color.trim() !== '') ? category.color : 'var(--color-primary)';
   }
  
   // ===== Ví & số dư hiện tại =====
@@ -301,14 +299,14 @@ export class Dashboard implements OnInit, OnDestroy {
   askAiForAdvice(): void {
     this.isAiThinking = true;
     this.aiAdvice = '';
-    this.cdr.detectChanges(); // disable nút ngay, tránh spam click
- 
+    this.cdr.detectChanges(); // Cập nhật ngay để disable nút, tránh spam click
+
     const url = `http://localhost:8080/api/ai/advice?username=${this.username}`;
     this.http.get(url).subscribe({
       next: (res: any) => {
         this.aiAdvice = res.message;
         this.isAiThinking = false;
-        this.cdr.detectChanges();
+        this.cdr.detectChanges(); // Hiển thị kết quả lời khuyên ngay lập tức
       },
       error: (err) => {
         console.error('Lỗi AI:', err);

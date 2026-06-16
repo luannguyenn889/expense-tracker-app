@@ -17,10 +17,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/categories")
 public class CategoryController {
-   @Autowired
+    @Autowired
     private  CategoryService categoryService;
-
-
     @PostMapping("/add")
     public ResponseEntity<?> addCategory(@RequestBody CategoryCreationRequest request) {
         try {

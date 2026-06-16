@@ -154,49 +154,41 @@
         </div> -->
         <span class="chart-card__badge">{{ userId ? 'Dữ liệu của bạn' : '' }}</span>
       </div>
- 
       <!-- Loading -->
       <div *ngIf="isCategoryLoading" class="chart-card__placeholder">
         <div class="chart-loading-spinner"></div>
         <p>Đang tải dữ liệu...</p>
       </div>
- 
       <!-- Empty — chưa có danh mục Chi tiêu -->
       <div *ngIf="!isCategoryLoading && !hasExpenseCategories" class="chart-card__placeholder">
         <span class="material-symbols-outlined chart-card__icon">pie_chart</span>
         <p>Chưa có danh mục chi tiêu nào.</p>
         <a class="chart-card__link" routerLink="/add-category">+ Tạo danh mục</a>
       </div>
- 
       <!-- Canvas biểu đồ tròn -->
       <div *ngIf="!isCategoryLoading && hasExpenseCategories" class="chart-card__canvas-wrap">
         <canvas id="categoryPieCanvas"></canvas>
       </div>
     </div>
   </div>
- 
   <!-- Row 3: Hoạt động gần đây — danh mục của user -->
   <div class="table-card">
     <div class="table-card__header">
       <h3 class="table-card__title">Hoạt động gần đây</h3>
       <a class="table-card__view-all" routerLink="/list-category">Xem tất cả</a>
     </div>
- 
     <div class="table-card__body">
- 
       <!-- Loading -->
       <div *ngIf="isCategoryLoading" class="cat-loading">
         <div class="cat-loading__spinner"></div>
         <span>Đang tải danh mục...</span>
       </div>
- 
       <!-- Empty state -->
       <div *ngIf="!isCategoryLoading && recentCategories.length === 0" class="cat-empty">
         <span class="material-symbols-outlined cat-empty__icon">inbox</span>
         <p>Bạn chưa tạo danh mục nào.</p>
         <a class="cat-empty__btn" routerLink="/add-category">+ Tạo danh mục mới</a>
       </div>
- 
       <!-- Table -->
       <table *ngIf="!isCategoryLoading && recentCategories.length > 0" class="txn-table">
         <thead>
@@ -223,12 +215,10 @@
                 <span *ngIf="cat.color" class="txn-table__cat-dot" [style.background-color]="cat.color"></span>
               </div>
             </td>
- 
             <!-- Mô tả -->
             <td class="txn-table__desc">
               {{ cat.description || '—' }}
             </td>
- 
             <!-- Loại -->
             <td>
               <span class="txn-table__type-badge"
@@ -237,7 +227,6 @@
                 {{ cat.type === 'INCOME' ? '↑ Thu nhập' : '↓ Chi tiêu' }}
               </span>
             </td>
- 
             <!-- Ngân sách tháng -->
             <td class="txn-table__right txn-table__amount"
                 [class.txn-table__amount--income]="cat.type === 'INCOME'">
@@ -251,7 +240,6 @@
           </tr>
         </tbody>
       </table>
- 
     </div>
   </div>
 </div>

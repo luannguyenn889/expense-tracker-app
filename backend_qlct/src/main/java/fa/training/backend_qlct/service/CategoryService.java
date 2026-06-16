@@ -41,23 +41,17 @@ public class CategoryService {
     public List<Categories> getCategoriesByUser(Long userId) {
         return categoryRepository.findByUserIdOrUserIdIsNull(userId);
     }
-
-    // Lấy danh mục theo id
-    public Categories getCategory(String id) {
-        return categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
+    // Lay danh muc theo id
+    public Categories getCategory(String id){
+       return categoryRepository.findById(id).orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
     }
-
-    // Xóa danh mục
+    // Xoa danh muc theo id
     public void deleteCategory(String id) {
         categoryRepository.deleteById(id);
     }
-
-    // Cập nhật danh mục
-    public Categories updateCategoryRequest(String id, CategoryUpdateRequest request) {
-
-        Categories categories = getCategory(id);
-
+    // Cap nhat danh muc theo id
+    public Categories updateCategoryRequest(String id, CategoryUpdateRequest request){
+         Categories categories = getCategory(id);
         categories.setName(request.getName());
         categories.setIcon(request.getIcon());
         categories.setType(request.getType());
