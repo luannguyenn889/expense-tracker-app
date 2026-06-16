@@ -46,7 +46,8 @@ export class TransactionService {
   // ==========================================
   
   getWallets(userId?: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.walletUrl}?userId=${userId}`);
+    const id = userId || this.getUserId();
+    return this.http.get<any[]>(`${this.walletUrl}?userId=${id}`);
   }
 
   getCategories(): Observable<any[]> {
