@@ -12,6 +12,7 @@ import java.util.List;
 // nhan request tu client, goi service de xu ly va tra ve response cho client
 @RestController
 @RequestMapping("/users")
+// @CrossOrigin(origins = "*")
 public class UserControllers {
     @Autowired
     private UserService userService;

@@ -61,6 +61,18 @@ public class CategoryService {
         categories.setMonthlyBudget(request.getMonthlyBudget());
         return categoryRepository.save(categories);
     }
+// : Danh mục đã có giao dịch gắn liền -> Hệ thống báo lỗi không cho xóa,
+//  hoặc yêu cầu người dùng chuyển toàn bộ giao dịch sang danh mục khác trước khi xóa
+//  (để đảm bảo tính toàn vẹn dữ liệu).
+    //  public void deleteCategoryWithTransactions(String id){
+    //      Categories categories = getCategory(id);
+    //     if(categories.getTransactions().isEmpty()){
+    //         deleteCategory(id);
+    //     }
+    //     else{
+    //         throw new RuntimeException("Category has transactions");
+    //     }
+    //  }
 }
 
 
