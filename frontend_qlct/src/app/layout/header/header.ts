@@ -45,14 +45,6 @@ constructor(
   private router: Router,
   private cdr: ChangeDetectorRef
   ) {}
-  loadNotifications(): void {
-    if (!this.userId) return;
-    this.notificationService.getNotifications(this.userId).subscribe({
-      next: (data) => this.notifications = data,
-      error: (err) => console.error('Lỗi tải thông báo:', err)
-    });
-  }
-
   markAsRead(id: number, event: Event): void {
     event.stopPropagation(); // Cực kỳ quan trọng để không đóng dropdown
     this.notificationService.markAsRead(id).subscribe({
@@ -90,22 +82,47 @@ constructor(
       this.showSearchResults = false;
     }
   }
-
-  ngOnInit() {
-    this.auth.isLoggedIn$.subscribe(status => {
-      this.isLoggedIn = status;
-      if (status) {
-        this.loadCategoriesAndWallets();
-      } else {
-        this.allCategories = [];
-        this.allWallets = [];
+// 1. Cập nhật ngOnInit để đảm bảo userId được gán và gọi loadNotifications
+ngOnInit() {
+  this.auth.isLoggedIn$.subscribe(status => {
+    this.isLoggedIn = status;
+    if (status) {
+      this.loadCategoriesAndWallets();
+      // Gọi loadNotifications khi người dùng đăng nhập thành công
+      if (this.userId) {
+        this.loadNotifications();
       }
-    });
+    } else {
+      this.allCategories = [];
+      this.allWallets = [];
+      this.notifications = []; // Xóa thông báo khi logout
+    }
+  });
 
-    this.auth.currentUser$.subscribe(userData => {
-      this.user = userData;
-    });
+  this.auth.currentUser$.subscribe(userData => {
+    this.user = userData;
+    if (userData && userData.id) {
+      this.userId = userData.id; // Gán đúng userId
+      this.loadNotifications();  // Tải thông báo ngay khi có user
+    }
+  });
+}
+
+// 2. Cập nhật loadNotifications với cơ chế ép cập nhật view (detectChanges)
+loadNotifications(): void {
+  if (!this.userId || this.userId === 0) {
+    console.warn('userId chưa sẵn sàng, chưa thể tải thông báo.');
+    return;
   }
+  
+  this.notificationService.getNotifications(this.userId).subscribe({
+    next: (data) => {
+      this.notifications = data;
+      this.cdr.detectChanges(); // Ép Angular cập nhật giao diện sau khi nhận dữ liệu
+    },
+    error: (err) => console.error('Lỗi tải thông báo:', err)
+  });
+}
 
   loadCategoriesAndWallets() {
     // Load danh mục để tìm kiếm offline cực nhanh
