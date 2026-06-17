@@ -16,7 +16,13 @@ import {Auth} from '../../services/auth';
 export class EditUser implements OnInit{
 
   isLoading: boolean = true;
-  user: User = new User();
+  user: any = {
+    username: '',
+    firstname: '',
+    lastname: '',
+    dob: '',
+    password: ''
+  };
   userId: number = 0;
 
   constructor(
@@ -30,10 +36,18 @@ export class EditUser implements OnInit{
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
     this.userId = idParam ? Number(idParam) : (this.auth.getCurrentUserId() || 0);
+    
+    console.log('EditUser - User ID:', this.userId);
+    console.log('EditUser - Auth User Object:', this.auth.getCurrentUser());
+
     if (this.userId) {
       this.userService.getUserById(this.userId).subscribe({
         next: (data) => {
-          this.user = data;
+          console.log('EditUser - Fetched User Data:', data);
+          this.user = {
+            ...this.user,
+            ...data
+          };
           this.isLoading = false;
           this.cdr.detectChanges();
         },
@@ -44,7 +58,8 @@ export class EditUser implements OnInit{
         }
       });
     } else {
-      this.isLoading = false;
+      console.warn('EditUser - No user ID found. Redirecting to login...');
+      this.router.navigate(['/login']);
     }
   }
 
