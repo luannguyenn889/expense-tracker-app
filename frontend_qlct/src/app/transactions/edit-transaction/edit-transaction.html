@@ -9,7 +9,7 @@
 
     <div class="form-group">
       <label>Loại</label>
-      <select [(ngModel)]="formData.type" [disabled]="isTransfer">
+      <select [(ngModel)]="formData.type" [disabled]="isTransfer" (change)="onTypeChange()">
         <option value="INCOME">Thu</option>
         <option value="EXPENSE">Chi</option>
         <option value="TRANSFER">Chuyển tiền</option>
@@ -30,11 +30,9 @@
       <label>Danh mục</label>
       <select [(ngModel)]="formData.categoryId">
         <option [value]="null">-- Chọn danh mục --</option>
-        <ng-container *ngFor="let cat of categories">
-          <option *ngIf="cat.type === formData.type" [value]="cat.id">
-            {{ cat.name }}
-          </option>
-        </ng-container>
+        <option *ngFor="let cat of getFilteredCategories()" [value]="cat.id">
+          {{ cat.name }}
+        </option>
       </select>
     </div>
 
