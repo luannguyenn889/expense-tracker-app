@@ -124,9 +124,10 @@
             <svg viewBox="0 0 32 32" style="width: 100%; height: 100%; transform: rotate(-90deg); border-radius: 50%;">
               <circle *ngFor="let cat of categoryExpenses; let i = index"
                       [title]="cat.name + ': ' + (cat.amount | number) + ' đ'"
-                      r="16" cx="16" cy="16" fill="transparent"
+                      r="8" cx="16" cy="16" fill="transparent"
+                      pathLength="100"
                       [style.stroke]="cat.color || '#3498db'"
-                      stroke-width="32"
+                      stroke-width="16"
                       style="transition: stroke-dasharray 0.5s ease;"
                       [style.stroke-dasharray]="getPieStrokeArray(i)"
                       [style.stroke-dashoffset]="getPieStrokeOffset(i)">

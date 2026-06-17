@@ -46,6 +46,15 @@ export class EditTransaction implements OnInit {
     }
   }
 
+  onTypeChange() {
+    this.formData.categoryId = null;
+  }
+
+  getFilteredCategories() {
+    if (!this.categories) return [];
+    return this.categories.filter(cat => cat.type === this.formData.type);
+  }
+
   save() {
     if (!this.formData.walletId) {
       alert('Vui lòng chọn ví!');
