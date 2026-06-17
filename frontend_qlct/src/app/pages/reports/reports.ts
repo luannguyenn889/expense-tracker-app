@@ -64,6 +64,7 @@ export class Reports implements OnInit {
     walletId: null
   };
   transactions: any[] = [];
+
   constructor(
     private dashboardSer: DashboardSer,
     private auth: Auth,
@@ -82,6 +83,12 @@ export class Reports implements OnInit {
 
   ngOnInit(): void {
     this.initializeDashboard();
+
+    this.transactionService.transactionChanges$.subscribe(() => {
+      if (this.userId) {
+        this.loadWallets();
+      }
+    });
   }
 
   private initializeDashboard(): void {
@@ -126,12 +133,6 @@ export class Reports implements OnInit {
           this.recentTransactions = data.recentTransactions || [];
           this.cdr.detectChanges(); 
         }
-      }
-    });
-
-    this.transactionService.transactionChanges$.subscribe(() => {
-      if (this.userId) {
-        this.loadWallets();
       }
     });
   }
@@ -209,7 +210,7 @@ export class Reports implements OnInit {
   }
 
   // Giữ nguyên các hàm cũ của bạn:
- getBarHeight(amount: number): number {
+  getBarHeight(amount: number): number {
     if (amount <= 0 || !this.cashFlows || this.cashFlows.length === 0) return 0;
     const maxHeight = 140; 
     const maxInList = Math.max(...this.cashFlows.map(item => Math.max(item.income, item.expense)));
@@ -233,10 +234,32 @@ export class Reports implements OnInit {
     for (let i = 0; i < index; i++) {
       accumulatedPercent += this.categoryExpenses[i].percentage || 0;
     }
-    return 100 - accumulatedPercent + 25; 
+    return 100 - accumulatedPercent; 
   }
+
   exportReport(format: 'excel' | 'pdf'): void {
-    this.transactionService.downloadReportFile(this.userId, format, this.filter).subscribe(blob => {
+    if (!this.userId) return;
+
+    // Tính toán ngày bắt đầu và kết thúc dựa trên selectedPeriod
+    const endDateObj = new Date();
+    const startDateObj = new Date();
+    startDateObj.setMonth(startDateObj.getMonth() - (this.selectedPeriod - 1));
+    startDateObj.setDate(1);
+
+    const formatDate = (date: Date) => {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    };
+
+    const exportFilter = {
+      ...this.filter,
+      startDate: formatDate(startDateObj),
+      endDate: formatDate(endDateObj)
+    };
+
+    this.transactionService.downloadReportFile(this.userId, format, exportFilter).subscribe(blob => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url; 

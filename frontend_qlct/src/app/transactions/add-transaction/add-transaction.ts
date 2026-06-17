@@ -29,6 +29,15 @@ export class AddTransaction {
 
   constructor(private transactionService: TransactionService) {}
 
+  onTypeChange() {
+    this.transactionData.categoryId = null;
+  }
+
+  getFilteredCategories() {
+    if (!this.categories) return [];
+    return this.categories.filter(cat => cat.type === this.transactionData.type);
+  }
+
   save() {
     if (!this.transactionData.walletId) {
       alert('Vui lòng chọn ví!');
