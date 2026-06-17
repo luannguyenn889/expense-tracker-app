@@ -29,7 +29,7 @@ export class EditUser implements OnInit{
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
-    this.userId = idParam ? Number(idParam) : 0;
+    this.userId = idParam ? Number(idParam) : (this.auth.getCurrentUserId() || 0);
     if (this.userId) {
       this.userService.getUserById(this.userId).subscribe({
         next: (data) => {
@@ -43,6 +43,8 @@ export class EditUser implements OnInit{
           this.cdr.detectChanges();
         }
       });
+    } else {
+      this.isLoading = false;
     }
   }
 
