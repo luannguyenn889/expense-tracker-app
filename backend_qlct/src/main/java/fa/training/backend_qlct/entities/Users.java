@@ -1,18 +1,19 @@
 package fa.training.backend_qlct.entities;
 
+import java.time.LocalDate;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import org.springframework.data.annotation.Id;
-
-import java.time.LocalDate;
+import jakarta.persistence.Id;
 // Entity la lop tuong ung voi bang trong database, chua thong tin va cau truc cua bang, de spring tao bang trong database va tuong tac voi database
 @Entity
 public class Users {
-    @jakarta.persistence.Id
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID) //
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "userid", nullable = false) // Map to userid (case-insensitive for MySQL)
+    private Long id;
 
     private String username;
     private  String password;
@@ -20,11 +21,11 @@ public class Users {
     private String lastname;
     private LocalDate dob;
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

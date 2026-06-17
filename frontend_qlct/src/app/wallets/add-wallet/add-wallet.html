@@ -1,0 +1,35 @@
+<div class="modal-overlay">
+  <div class="add-wallet-modal">
+    <h3>Thêm ví mới</h3>
+
+    <div class="form-group">
+      <label>Tên ví</label>
+      <input [(ngModel)]="newWallet.name" placeholder="Nhập tên ví" />
+      <div class="error-message" *ngIf="nameError">Tên ví không được để trống!</div>
+    </div>
+
+    <div class="form-group">
+      <label>Số dư ban đầu</label>
+      <input type="number" [(ngModel)]="newWallet.balance" placeholder="0" />
+    </div>
+
+    <div class="form-group">
+      <label>Loại tiền tệ</label>
+      <select [(ngModel)]="newWallet.currency">
+        <option value="VND">VND - Việt Nam Đồng</option>
+        <option value="USD">USD - Đô la Mỹ</option>
+        <option value="EUR">EUR - Euro</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Mô tả</label>
+      <textarea [(ngModel)]="newWallet.description" placeholder="Nhập mô tả (không bắt buộc)" rows="3"></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="cancel()">Hủy</button>
+      <button class="save-btn" (click)="save()">Lưu</button>
+    </div>
+  </div>
+</div>

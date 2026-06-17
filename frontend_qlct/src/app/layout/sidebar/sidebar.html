@@ -1,14 +1,21 @@
 <nav class="sidebar">
   <!-- Logo -->
-  <div class="sidebar__brand">
+  <div class="sidebar__brand" routerLink="/" style="cursor: pointer;">
     <div class="sidebar__brand-row">
-      <img
-        alt="WealthWise Logo"
-        class="sidebar__logo-img"
-        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAABGlJREFUaIHtmVtsFUUYx3/fOW1pS1sMVWm1xlRFjcYLBm+JiRoTE2N8UOODxgcfNEZjjPHBxBgvL0aj8RL1QWO8BKNGo/GCxoAoihdUvKFi1IoWraC0tIWW9pzx+83u2T1nz9ntnlMu/pPN7OzMt/P9d+ab2VmwWCwWi8VisVgsFovFYrFYLBaLxWKxWCwWi8VisVgsFovlvwzlLdDc3KxjY2NpNxuBPcCezs7O7rwdV1dX6+DgYNo9CQwEaZTOqNQp0CWiZ4WNa0ZHR2/0LFuKXLzGOBb5K/Ja3r17Q0cXoZPzBHFPkpJ6x4gXc7l9N/IKvAF4A3gIOA0T90V6OjZT/qBjUArcDJwInC0P10MXAbcCjQBBTflFNA+I/hL4GPXR3pxvGfideCVoWuXAHcBT7rXy3H+Xv5+RFdnS0t82GzS6p0AjvJeePyYn4QvzFH0DeAnYIZU9EnVdTkdZFZ3cF6Xs9x2K9CH83e4P+haBj4HhqLGVvjIR8PuNi3KfcLFa+YeVcAJ6MsFnrGM7TaQUe7AMu0Ux90DWq6gzk7eB/4EW3y21Js9x70kF/AhqBV4DfcfYc26qcXw9gA+BQ5J+05NE3EjlBsC6I2gy8EpP2APCD+JoRCUhXyVp8FxxZ3k/iH5T0Lm9RJPC2KfJLY+ojeH8XvIF1MfclQfpT5WJx13NfHgP2xOnx7yCDQB/oO8mYqYiM4u3Ax0OXm5tGYl/sDcJ+HWmjMNO3T5DkD9XJ2CKagYeA94H/cFasd6AUUXOqtBe4FHgdeInyL3MTAb2eZx5cJqoIcivM7MUB74PabPpv0N2AxcDpzjKXcA8BDQBXwKDOSQqVKsAt4DPo6J3w7UEzzHp4F3gC7P/MfAbuAAb8cJpuhTiQ9L04+cBdwC/BOTfx/OJnYbQTLsj8D/FLgbuBj4i2BHMR34nKCevUOXWAicDPwZKjcIrMT5J/EH0Il8oqNJqzqcN7cW+AMn4gXAE8A9wO+uTG7LajIIjOJ8z+sU9ZZiGwIyIl/J/AbuAp4l+C50+2mv8uNN9p3Q4/APTjP1Y4z7c5mIH8F+sDpWV8GLvfkfQz81XPdD/RGlBkGPsNZ2UaBdqCbhM+IOw3F7xXYIHYCi4muL4E+oF3gL+AT4ETPGm7Xe1kNPVZ4G3gPJx/ZwCYAbwNfAW8TzCMjuN4/3r8YXSEBMNNKGRGXKVzinuAvJuImerSLwBeJBi6nuc0ypnnfkr4DPdcchZwEfBcKH8jwTPMxvVhvS5xHGfe3IfzdepzZ5bgXWAHzhdJgJ+x++JZl1oSFO/3LNcTvD+AvgQ6PKUuJBhaXgceAbny1YnzrD6kCefd+g8Fvl3knxb2Eywj7iLCr3RcqPSi4BXgP2A/XC+hL0D/BR1U0aZCIr3A0cBL1HDj5AnUPrfaQHOAA4DTiDYML+C87VpDfAPpf+xZrFYLBaLxWKxWCwWi8VisVgsFovFYrFYLBaLxWKxWP5L/AuERWlBAVrrogAAAABJRU5ErkJggg==" />
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="sidebar__logo-img logo-svg" style="width: 40px; height: 40px; display: block;">
+        <defs>
+          <linearGradient id="logoGradSidebar" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#4F46E5" />
+            <stop offset="100%" stop-color="#06B6D4" />
+          </linearGradient>
+        </defs>
+        <rect width="24" height="24" rx="6" fill="url(#logoGradSidebar)" />
+        <path d="M6 13 L9 17 L12 12 L15 16 L18 8" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M14 8 H18 V12" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
       <div>
         <h1 class="sidebar__title">WealthWise</h1>
-        <p class="sidebar__subtitle">Personal Finance Manager</p>
+        <p class="sidebar__subtitle">Quản lý tài chính cá nhân</p>
       </div>
     </div>
   </div>
@@ -17,39 +24,43 @@
   <div class="sidebar__nav">
     <a class="sidebar__link" routerLink="/" routerLinkActive="sidebar__link--active" [routerLinkActiveOptions]="{ exact: true }">
       <span class="material-symbols-outlined">dashboard</span>
-      Dashboard
+      Tổng quan
     </a>
     <a class="sidebar__link" routerLink="/transactions" routerLinkActive="sidebar__link--active">
       <span class="material-symbols-outlined">receipt_long</span>
-      Transactions
+      Giao dịch
     </a>
     <a class="sidebar__link" routerLink="/categories" routerLinkActive="sidebar__link--active">
       <span class="material-symbols-outlined">category</span>
-      Categories
+      Danh mục
     </a>
     <a class="sidebar__link" routerLink="/wallets" routerLinkActive="sidebar__link--active">
       <span class="material-symbols-outlined">account_balance_wallet</span>
-      Wallets
+      Ví
     </a>
     <a class="sidebar__link" routerLink="/budget" routerLinkActive="sidebar__link--active">
       <span class="material-symbols-outlined">target</span>
-      Budget
+      Ngân sách
+    </a>
+    <a class="sidebar__link" routerLink="/saving-goals" routerLinkActive="sidebar__link--active">
+      <span class="material-symbols-outlined">savings</span>
+      Mục tiêu tiết kiệm
     </a>
     <a class="sidebar__link" routerLink="/reports" routerLinkActive="sidebar__link--active">
       <span class="material-symbols-outlined">bar_chart</span>
-      Reports
+      Báo cáo
     </a>
     <a class="sidebar__link" routerLink="/settings" routerLinkActive="sidebar__link--active">
       <span class="material-symbols-outlined">settings</span>
-      Settings
+      Cài đặt
     </a>
   </div>
 
   <!-- New Transaction Button -->
   <div class="sidebar__footer">
-    <button class="sidebar__new-btn">
+    <button class="sidebar__new-btn" (click)="openNewTransaction()">
       <span class="material-symbols-outlined">add</span>
-      New Transaction
+      Giao dịch mới
     </button>
   </div>
 </nav>

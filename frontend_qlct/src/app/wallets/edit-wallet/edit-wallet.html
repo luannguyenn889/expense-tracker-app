@@ -1,0 +1,25 @@
+<div class="modal-overlay">
+  <div class="edit-wallet-modal" *ngIf="editingWallet">
+    <h3>Sửa ví</h3>
+
+    <div class="form-group">
+      <label>Tên ví</label>
+      <input [(ngModel)]="editingWallet.name" placeholder="Tên ví" />
+    </div>
+
+    <div class="form-group">
+      <label>Số dư hiện tại</label>
+      <input [value]="editingWallet.balance | number:'1.0-0'" disabled class="disabled-input" />
+    </div>
+
+    <div class="form-group">
+      <label>Mô tả</label>
+      <textarea [(ngModel)]="editingWallet.description" placeholder="Mô tả" rows="3"></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="cancel()">Hủy</button>
+      <button class="save-btn" (click)="update()">Lưu</button>
+    </div>
+  </div>
+</div>

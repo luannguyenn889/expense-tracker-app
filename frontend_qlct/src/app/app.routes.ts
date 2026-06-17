@@ -12,6 +12,9 @@ import { ListCategory } from './categories/list-category/list-category';
 import { AddCategory } from './categories/add-category/add-category';
 import { EditCategory } from './categories/edit-category/edit-category';
 
+import {SavingGoals} from './pages/saving-goals/saving-goals';
+import { EditUser } from './user/edit-user/edit-user';
+
 export const routes: Routes = [
   { path: 'login', component: Login },
   { path: 'register', component: Register },
@@ -25,6 +28,8 @@ export const routes: Routes = [
   { path: 'list-category', component: ListCategory },
   { path: 'categories/add', component: AddCategory },
   { path: 'categories/edit/:id', component: EditCategory },
+  { path: 'user/edit/:id', component: EditUser },
+  { path: 'saving-goals', component: SavingGoals },
   { path: '**', redirectTo: '' }
 ];
 

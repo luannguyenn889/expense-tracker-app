@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-// Entity la lop tuong ung voi bang trong database, chua thong tin va cau truc cua bang, de spring tao bang trong database va tuong tac voi database
 @Entity
 @Table(name = "wallets")
 public class Wallet {
@@ -27,21 +26,24 @@ public class Wallet {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
-
-    // Constructor khong tham so
+    
+    @Column(nullable = false)
+    private String status = "ACTIVE"; // ACTIVE, INACTIVE
+    
+    // Constructor
     public Wallet() {
     }
 
-    
     public Wallet(String name, BigDecimal balance, Long userId, String description) {
         this.name = name;
         this.balance = balance != null ? balance : BigDecimal.ZERO;
         this.userId = userId;
         this.description = description;
         this.createdAt = LocalDateTime.now();
+        this.status = "ACTIVE";
     }
 
-    // Getter va Setter
+    // Getter/Setter
     public Long getId() {
         return id;
     }
@@ -90,7 +92,19 @@ public class Wallet {
         this.createdAt = createdAt;
     }
 
-    
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    // Phương thức kiểm tra
+    public boolean isActive() {
+        return "ACTIVE".equals(this.status);
+    }
+
     @Override
     public String toString() {
         return "Wallet{" +
@@ -98,8 +112,7 @@ public class Wallet {
                 ", name='" + name + '\'' +
                 ", balance=" + balance +
                 ", userId=" + userId +
-                ", description='" + description + '\'' +
-                ", createdAt=" + createdAt +
+                ", status='" + status + '\'' +
                 '}';
     }
 }

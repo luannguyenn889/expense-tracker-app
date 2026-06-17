@@ -12,7 +12,11 @@ export class CategoryService {
 
   constructor(private http: HttpClient) {}
 
-  getAllCategories(): Observable<Category[]> {
+  getAllCategories(userId?: number): Observable<Category[]> {
+    // Nếu có userId thì thêm tham số truy vấn để lọc danh mục theo người dùng đang đăng nhập
+    if (userId) {
+      return this.http.get<Category[]>(`${this.apiUrl}?userId=${userId}`);
+    }
     return this.http.get<Category[]>(this.apiUrl);
   }
 
