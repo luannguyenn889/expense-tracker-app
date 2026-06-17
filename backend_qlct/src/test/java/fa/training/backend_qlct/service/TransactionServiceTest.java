@@ -57,14 +57,14 @@ public class TransactionServiceTest {
         Wallet w1 = new Wallet();
         w1.setName("Ví chính");
         w1.setBalance(BigDecimal.valueOf(1000000)); // 1,000,000
-        w1.setUserId(testUser.getId());
+        w1.setUserId(testUser.getUserId());
         w1.setStatus("ACTIVE");
         testWallet1 = walletRepository.save(w1);
 
         Wallet w2 = new Wallet();
         w2.setName("Ví phụ");
         w2.setBalance(BigDecimal.valueOf(500000)); // 500,000
-        w2.setUserId(testUser.getId());
+        w2.setUserId(testUser.getUserId());
         w2.setStatus("ACTIVE");
         testWallet2 = walletRepository.save(w2);
 
@@ -72,7 +72,7 @@ public class TransactionServiceTest {
         Categories cat = new Categories();
         cat.setName("Ăn uống");
         cat.setType("EXPENSE");
-        cat.setUserId(testUser.getId());
+        cat.setUserId(testUser.getUserId());
         testCategory = categoryRepository.save(cat);
     }
 
@@ -85,7 +85,7 @@ public class TransactionServiceTest {
         request.setCategoryId(testCategory.getId());
         request.setNote("Nhận lương");
 
-        TransactionResponse response = transactionService.createTransaction(request, testUser.getId());
+        TransactionResponse response = transactionService.createTransaction(request, testUser.getUserId());
         assertNotNull(response.getTransaction());
         assertEquals("INCOME", response.getTransaction().getType());
         assertEquals(0, response.getTransaction().getAmount().compareTo(BigDecimal.valueOf(100000)));
@@ -103,7 +103,7 @@ public class TransactionServiceTest {
         request.setCategoryId(testCategory.getId());
         request.setNote("Ăn trưa");
 
-        TransactionResponse response = transactionService.createTransaction(request, testUser.getId());
+        TransactionResponse response = transactionService.createTransaction(request, testUser.getUserId());
         assertNotNull(response.getTransaction());
         assertEquals("EXPENSE", response.getTransaction().getType());
 
@@ -120,7 +120,7 @@ public class TransactionServiceTest {
         request.setType("TRANSFER");
         request.setNote("Chuyển tiền sang ví phụ");
 
-        TransactionResponse response = transactionService.createTransaction(request, testUser.getId());
+        TransactionResponse response = transactionService.createTransaction(request, testUser.getUserId());
         assertNotNull(response.getTransaction());
         assertEquals("TRANSFER", response.getTransaction().getType());
         assertEquals(testWallet2.getId(), response.getTransaction().getToWalletId());
@@ -141,7 +141,7 @@ public class TransactionServiceTest {
         request.setCategoryId(testCategory.getId());
 
         assertThrows(RuntimeException.class, () -> {
-            transactionService.createTransaction(request, testUser.getId());
+            transactionService.createTransaction(request, testUser.getUserId());
         });
     }
 
@@ -153,7 +153,7 @@ public class TransactionServiceTest {
         request.setType("INVALID_TYPE");
 
         assertThrows(RuntimeException.class, () -> {
-            transactionService.createTransaction(request, testUser.getId());
+            transactionService.createTransaction(request, testUser.getUserId());
         });
     }
 
@@ -165,7 +165,7 @@ public class TransactionServiceTest {
         request.setType("INCOME");
 
         assertThrows(RuntimeException.class, () -> {
-            transactionService.createTransaction(request, testUser.getId());
+            transactionService.createTransaction(request, testUser.getUserId());
         });
     }
 
@@ -179,7 +179,7 @@ public class TransactionServiceTest {
         request.setCategoryId(testCategory.getId());
         request.setNote("Ăn tối");
 
-        TransactionResponse response = transactionService.createTransaction(request, testUser.getId());
+        TransactionResponse response = transactionService.createTransaction(request, testUser.getUserId());
         Transaction txn = response.getTransaction();
 
         // Balance after creation: 800,000 in DB
@@ -196,7 +196,7 @@ public class TransactionServiceTest {
         updateRequest.setCategoryId(testCategory.getId());
         updateRequest.setNote("Được nâng cấp bữa tối sang xịn");
 
-        Transaction updatedTxn = transactionService.updateTransaction(txn.getId(), updateRequest, testUser.getId());
+        Transaction updatedTxn = transactionService.updateTransaction(txn.getId(), updateRequest, testUser.getUserId());
         assertNotNull(updatedTxn);
         assertEquals(0, updatedTxn.getAmount().compareTo(BigDecimal.valueOf(950000)));
 
@@ -213,7 +213,7 @@ public class TransactionServiceTest {
         request.setType("EXPENSE");
         request.setCategoryId(testCategory.getId());
 
-        TransactionResponse response = transactionService.createTransaction(request, testUser.getId());
+        TransactionResponse response = transactionService.createTransaction(request, testUser.getUserId());
         Transaction txn = response.getTransaction();
 
         // Attempt to update the transaction to use another user's wallet
@@ -226,7 +226,7 @@ public class TransactionServiceTest {
         Wallet otherWallet = new Wallet();
         otherWallet.setName("Ví người lạ");
         otherWallet.setBalance(BigDecimal.valueOf(100000));
-        otherWallet.setUserId(otherUser.getId());
+        otherWallet.setUserId(otherUser.getUserId());
         otherWallet.setStatus("ACTIVE");
         otherWallet = walletRepository.save(otherWallet);
 
@@ -238,7 +238,7 @@ public class TransactionServiceTest {
 
         TransactionRequest finalUpdateRequest = updateRequest;
         assertThrows(RuntimeException.class, () -> {
-            transactionService.updateTransaction(txn.getId(), finalUpdateRequest, testUser.getId());
+            transactionService.updateTransaction(txn.getId(), finalUpdateRequest, testUser.getUserId());
         });
     }
 
@@ -251,14 +251,14 @@ public class TransactionServiceTest {
         request.setType("EXPENSE");
         request.setCategoryId(testCategory.getId());
 
-        TransactionResponse response = transactionService.createTransaction(request, testUser.getId());
+        TransactionResponse response = transactionService.createTransaction(request, testUser.getUserId());
         Transaction txn = response.getTransaction();
 
         Wallet currentWallet = walletRepository.findById(testWallet1.getId()).orElseThrow();
         assertEquals(0, currentWallet.getBalance().compareTo(BigDecimal.valueOf(600000)));
 
         // Delete the transaction
-        transactionService.deleteTransaction(txn.getId(), testUser.getId());
+        transactionService.deleteTransaction(txn.getId(), testUser.getUserId());
 
         // Wallet balance should be reverted back to 1,000,000
         Wallet updatedWallet = walletRepository.findById(testWallet1.getId()).orElseThrow();

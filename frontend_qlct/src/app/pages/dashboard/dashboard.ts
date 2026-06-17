@@ -37,7 +37,7 @@ export class Dashboard implements OnInit, OnDestroy {
   username: string = '';
  
   // ===== Bộ lọc =====
-  selectedPeriod: number = 6;
+  selectedPeriod: number = 1;
   selectedMonth: number = new Date().getMonth() + 1;
   selectedYear: number = new Date().getFullYear();
   monthsList: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
@@ -149,7 +149,7 @@ export class Dashboard implements OnInit, OnDestroy {
   /** Tỷ lệ tiết kiệm = dòng tiền ròng / tổng thu nhập */
   getSavingRate(): number {
     if (!this.totalIncome || this.totalIncome <= 0) return 0;
-    return (this.netCashFlow / this.totalIncome) * 100;
+    return (this.netCashFlow / this.totalIncome) * 100; 
   }
  
   // ===== Biểu đồ tròn: chi tiêu theo danh mục (lọc theo tháng/năm) =====

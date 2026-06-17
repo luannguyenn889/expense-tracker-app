@@ -5,6 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -474,7 +475,7 @@ dto.setId(tx.getId());
  
         return new ByteArrayInputStream(out.toByteArray());
     }
-
+    
     // ==========================================
     // THÔNG BÁO (NOTIFICATIONS)
     // ==========================================
